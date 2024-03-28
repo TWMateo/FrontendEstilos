@@ -1,2 +1,2 @@
-#Frontend para la aplicación de análisis de estilos de aprendizaje
+# Frontend para la aplicación de análisis de estilos de aprendizaje
 
