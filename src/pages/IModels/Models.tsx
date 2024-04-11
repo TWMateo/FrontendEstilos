@@ -4,7 +4,7 @@ import DefaultLayout from '../../layout/DefaultLayout';
 import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
 import CardList from '../../components/CardList';
 import MultiChoiceQuestion from '../../components/TypesQuestion/MultiChoiceQuestion';
-import TrueFalse from '../../components/TypesQuestion/TrueFalse';
+import Likert from '../../components/TypesQuestion/Likert';
 
 interface Opcion {
   texto: string;
@@ -60,7 +60,7 @@ const Models = () => {
 
   const tiposPreguntas = {
     mensaje: 'Selecciona el tipo de pregunta',
-    tipos: ['Selección múltiple', 'Verdadero/Falso', 'Likert'],
+    tipos: ['Selección múltiple', 'Likert'],
   };
 
   const tiposEstilosAprendizaje = {
@@ -389,8 +389,12 @@ const Models = () => {
               eliminarOpcion={eliminarOpcion}
             />
           )}
-          {tipoPregunta === 'Verdadero/Falso' && (
-            <TrueFalse cambiarTipoEstiloPregunta={cambiarTipoEstiloPregunta} estilosAprendizaje={tiposEstilosAprendizaje}/>
+          {tipoPregunta === 'Likert' && (
+            <Likert
+              cambiarTipoEstiloPregunta={cambiarTipoEstiloPregunta}
+              estilosAprendizaje={tiposEstilosAprendizaje}
+              actualizandoOpcion={actualizandoOpcion}
+            />
           )}
           {tipoPregunta === 'Likert'}
           {actualizandoPregunta ? (
