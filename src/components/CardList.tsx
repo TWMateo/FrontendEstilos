@@ -3,7 +3,7 @@ import React from 'react';
 interface Props {
   actualizar: (valor: string) => void;
   eliminar: (valor: string) => void;
-  cambiarOrden?: (valor: string,direccion:string) => void;
+  cambiarOrden?: (valor: string, direccion: string) => void;
   valor: string;
   limite: number;
   mensaje?: string;
@@ -20,7 +20,7 @@ const CardList: React.FC<Props> = ({
   return (
     <li
       title={valor}
-      className="flex flex-row border-[1.5px] border-stroke rounded-lg w-full bg-transparent text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+      className="flex flex-row border-[1.5px] bg-bodydark1 border-strokedark rounded-lg w-full bg-transparent text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
       key={valor}
     >
       <div className="py-2 px-3 w-[80%] whitespace-pre-wrap sm:w-[90%]">
@@ -38,7 +38,7 @@ const CardList: React.FC<Props> = ({
         className={`flex justify-center items-center w-[8%] sm:w-[5%] rounded-l-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
       >
         <svg
-          className="fill-current absolute"
+          className="fill-white dark:fill-bodydark1 absolute"
           width="18"
           height="18"
           viewBox="0 0 576 512"
@@ -57,20 +57,19 @@ const CardList: React.FC<Props> = ({
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="fill-current absolute"
+          className="fill-white dark:fill-bodydark1 absolute"
           width="18"
           height="18"
           viewBox="0 0 576 512"
-          fill="none"
         >
-          <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
+          <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z" />
         </svg>
       </button>
       {cambiarOrden && (
         <div className="w-[8%]">
           <div
             className="flex justify-center h-[50%] items-center rounded-tr-lg rounded-b-none bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-            onClick={() => cambiarOrden(valor,'arriba')}
+            onClick={() => cambiarOrden(valor, 'arriba')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -84,7 +83,7 @@ const CardList: React.FC<Props> = ({
           </div>
           <div
             className="flex justify-center h-[50%] items-center rounded-r-lg rounded-t-none bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-            onClick={() => cambiarOrden(valor,'abajo')}
+            onClick={() => cambiarOrden(valor, 'abajo')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

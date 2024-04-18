@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import Logo from '../../images/UTN/logo-utn.png';
 import LogoSidebar from '../../images/UTN/logo-utn-sidebar.png';
-import EscudoUtn from '../../images/UTN/escudo-utn.png'
+import EscudoUtn from '../../images/UTN/escudo-utn.png';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -60,13 +60,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <aside
       ref={sidebar}
-      className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-white duration-300 ease-linear dark:bg-black lg:static lg:translate-x-0 ${
+      className={`absolute left-0 top-0 z-9999 flex h-screen border-[1.5px] bg-bodydark1 border-stroke dark:border-none w-72.5 flex-col overflow-y-hidden duration-300 ease-linear dark:bg-black lg:static lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
       {/* <!-- SIDEBAR HEADER --> */}
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-      <NavLink className={''} to="/">
+        <NavLink className={''} to="/">
           <img src={EscudoUtn} alt="Logo" />
         </NavLink>
         <h3 className="text-title-xsm w-[70%] text-center font-bold text-black dark:text-white">
@@ -101,9 +101,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
           {/* <!-- Menu Group --> */}
           <div>
-            <h3 className="mb-4 ml-4 text-sm font-semibold ">
-              MENU
-            </h3>
+            <h3 className="mb-4 ml-4 text-sm font-semibold ">MENU</h3>
 
             <ul className="mb-6 flex flex-col gap-1.5">
               {/* <!-- Menu Item Dashboard --> */}
@@ -232,7 +230,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 <NavLink
                   to="/profile"
                   className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium dark:text-bodydark1 duration-300 ease-in-out text-black hover:bg-black hover:text-white dark:hover:bg-meta-4 ${
-                    pathname.includes('profile') && 'bg-black text-white dark:bg-meta-4'
+                    pathname.includes('profile') &&
+                    'bg-black text-white dark:bg-meta-4'
                   }`}
                 >
                   <svg
@@ -445,7 +444,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 <NavLink
                   to="/tables"
                   className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium dark:text-bodydark1 duration-300 ease-in-out text-black hover:bg-black hover:text-white dark:hover:bg-meta-4 ${
-                    pathname.includes('tables') && 'bg-black text-white dark:bg-meta-4'
+                    pathname.includes('tables') &&
+                    'bg-black text-white dark:bg-meta-4'
                   }`}
                 >
                   <svg
@@ -535,7 +535,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 <NavLink
                   to="/chart"
                   className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium dark:text-bodydark1 duration-300 ease-in-out text-black hover:bg-graydark dark:hover:bg-meta-4 ${
-                    pathname.includes('chart') && 'bg-graydark text-white dark:bg-meta-4'
+                    pathname.includes('chart') &&
+                    'bg-graydark text-white dark:bg-meta-4'
                   }`}
                 >
                   <svg

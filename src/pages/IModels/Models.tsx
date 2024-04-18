@@ -7,7 +7,8 @@ import MultiChoiceQuestion from '../../components/TypesQuestion/MultiChoiceQuest
 import Likert from '../../components/TypesQuestion/Likert';
 
 interface Opcion {
-  texto: string;
+  id: number;
+  opcion: string;
   estilo: string;
 }
 
@@ -27,9 +28,11 @@ interface Test {
 }
 
 interface Pregunta {
+  id: number;
   orden: number;
   pregunta: string;
   tipoPregunta: string;
+  limiteRespuesta: 0;
   opciones: Opcion[];
 }
 
@@ -57,6 +60,26 @@ const Models = () => {
   const [autor, setAutor] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [limiteRespuestas, setLimiteRespuestas] = useState<number>(0);
+  // const [preguntasPrueba, setPreguntasPrueba] = useState([
+  //   {
+  //     id: 1,
+  //     pregunta: 'Agregar nueva pregunta',
+  //     tipoDePregunta: '',
+  //     opciones: [
+  //       { opcion: 'Opción 1', estiloDeAprendizaje: '' },
+  //       { opcion: 'Opción 2', estiloDeAprendizaje: '' },
+  //     ],
+  //   },
+  //   {
+  //     id: 2,
+  //     pregunta: 'Agregar nueva pregunta',
+  //     tipoDePregunta: '',
+  //     opciones: [
+  //       { opcion: 'Opción 1', estiloDeAprendizaje: '' },
+  //       { opcion: 'Opción 2', estiloDeAprendizaje: '' },
+  //     ],
+  //   },
+  // ]);
 
   const tiposPreguntas = {
     mensaje: 'Selecciona el tipo de pregunta',
@@ -68,16 +91,22 @@ const Models = () => {
     tipos: estilosAprendizaje,
   };
 
-  const agregarOpcion = () => {
-    if (nuevaOpcion.length == 0) return;
-    if (estiloNuevaOpcion.length == 0) return;
-    if (opcionesPregunta.findIndex((op) => op.texto === nuevaOpcion) != -1)
-      return;
+  const agregarOpcion = (idPregunta: number) => {
+    if (idPregunta === undefined) return;
+    let opciones = listaPreguntas.find((pre) => pre.id === idPregunta)
+      ?.opciones;
+    if (opciones === undefined) return;
+    let nuevoIdOpcion = opciones[opciones?.length - 1].id+1;
     const opcion: Opcion = {
-      texto: nuevaOpcion,
-      estilo: estiloNuevaOpcion,
+      id: nuevoIdOpcion,
+      opcion: 'Opción ' + nuevoIdOpcion,
+      estilo: '',
     };
-    setOpcionesPregunta([...opcionesPregunta, opcion]);
+    let copiaPreguntas = [...listaPreguntas];
+    let pregunta = copiaPreguntas.find((pre) => pre.id === idPregunta);
+    if (pregunta === undefined) return;
+    pregunta.opciones=pregunta?.opciones.concat(opcion);
+    setListaPreguntas(copiaPreguntas);
   };
 
   //REVISANDO
@@ -140,7 +169,7 @@ const Models = () => {
 
   const eliminarOpcion = (valor: string) => {
     const posicion = opcionesPregunta.findIndex(
-      (opcion) => opcion.texto === valor,
+      (opcion) => opcion.opcion === valor,
     );
     if (posicion != -1) {
       opcionesPregunta.splice(posicion, 1);
@@ -151,7 +180,7 @@ const Models = () => {
   const prepararActualizacionOpciones = (valor: string) => {
     setActualizandoOpcion(true);
     const estiloNuevaOpcion: Opcion | undefined = opcionesPregunta.find(
-      (op) => op.texto == valor,
+      (op) => op.opcion == valor,
     );
     if (estiloNuevaOpcion == undefined) return;
     setNuevaOpcion(valor);
@@ -162,9 +191,9 @@ const Models = () => {
   const onActualizarOpcion = () => {
     setActualizandoOpcion(false);
     const posicion = opcionesPregunta.findIndex(
-      (opcion) => opcion.texto.toLowerCase() === opcionBuscada.toLowerCase(),
+      (opcion) => opcion.opcion.toLowerCase() === opcionBuscada.toLowerCase(),
     );
-    opcionesPregunta[posicion].texto = nuevaOpcion;
+    opcionesPregunta[posicion].opcion = nuevaOpcion;
     opcionesPregunta[posicion].estilo = estiloNuevaOpcion;
     setOpcionesPregunta(opcionesPregunta);
   };
@@ -183,15 +212,22 @@ const Models = () => {
   const onAgregarPregunta = () => {
     if (nombreTest.length == 0) return;
     if (estilosAprendizaje.length == 0) return;
-    if (nuevaPregunta.length == 0) return;
-    if (opcionesPregunta.length == 0) return;
-    if (listaPreguntas.findIndex((pre) => pre.pregunta == nuevaPregunta) != -1)
-      return;
+    let IdUltimaPregunta;
+    if (listaPreguntas.length == 0) {
+      IdUltimaPregunta = 1;
+    } else {
+      IdUltimaPregunta = listaPreguntas[listaPreguntas.length - 1].id + 1;
+    }
     const pregunta: Pregunta = {
+      id: IdUltimaPregunta,
       orden: listaPreguntas.length + 1,
-      pregunta: nuevaPregunta,
+      pregunta: 'Nueva pregunta',
       tipoPregunta: tipoPregunta,
-      opciones: opcionesPregunta,
+      limiteRespuesta: 0,
+      opciones: [
+        { id: 1, opcion: 'Opción 1', estilo: '' },
+        { id: 2, opcion: 'Opción 2', estilo: '' },
+      ],
     };
     const nuevaLista = listaPreguntas
       .concat(pregunta)
@@ -279,28 +315,34 @@ const Models = () => {
     <DefaultLayout>
       <Breadcrumb pageName="Modelos" />
       <div className="flex flex-col gap-3">
-        <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-          Título:
-        </h3>
-        <input
-          type="text"
-          placeholder="Nombre del modelo"
-          maxLength={75}
-          value={nombreTest.length > 0 ? nombreTest : ''}
-          onChange={(e) => setNombreTest(e.target.value)}
-          className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-1 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-        />
-        <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-          Autor:
-        </h3>
-        <input
-          type="text"
-          placeholder="Nombre del Autor"
-          value={autor}
-          maxLength={100}
-          onChange={(e) => setAutor(e.target.value)}
-          className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="">
+            <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+              Título:
+            </h3>
+            <input
+              type="text"
+              placeholder="Nombre del modelo"
+              maxLength={75}
+              value={nombreTest.length > 0 ? nombreTest : ''}
+              onChange={(e) => setNombreTest(e.target.value)}
+              className="w-full rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-1 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            />
+          </div>
+          <div className="">
+            <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+              Autor:
+            </h3>
+            <input
+              type="text"
+              placeholder="Nombre del Autor"
+              value={autor}
+              maxLength={100}
+              onChange={(e) => setAutor(e.target.value)}
+              className="w-full rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            />
+          </div>
+        </div>
         <h3 className="text-title-xsm font-semibold text-black dark:text-white">
           Descripción:
         </h3>
@@ -310,7 +352,7 @@ const Models = () => {
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
           maxLength={100}
-          className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          className="w-full rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
         />
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-3">
@@ -323,7 +365,7 @@ const Models = () => {
                 placeholder="Agregar nuevo estilo"
                 value={nuevoEstiloAprendizaje}
                 onChange={(e) => setNuevoEstiloAprendizaje(e.target.value)}
-                className="w-[50%] rounded-l-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                className="w-[50%] rounded-l-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               />
               {actualizandoEstilo === true ? (
                 <button
@@ -354,16 +396,37 @@ const Models = () => {
             </ul>
           </div>
           <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-            Pregunta
+            Test:
           </h3>
-          <input
-            type="text"
-            placeholder="Agregar nueva pregunta"
-            value={nuevaPregunta}
-            maxLength={300}
-            onChange={(e) => setNuevaPregunta(e.target.value)}
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-          />
+          {listaPreguntas &&
+            listaPreguntas.map((pre) => (
+              <div className="gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
+                {pre.tipoPregunta === 'Selección múltiple' && (
+                  <MultiChoiceQuestion
+                    pregunta={pre}
+                    cambiarLimiteRespuesta={cambiarLimiteRespuesta}
+                    nuevaOpcion={nuevaOpcion}
+                    agregarNuevaOpcion={setNuevaOpcion}
+                    cambiarTipoEstiloPregunta={cambiarTipoEstiloPregunta}
+                    tiposEstilosAprendizaje={tiposEstilosAprendizaje}
+                    estiloNuevaOpcion={estiloNuevaOpcion}
+                    actualizandoOpcion={actualizandoOpcion}
+                    onActualizarOpcion={onActualizarOpcion}
+                    agregarOpcion={agregarOpcion}
+                    eliminarOpcion={eliminarOpcion}
+                  />
+                )}
+                {pre.tipoPregunta === 'Likert' && (
+                  <Likert
+                    cambiarTipoEstiloPregunta={cambiarTipoEstiloPregunta}
+                    estilosAprendizaje={tiposEstilosAprendizaje}
+                    actualizandoOpcion={actualizandoOpcion}
+                  />
+                )}
+              </div>
+            ))}
+        </div>
+        <div className="flex flex-col gap-2">
           <h3 className="text-title-xsm font-semibold text-black dark:text-white">
             Tipo de pregunta:
           </h3>
@@ -372,31 +435,8 @@ const Models = () => {
             opciones={tiposPreguntas}
             opcionPorDefecto={tipoPregunta}
           />
-          {tipoPregunta === 'Selección múltiple' && (
-            <MultiChoiceQuestion
-              cambiarLimiteRespuesta={cambiarLimiteRespuesta}
-              limiteRespuestas={limiteRespuestas}
-              nuevaOpcion={nuevaOpcion}
-              agregarNuevaOpcion={setNuevaOpcion}
-              cambiarTipoEstiloPregunta={cambiarTipoEstiloPregunta}
-              tiposEstilosAprendizaje={tiposEstilosAprendizaje}
-              estiloNuevaOpcion={estiloNuevaOpcion}
-              actualizandoOpcion={actualizandoOpcion}
-              onActualizarOpcion={onActualizarOpcion}
-              agregarOpcion={agregarOpcion}
-              opcionesPregunta={opcionesPregunta}
-              prepararActualizacionOpciones={prepararActualizacionOpciones}
-              eliminarOpcion={eliminarOpcion}
-            />
-          )}
-          {tipoPregunta === 'Likert' && (
-            <Likert
-              cambiarTipoEstiloPregunta={cambiarTipoEstiloPregunta}
-              estilosAprendizaje={tiposEstilosAprendizaje}
-              actualizandoOpcion={actualizandoOpcion}
-            />
-          )}
-          {tipoPregunta === 'Likert'}
+        </div>
+        <div className="flex gap-4">
           {actualizandoPregunta ? (
             <button
               className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
@@ -412,30 +452,13 @@ const Models = () => {
               Agregar Pregunta
             </button>
           )}
-          {listaPreguntas.length > 0 && (
-            <>
-              <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-                Lista de Preguntas:
-              </h3>
-              {listaPreguntas.map((pre) => (
-                <CardList
-                  actualizar={prepararActualizacionPregunta}
-                  eliminar={onEliminarPregunta}
-                  valor={pre.pregunta}
-                  cambiarOrden={cambiarOrden}
-                  mensaje={`PREGUNTA: ${pre.pregunta}\nTIPO DE PREGUNTA: ${pre.tipoPregunta}`}
-                  limite={150}
-                />
-              ))}
-            </>
-          )}
+          <button
+            className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+            onClick={() => onGuardarTest()}
+          >
+            Guardar Test
+          </button>
         </div>
-        <button
-          className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-          onClick={() => onGuardarTest()}
-        >
-          Guardar Test
-        </button>
       </div>
     </DefaultLayout>
   );
