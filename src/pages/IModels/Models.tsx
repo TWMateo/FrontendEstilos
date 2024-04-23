@@ -96,7 +96,7 @@ const Models = () => {
     let opciones = listaPreguntas.find((pre) => pre.id === idPregunta)
       ?.opciones;
     if (opciones === undefined) return;
-    let nuevoIdOpcion = opciones[opciones?.length - 1].id+1;
+    let nuevoIdOpcion = opciones[opciones?.length - 1].id + 1;
     const opcion: Opcion = {
       id: nuevoIdOpcion,
       opcion: 'Opción ' + nuevoIdOpcion,
@@ -105,8 +105,56 @@ const Models = () => {
     let copiaPreguntas = [...listaPreguntas];
     let pregunta = copiaPreguntas.find((pre) => pre.id === idPregunta);
     if (pregunta === undefined) return;
-    pregunta.opciones=pregunta?.opciones.concat(opcion);
+    pregunta.opciones = pregunta?.opciones.concat(opcion);
     setListaPreguntas(copiaPreguntas);
+  };
+
+  const handleChangePregunta = (idPregunta: number, pregunta: string) => {
+    if (idPregunta === undefined) return;
+    let currentListaPregunta = [...listaPreguntas];
+    const index = currentListaPregunta.findIndex(
+      (pre) => pre.id === idPregunta,
+    );
+    if (index === -1) return;
+    currentListaPregunta[index].pregunta = pregunta;
+    setListaPreguntas(currentListaPregunta);
+  };
+
+  const handleChangeOpcion = (
+    idPregunta: number,
+    idOpcion: number,
+    opcion: string = '',
+    estilo: string = '',
+  ) => {
+    if (idPregunta === undefined || idOpcion === undefined) return;
+    let currentListaPregunta = [...listaPreguntas];
+    const indexPregunta = currentListaPregunta.findIndex(
+      (pre) => pre.id === idPregunta,
+    );
+    let currentOpciones = currentListaPregunta[indexPregunta].opciones;
+    const indexOpciones = currentOpciones.findIndex(
+      (opc) => opc.id === idOpcion,
+    );
+    if (estilo=='')
+      currentListaPregunta[indexPregunta].opciones[indexOpciones].opcion =
+        opcion;
+    if (estilo != '')
+      currentListaPregunta[indexPregunta].opciones[indexOpciones].estilo =
+        estilo;
+    setListaPreguntas(currentListaPregunta);
+  };
+
+  const handleClickDeleteOpcion = (idPregunta: number, idOpcion: number) => {
+    if (idPregunta == undefined && idOpcion == undefined) return;
+    let currentListaPreguntas = [...listaPreguntas];
+    const indexPregunta = currentListaPreguntas.findIndex(
+      (pre) => pre.id === idPregunta,
+    );
+    if (indexPregunta == -1) return;
+    const currentListaOpciones = currentListaPreguntas[indexPregunta].opciones;
+    const indexOpcion = currentListaOpciones.findIndex((opc) => opc.id === idOpcion);
+    currentListaPreguntas[indexPregunta].opciones.splice(indexOpcion,1);
+    setListaPreguntas(currentListaPreguntas);
   };
 
   //REVISANDO
@@ -282,6 +330,10 @@ const Models = () => {
     setLimiteRespuestas(num);
   };
 
+  useEffect(() => {
+    console.log(listaPreguntas);
+  }, [listaPreguntas]);
+
   const cambiarOrden = (valor: string, direccion: string) => {
     const indice = listaPreguntas.findIndex(
       (pre) => pre.pregunta.toLowerCase() == valor.toLowerCase(),
@@ -404,6 +456,9 @@ const Models = () => {
                 {pre.tipoPregunta === 'Selección múltiple' && (
                   <MultiChoiceQuestion
                     pregunta={pre}
+                    onUpdatePregunta={handleChangePregunta}
+                    onUpdateOpcion={handleChangeOpcion}
+                    onDeleteOpcion={handleClickDeleteOpcion}
                     cambiarLimiteRespuesta={cambiarLimiteRespuesta}
                     nuevaOpcion={nuevaOpcion}
                     agregarNuevaOpcion={setNuevaOpcion}

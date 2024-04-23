@@ -1,15 +1,26 @@
 import React, { useState } from 'react';
+import { AlertError } from '../../Alerts/AlertError';
 
 interface Props {
-  onChange: (valor: string) => void;
+  onChange?: (valor: string) => void;
+  onChangeTwo?: (idPregunta: number, idOpcion: number,opcion:string, valor: string) => void;
   opciones: {
     mensaje: string;
     tipos: string[];
   };
   opcionPorDefecto?: string;
+  idPregunta?: number;
+  idOpcion?: number;
 }
 
-const SelectGroupOne: React.FC<Props> = ({ onChange, opciones, opcionPorDefecto=''}) => {
+const SelectGroupOne: React.FC<Props> = ({
+  onChange,
+  onChangeTwo,
+  opciones,
+  opcionPorDefecto = '',
+  idPregunta = null,
+  idOpcion = null,
+}) => {
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [isOptionSelected, setIsOptionSelected] = useState<boolean>(false);
 
@@ -20,14 +31,18 @@ const SelectGroupOne: React.FC<Props> = ({ onChange, opciones, opcionPorDefecto=
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const valor = e.target.value;
     setSelectedOption(valor);
-    onChange(valor);
+    if (onChangeTwo && idPregunta != null && idOpcion != null) {
+      onChangeTwo(idPregunta, idOpcion,"",valor);
+    } else if(onChange){
+      onChange(valor);
+    }
     changeTextColor();
   };
   return (
     <div className="mb-4.5">
       <div className="relative z-20 bg-transparent dark:bg-form-input">
         <select
-          title={opcionPorDefecto =='' ? selectedOption : opcionPorDefecto}
+          title={opcionPorDefecto == '' ? selectedOption : opcionPorDefecto}
           value={opcionPorDefecto == '' ? selectedOption : opcionPorDefecto}
           onChange={handleChange}
           className={`relative z-20 w-full appearance-none rounded border border-strokedark bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
@@ -48,7 +63,7 @@ const SelectGroupOne: React.FC<Props> = ({ onChange, opciones, opcionPorDefecto=
               </option>
             ))}
         </select>
-
+        {selectedOption =="" && <AlertError mensaje='Selecciona una opción'/>}
         <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
           <svg
             className="fill-current"
