@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import DefaultLayout from '../../layout/DefaultLayout';
 import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
@@ -34,6 +34,8 @@ interface Pregunta {
   tipoPregunta: string;
   limiteRespuesta: 0;
   opciones: Opcion[];
+  min: number;
+  max: number;
 }
 
 interface Props {
@@ -60,6 +62,8 @@ const Models = () => {
   const [autor, setAutor] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [limiteRespuestas, setLimiteRespuestas] = useState<number>(0);
+  const [encuestaCuantitativa, setEncuestaCuantitativa] = useState(false);
+  const [valorPregunta, setValorPregunta] = useState(1);
   // const [preguntasPrueba, setPreguntasPrueba] = useState([
   //   {
   //     id: 1,
@@ -91,7 +95,7 @@ const Models = () => {
     tipos: estilosAprendizaje,
   };
 
-  const agregarOpcion = (idPregunta: number) => {
+  const handleClickAddOpcion = (idPregunta: number) => {
     if (idPregunta === undefined) return;
     let opciones = listaPreguntas.find((pre) => pre.id === idPregunta)
       ?.opciones;
@@ -135,7 +139,7 @@ const Models = () => {
     const indexOpciones = currentOpciones.findIndex(
       (opc) => opc.id === idOpcion,
     );
-    if (estilo=='')
+    if (estilo == '')
       currentListaPregunta[indexPregunta].opciones[indexOpciones].opcion =
         opcion;
     if (estilo != '')
@@ -152,9 +156,51 @@ const Models = () => {
     );
     if (indexPregunta == -1) return;
     const currentListaOpciones = currentListaPreguntas[indexPregunta].opciones;
-    const indexOpcion = currentListaOpciones.findIndex((opc) => opc.id === idOpcion);
-    currentListaPreguntas[indexPregunta].opciones.splice(indexOpcion,1);
+    if (currentListaOpciones.length == 1) return;
+    const indexOpcion = currentListaOpciones.findIndex(
+      (opc) => opc.id === idOpcion,
+    );
+    currentListaPreguntas[indexPregunta].opciones.splice(indexOpcion, 1);
     setListaPreguntas(currentListaPreguntas);
+  };
+
+  const handleClickDeletePregunta = (idPregunta: number) => {
+    if (idPregunta === undefined) return;
+    let currentListaPregunta = [...listaPreguntas];
+    let indexPregunta = currentListaPregunta.findIndex(
+      (pre) => pre.id === idPregunta,
+    );
+    if (indexPregunta === -1) return;
+    currentListaPregunta.splice(indexPregunta, 1);
+    setListaPreguntas(currentListaPregunta);
+  };
+
+  const handleChangeLimiteRespuesta = (
+    idPregunta: number,
+    indicador: string,
+    valor: number,
+  ) => {
+    if (idPregunta === undefined) return;
+    let currentListaPreguntas = [...listaPreguntas];
+    let index = currentListaPreguntas.findIndex((pre) => pre.id === idPregunta);
+    if (index === -1) return;
+    currentListaPreguntas[index].min = 0;
+    currentListaPreguntas[index].max = 0;
+    if (indicador === 'min') {
+      currentListaPreguntas[index].min = valor;
+    }
+    if (indicador === 'max') {
+      currentListaPreguntas[index].max = valor;
+    }
+    setListaPreguntas(currentListaPreguntas);
+  };
+
+  const handleUpdateValorRespuesta = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    let valor = parseInt(e.target.value);
+    if (valor <= 0) return;
+    setValorPregunta(valor);
   };
 
   //REVISANDO
@@ -215,37 +261,6 @@ const Models = () => {
     setEstiloBuscado(valor);
   };
 
-  const eliminarOpcion = (valor: string) => {
-    const posicion = opcionesPregunta.findIndex(
-      (opcion) => opcion.opcion === valor,
-    );
-    if (posicion != -1) {
-      opcionesPregunta.splice(posicion, 1);
-      setOpcionesPregunta((prevState) => [...prevState]);
-    }
-  };
-
-  const prepararActualizacionOpciones = (valor: string) => {
-    setActualizandoOpcion(true);
-    const estiloNuevaOpcion: Opcion | undefined = opcionesPregunta.find(
-      (op) => op.opcion == valor,
-    );
-    if (estiloNuevaOpcion == undefined) return;
-    setNuevaOpcion(valor);
-    setEstiloNuevaOpcion(estiloNuevaOpcion.estilo);
-    setOpcionBuscada(valor);
-  };
-
-  const onActualizarOpcion = () => {
-    setActualizandoOpcion(false);
-    const posicion = opcionesPregunta.findIndex(
-      (opcion) => opcion.opcion.toLowerCase() === opcionBuscada.toLowerCase(),
-    );
-    opcionesPregunta[posicion].opcion = nuevaOpcion;
-    opcionesPregunta[posicion].estilo = estiloNuevaOpcion;
-    setOpcionesPregunta(opcionesPregunta);
-  };
-
   const cambiarTipoPregunta = (valor: string) => {
     setTipoPregunta(valor);
     setOpcionesPregunta([]);
@@ -257,7 +272,7 @@ const Models = () => {
     setEstiloNuevaOpcion(valor);
   };
 
-  const onAgregarPregunta = () => {
+  const onAddPregunta = () => {
     if (nombreTest.length == 0) return;
     if (estilosAprendizaje.length == 0) return;
     let IdUltimaPregunta;
@@ -276,24 +291,14 @@ const Models = () => {
         { id: 1, opcion: 'Opción 1', estilo: '' },
         { id: 2, opcion: 'Opción 2', estilo: '' },
       ],
+      min: 0,
+      max: 0,
     };
     const nuevaLista = listaPreguntas
       .concat(pregunta)
       .sort((a, b) => a.orden - b.orden);
     setListaPreguntas(nuevaLista);
     ResetCamposPregunta();
-  };
-
-  const prepararActualizacionPregunta = (valor: string) => {
-    setActualizandoPregunta(true);
-    const pregunta: Pregunta | undefined = listaPreguntas.find(
-      (pre) => pre.pregunta.toLowerCase() == valor.toLowerCase(),
-    );
-    if (pregunta == undefined) return;
-    setNuevaPregunta(valor);
-    setTipoPregunta(pregunta.tipoPregunta);
-    setOpcionesPregunta(pregunta.opciones);
-    setPreguntaBuscada(valor);
   };
 
   const onActualizarPregunta = () => {
@@ -315,24 +320,11 @@ const Models = () => {
     setNuevaOpcion('');
   };
 
-  const onEliminarPregunta = (valor: string) => {
-    const indice = listaPreguntas.findIndex(
-      (pre) => pre.pregunta.toLowerCase() === valor.toLowerCase(),
-    );
-    if (indice == -1) return;
-    listaPreguntas.splice(indice, 1);
-    setListaPreguntas((prevState) => [...prevState]);
-  };
-
   const cambiarLimiteRespuesta = (valor: string) => {
     let num = parseInt(valor);
     if (num < 0) return;
     setLimiteRespuestas(num);
   };
-
-  useEffect(() => {
-    console.log(listaPreguntas);
-  }, [listaPreguntas]);
 
   const cambiarOrden = (valor: string, direccion: string) => {
     const indice = listaPreguntas.findIndex(
@@ -360,6 +352,11 @@ const Models = () => {
   };
 
   useEffect(() => {
+    if (!encuestaCuantitativa) setValorPregunta(0);
+  }, [encuestaCuantitativa]);
+
+  // Pruebas de estados
+  useEffect(() => {
     console.log(listaPreguntas);
   }, [listaPreguntas]);
 
@@ -378,7 +375,7 @@ const Models = () => {
               maxLength={75}
               value={nombreTest.length > 0 ? nombreTest : ''}
               onChange={(e) => setNombreTest(e.target.value)}
-              className="w-full rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-1 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              className="w-full rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             />
           </div>
           <div className="">
@@ -395,17 +392,91 @@ const Models = () => {
             />
           </div>
         </div>
-        <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-          Descripción:
-        </h3>
-        <input
-          type="text"
-          placeholder="Descripción del test"
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-          maxLength={100}
-          className="w-full rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-3">
+            <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+              Tipo de test:
+            </h3>
+            <div className="gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
+              <label className="flex items-center gap-3 pt-2 pb-2">
+                <div className="w-full pl-4 font-semibold">Cuantitativo</div>
+                <div className="relative">
+                  <input
+                    title="Cuantitativo"
+                    type="radio"
+                    name="tipoTest"
+                    onClick={() => setEncuestaCuantitativa(true)}
+                    className="sr-only"
+                  />
+                  <div
+                    className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border ${
+                      encuestaCuantitativa && 'border-primary'
+                    }`}
+                  >
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full bg-transparent ${
+                        encuestaCuantitativa && '!bg-primary'
+                      }`}
+                    >
+                      {' '}
+                    </span>
+                  </div>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 pt-2 pb-2">
+                <div className="w-full pl-4 font-semibold">Cualitativo</div>
+                <div>
+                  <input
+                    title="Cualitativo"
+                    type="radio"
+                    name="tipoTest"
+                    onClick={() => setEncuestaCuantitativa(false)}
+                    className="sr-only"
+                  />
+                  <div
+                    className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border ${
+                      !encuestaCuantitativa && 'border-primary'
+                    }`}
+                  >
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full bg-transparent ${
+                        !encuestaCuantitativa && '!bg-primary'
+                      }`}
+                    >
+                      {' '}
+                    </span>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3">
+            <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+              Descripción:
+            </h3>
+            <textarea
+              placeholder="Descripción del test"
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+              maxLength={100}
+              className="w-full h-[83%] rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            />
+          </div>
+        </div>
+        {encuestaCuantitativa && (
+          <div className="gap-4">
+            <h3 className="text-title-xsm pt-2 pb-4 font-semibold text-black dark:text-white">
+              Valor de preguntas:
+            </h3>
+            <input
+              type="number"
+              placeholder="Limite"
+              value={valorPregunta}
+              onChange={handleUpdateValorRespuesta}
+              className="rounded-lg w-full h-13 border-[1.5px] border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-3">
             <h3 className="text-title-xsm font-semibold text-black dark:text-white">
@@ -456,19 +527,14 @@ const Models = () => {
                 {pre.tipoPregunta === 'Selección múltiple' && (
                   <MultiChoiceQuestion
                     pregunta={pre}
+                    tiposEstilosAprendizaje={tiposEstilosAprendizaje}
                     onUpdatePregunta={handleChangePregunta}
                     onUpdateOpcion={handleChangeOpcion}
                     onDeleteOpcion={handleClickDeleteOpcion}
+                    onDeletePregunta={handleClickDeletePregunta}
+                    onAddOpcion={handleClickAddOpcion}
+                    onUpdateLimiteRespuesta={handleChangeLimiteRespuesta}
                     cambiarLimiteRespuesta={cambiarLimiteRespuesta}
-                    nuevaOpcion={nuevaOpcion}
-                    agregarNuevaOpcion={setNuevaOpcion}
-                    cambiarTipoEstiloPregunta={cambiarTipoEstiloPregunta}
-                    tiposEstilosAprendizaje={tiposEstilosAprendizaje}
-                    estiloNuevaOpcion={estiloNuevaOpcion}
-                    actualizandoOpcion={actualizandoOpcion}
-                    onActualizarOpcion={onActualizarOpcion}
-                    agregarOpcion={agregarOpcion}
-                    eliminarOpcion={eliminarOpcion}
                   />
                 )}
                 {pre.tipoPregunta === 'Likert' && (
@@ -502,7 +568,7 @@ const Models = () => {
           ) : (
             <button
               className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-              onClick={onAgregarPregunta}
+              onClick={onAddPregunta}
             >
               Agregar Pregunta
             </button>
