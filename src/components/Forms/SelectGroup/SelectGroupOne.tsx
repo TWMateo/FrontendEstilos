@@ -92,7 +92,7 @@ const SelectGroupOne: React.FC<Props> = ({
             </svg>
           </span>
         </div>
-        {selectedOption == '' && <AlertError mensaje="Selecciona una opción" />}
+        {selectedOption == '' && <AlertError mensaje="Selecciona" />}
       </div>
     </div>
   );

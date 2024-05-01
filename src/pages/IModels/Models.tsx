@@ -5,6 +5,7 @@ import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
 import CardList from '../../components/CardList';
 import MultiChoiceQuestion from '../../components/TypesQuestion/MultiChoiceQuestion';
 import Likert from '../../components/TypesQuestion/Likert';
+import { AlertError } from '../../components/Alerts/AlertError';
 
 interface Opcion {
   id: number;
@@ -32,10 +33,15 @@ interface Pregunta {
   orden: number;
   pregunta: string;
   tipoPregunta: string;
-  limiteRespuesta: 0;
   opciones: Opcion[];
+  escalas: string[];
   min: number;
   max: number;
+}
+
+interface ReglaDeCalculo {
+  fila: string;
+  columnas: string[];
 }
 
 interface Props {
@@ -64,37 +70,25 @@ const Models = () => {
   const [limiteRespuestas, setLimiteRespuestas] = useState<number>(0);
   const [encuestaCuantitativa, setEncuestaCuantitativa] = useState(false);
   const [valorPregunta, setValorPregunta] = useState(1);
-  // const [preguntasPrueba, setPreguntasPrueba] = useState([
-  //   {
-  //     id: 1,
-  //     pregunta: 'Agregar nueva pregunta',
-  //     tipoDePregunta: '',
-  //     opciones: [
-  //       { opcion: 'Opción 1', estiloDeAprendizaje: '' },
-  //       { opcion: 'Opción 2', estiloDeAprendizaje: '' },
-  //     ],
-  //   },
-  //   {
-  //     id: 2,
-  //     pregunta: 'Agregar nueva pregunta',
-  //     tipoDePregunta: '',
-  //     opciones: [
-  //       { opcion: 'Opción 1', estiloDeAprendizaje: '' },
-  //       { opcion: 'Opción 2', estiloDeAprendizaje: '' },
-  //     ],
-  //   },
-  // ]);
+  const [reglaCalculo, setReglaCalculo] = useState<ReglaDeCalculo[]>([
+    {
+      fila: '',
+      columnas: [''],
+    },
+  ]);
 
   const tiposPreguntas = {
     mensaje: 'Selecciona el tipo de pregunta',
     tipos: ['Selección múltiple', 'Likert'],
   };
 
-  const tiposEstilosAprendizaje = {
+  const tiposEstilosAprendizaje={
     mensaje: 'Estilo de aprendizaje',
     tipos: estilosAprendizaje,
   };
 
+  /* {Código relacionado al funcionamiento de las preguntas
+   de opción multiple} */
   const handleClickAddOpcion = (idPregunta: number) => {
     if (idPregunta === undefined) return;
     let opciones = listaPreguntas.find((pre) => pre.id === idPregunta)
@@ -195,14 +189,84 @@ const Models = () => {
     setListaPreguntas(currentListaPreguntas);
   };
 
-  const handleUpdateValorRespuesta = (
+  const handleChangeValorRespuesta = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     let valor = parseInt(e.target.value);
+    if (isNaN(valor)) {
+      setValorPregunta(1);
+      return;
+    }
     if (valor <= 0) return;
     setValorPregunta(valor);
   };
 
+  /*{Código relacionado al funcionamiento del registro de las reglas 
+    de cálculo
+  }*/
+
+  const handleClickAddFilaReglaCalculo = () => {
+    if (reglaCalculo.length >= tiposEstilosAprendizaje.tipos.length) return;
+    let currentReglaCalculo = reglaCalculo;
+    let nuevaReglaCalculo = currentReglaCalculo.concat({
+      fila: '',
+      columnas: [''],
+    });
+    setReglaCalculo(nuevaReglaCalculo);
+  };
+
+  const handleClickAddColumnaReglaCalculo = (indexFila: number) => {
+    let currentFila = reglaCalculo[indexFila];
+    if (currentFila.columnas.length >= tiposEstilosAprendizaje.tipos.length)
+      return;
+    let nuevasColumnas = currentFila.columnas.concat('');
+    currentFila.columnas = nuevasColumnas;
+    let currentReglaCalculo = [...reglaCalculo];
+    currentReglaCalculo[indexFila] = currentFila;
+    setReglaCalculo(currentReglaCalculo);
+  };
+
+  const handleClickDeleteReglaCalculo = (
+    indexFila: number,
+    indexColumna?: number,
+  ) => {
+    if (indexFila == undefined) return;
+    let currentFila = reglaCalculo[indexFila];
+    let currentReglaCalculo = [...reglaCalculo];
+    if (indexFila != undefined && indexColumna != undefined) {
+      if (currentFila.columnas.length == 1) return;
+      currentFila.columnas.splice(indexColumna, 1);
+      currentReglaCalculo[indexFila] = currentFila;
+      setReglaCalculo(currentReglaCalculo);
+    }
+    if (indexFila != undefined && indexColumna == undefined) {
+      if (currentReglaCalculo.length == 1) return;
+      currentReglaCalculo.splice(indexFila, 1);
+      setReglaCalculo(currentReglaCalculo);
+    }
+  };
+
+  const handleChangeReglaCalculo = (
+    indexFila: number,
+    indexColumna: number,
+    opcion: string = '',
+    estilo: string = '',
+  ) => {
+    let currentReglaCalculo = [...reglaCalculo];
+    if (estilosAprendizaje.findIndex((estilo) => estilo == estilo) == -1)
+      return;
+    if (currentReglaCalculo[indexFila].fila == estilo) return;
+    if (indexColumna != undefined && indexColumna >= 0) {
+      currentReglaCalculo[indexFila].columnas[indexColumna] = estilo;
+    }
+    if (indexColumna < 0) {
+      currentReglaCalculo[indexFila].fila = estilo;
+    }
+    setReglaCalculo(currentReglaCalculo);
+  };
+
+  /*{Código relacionado al funcionamiento del ingreso de los datos
+     del test}*/
   //REVISANDO
   const onGuardarTest = () => {
     if (nombreTest.length == 0) return;
@@ -236,15 +300,18 @@ const Models = () => {
     }
   };
 
-  const onEliminarEstiloAprendizaje = (estilo: string) => {
+  const handleClickDeleteEstiloAprendizaje = (estilo: string) => {
     const index = estilosAprendizaje.indexOf(estilo);
+    let currentEstilosAprendizaje = [...estilosAprendizaje];
     if (index != -1) {
-      if (estilosAprendizaje.length == 1) {
-        estilosAprendizaje[0] = '';
+      if (currentEstilosAprendizaje.length == 1) {
+        currentEstilosAprendizaje[0] = '';
       } else {
-        estilosAprendizaje.splice(index, 1);
+        currentEstilosAprendizaje.splice(index, 1);
       }
-      setEstilosAprendizaje((prevState) => [...prevState]);
+      setEstilosAprendizaje(currentEstilosAprendizaje);
+      
+      console.log('')
     }
   };
 
@@ -268,10 +335,6 @@ const Models = () => {
     setEstiloNuevaOpcion('');
   };
 
-  const cambiarTipoEstiloPregunta = (valor: string) => {
-    setEstiloNuevaOpcion(valor);
-  };
-
   const onAddPregunta = () => {
     if (nombreTest.length == 0) return;
     if (estilosAprendizaje.length == 0) return;
@@ -281,16 +344,25 @@ const Models = () => {
     } else {
       IdUltimaPregunta = listaPreguntas[listaPreguntas.length - 1].id + 1;
     }
+    let escalas: string[] = [];
+    if (tipoPregunta == 'Likert')
+      escalas = [
+        'Muy insatisfecho',
+        'Insatisfecho',
+        'Neutral',
+        'Satisfecho',
+        'Muy satisfecho',
+      ];
     const pregunta: Pregunta = {
       id: IdUltimaPregunta,
       orden: listaPreguntas.length + 1,
       pregunta: 'Nueva pregunta',
       tipoPregunta: tipoPregunta,
-      limiteRespuesta: 0,
       opciones: [
         { id: 1, opcion: 'Opción 1', estilo: '' },
         { id: 2, opcion: 'Opción 2', estilo: '' },
       ],
+      escalas: escalas,
       min: 0,
       max: 0,
     };
@@ -301,29 +373,10 @@ const Models = () => {
     ResetCamposPregunta();
   };
 
-  const onActualizarPregunta = () => {
-    setActualizandoPregunta(false);
-    const indice = listaPreguntas.findIndex(
-      (pre) => pre.pregunta.toLowerCase() === preguntaBuscada.toLowerCase(),
-    );
-    if (indice == -1) return;
-    listaPreguntas[indice].pregunta = nuevaPregunta;
-    listaPreguntas[indice].tipoPregunta = tipoPregunta;
-    listaPreguntas[indice].opciones = opcionesPregunta;
-    setListaPreguntas(listaPreguntas);
-    ResetCamposPregunta();
-  };
-
   const ResetCamposPregunta = () => {
     setNuevaPregunta('');
     setOpcionesPregunta([]);
     setNuevaOpcion('');
-  };
-
-  const cambiarLimiteRespuesta = (valor: string) => {
-    let num = parseInt(valor);
-    if (num < 0) return;
-    setLimiteRespuestas(num);
   };
 
   const cambiarOrden = (valor: string, direccion: string) => {
@@ -352,13 +405,21 @@ const Models = () => {
   };
 
   useEffect(() => {
-    if (!encuestaCuantitativa) setValorPregunta(0);
+    if (!encuestaCuantitativa) setValorPregunta(1);
   }, [encuestaCuantitativa]);
 
   // Pruebas de estados
   useEffect(() => {
     console.log(listaPreguntas);
   }, [listaPreguntas]);
+  useEffect(() => {
+    console.log(valorPregunta);
+    console.log('');
+  }, [valorPregunta]);
+
+  useEffect(() => {
+    console.log(reglaCalculo);
+  }, [reglaCalculo]);
 
   return (
     <DefaultLayout>
@@ -366,7 +427,7 @@ const Models = () => {
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-4">
           <div className="">
-            <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+            <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
               Título:
             </h3>
             <input
@@ -375,21 +436,31 @@ const Models = () => {
               maxLength={75}
               value={nombreTest.length > 0 ? nombreTest : ''}
               onChange={(e) => setNombreTest(e.target.value)}
-              className="w-full rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              className={`w-full ${
+                nombreTest.length == 0 ? 'rounded-t-lg' : 'rounded-lg'
+              } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
             />
+            {nombreTest.length == 0 && (
+              <AlertError mensaje="El campo no debe estar vacío" />
+            )}
           </div>
           <div className="">
-            <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+            <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
               Autor:
             </h3>
             <input
               type="text"
-              placeholder="Nombre del Autor"
+              placeholder="Nombre del autor"
               value={autor}
               maxLength={100}
               onChange={(e) => setAutor(e.target.value)}
-              className="w-full rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              className={`w-full ${
+                autor.length == 0 ? 'rounded-t-lg' : 'rounded-lg'
+              } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
             />
+            {autor.length == 0 && (
+              <AlertError mensaje="El campo no debe estar vacío" />
+            )}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -398,31 +469,6 @@ const Models = () => {
               Tipo de test:
             </h3>
             <div className="gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
-              <label className="flex items-center gap-3 pt-2 pb-2">
-                <div className="w-full pl-4 font-semibold">Cuantitativo</div>
-                <div className="relative">
-                  <input
-                    title="Cuantitativo"
-                    type="radio"
-                    name="tipoTest"
-                    onClick={() => setEncuestaCuantitativa(true)}
-                    className="sr-only"
-                  />
-                  <div
-                    className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border ${
-                      encuestaCuantitativa && 'border-primary'
-                    }`}
-                  >
-                    <span
-                      className={`h-2.5 w-2.5 rounded-full bg-transparent ${
-                        encuestaCuantitativa && '!bg-primary'
-                      }`}
-                    >
-                      {' '}
-                    </span>
-                  </div>
-                </div>
-              </label>
               <label className="flex items-center gap-3 pt-2 pb-2">
                 <div className="w-full pl-4 font-semibold">Cualitativo</div>
                 <div>
@@ -448,10 +494,35 @@ const Models = () => {
                   </div>
                 </div>
               </label>
+              <label className="flex items-center gap-3 pt-2 pb-2">
+                <div className="w-full pl-4 font-semibold">Cuantitativo</div>
+                <div className="relative">
+                  <input
+                    title="Cuantitativo"
+                    type="radio"
+                    name="tipoTest"
+                    onClick={() => setEncuestaCuantitativa(true)}
+                    className="sr-only"
+                  />
+                  <div
+                    className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border ${
+                      encuestaCuantitativa && 'border-primary'
+                    }`}
+                  >
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full bg-transparent ${
+                        encuestaCuantitativa && '!bg-primary'
+                      }`}
+                    >
+                      {' '}
+                    </span>
+                  </div>
+                </div>
+              </label>
             </div>
           </div>
-          <div className="flex flex-col gap-3">
-            <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+          <div className="flex flex-col">
+            <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
               Descripción:
             </h3>
             <textarea
@@ -459,27 +530,30 @@ const Models = () => {
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               maxLength={100}
-              className="w-full h-[83%] rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              className={`w-full h-[83%] ${
+                descripcion.length == 0 ? 'rounded-t-lg' : 'rounded-lg'
+              } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
             />
+            {descripcion.length == 0 && (
+              <AlertError mensaje="El campo no debe estar vacío" />
+            )}
           </div>
         </div>
-        {encuestaCuantitativa && (
-          <div className="gap-4">
-            <h3 className="text-title-xsm pt-2 pb-4 font-semibold text-black dark:text-white">
-              Valor de preguntas:
-            </h3>
-            <input
-              type="number"
-              placeholder="Limite"
-              value={valorPregunta}
-              onChange={handleUpdateValorRespuesta}
-              className="rounded-lg w-full h-13 border-[1.5px] border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-            />
-          </div>
-        )}
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-3">
-            <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+        <div className="gap-4">
+          <h3 className="text-title-xsm pt-2 pb-4 font-semibold text-black dark:text-white">
+            Valor de preguntas:
+          </h3>
+          <input
+            type="number"
+            placeholder="Valor cuantitativo"
+            value={valorPregunta}
+            onChange={handleChangeValorRespuesta}
+            className="rounded-lg w-full h-13 border-[1.5px] border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          />
+        </div>
+        <div className="flex flex-col">
+          <div className="flex flex-col">
+            <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
               Estilos de aprendizaje:
             </h3>
             <div className="flex flex-row">
@@ -488,11 +562,13 @@ const Models = () => {
                 placeholder="Agregar nuevo estilo"
                 value={nuevoEstiloAprendizaje}
                 onChange={(e) => setNuevoEstiloAprendizaje(e.target.value)}
-                className="w-[50%] rounded-l-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                className={`w-[50%] ${
+                  estilosAprendizaje[0] == '' ? 'rounded-tl-lg' : 'rounded-l-lg'
+                } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
               />
               {actualizandoEstilo === true ? (
                 <button
-                  className="flex w-[50%] justify-center rounded-r-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  className={`flex w-[50%] justify-center bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
                   onClick={() => onActualizarEstiloAprendizaje()}
                 >
                   Actualizar Estilo de Aprendizaje
@@ -506,19 +582,132 @@ const Models = () => {
                 </button>
               )}
             </div>
-            <ul className="grid grid-cols-3 gap-4">
+            {estilosAprendizaje[0] == '' && (
+              <AlertError mensaje="La lista no debe estar vacío" />
+            )}
+            <ul className="grid grid-cols-3 gap-4 pt-3">
               {estilosAprendizaje[0].length > 0 &&
                 estilosAprendizaje.map((estilo) => (
                   <CardList
                     actualizar={prepararActualizacionEstilo}
-                    eliminar={onEliminarEstiloAprendizaje}
+                    eliminar={handleClickDeleteEstiloAprendizaje}
                     valor={estilo}
                     limite={11}
                   />
                 ))}
             </ul>
           </div>
-          <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+          {/* Sección de reglas de cálculo */}
+          <div>
+            <h3 className="text-title-xsm pt-3 pb-3 font-semibold text-black dark:text-white">
+              Regla de cálculo:
+            </h3>
+            <div className="flex flex-col bg-whiten dark:bg-form-input gap-5 rounded-lg border-[1.5px] border-black py-8 px-5 dark:text-white outline-none transition dark:border-form-strokedark">
+              <div className="flex flex-col overflow-auto">
+                <table>
+                  <tbody>
+                    {reglaCalculo.map((estilo, index) => (
+                      <tr className="flex">
+                        <td className="flex w-65 flex-row content-center">
+                          <SelectGroupOne
+                            onChangeTwo={handleChangeReglaCalculo}
+                            opciones={tiposEstilosAprendizaje}
+                            idPregunta={index}
+                            idOpcion={-1}
+                          />
+                          <button
+                            title="Añadir"
+                            className="rounded-md hover:bg-opacity-90"
+                            onClick={() =>
+                              handleClickAddColumnaReglaCalculo(index)
+                            }
+                          >
+                            {' '}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width={18}
+                              height={18}
+                              className="fill-black ml-3 mb-5 dark:fill-bodydark1"
+                              viewBox="0 0 448 512"
+                            >
+                              <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
+                            </svg>
+                          </button>
+                          <button
+                            title="Borrar"
+                            className={`w-[5%] pt-1 ml-3 mb-5`}
+                            onClick={() => handleClickDeleteReglaCalculo(index)}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width={18}
+                              height={18}
+                              className="dark:fill-bodydark1"
+                              viewBox="0 0 448 512"
+                            >
+                              <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z" />
+                            </svg>
+                          </button>
+                        </td>
+
+                        {estilo.columnas.map((columna, indexColumna) => (
+                          <td className="w-54 flex">
+                            <SelectGroupOne
+                              onChangeTwo={handleChangeReglaCalculo}
+                              opciones={tiposEstilosAprendizaje}
+                              idPregunta={index}
+                              idOpcion={indexColumna}
+                            />
+                            <button
+                              title="Borrar"
+                              className={`w-[5%] pt-1 ml-3 mb-5`}
+                              onClick={() =>
+                                handleClickDeleteReglaCalculo(
+                                  index,
+                                  indexColumna,
+                                )
+                              }
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={18}
+                                height={18}
+                                className="dark:fill-bodydark1"
+                                viewBox="0 0 448 512"
+                              >
+                                <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z" />
+                              </svg>
+                            </button>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <button
+                title="Añadir"
+                className="flex rigth items-center pt-1 pb-1 w-[25%] lg:p-2 lg:pt-2 lg:pb-2 bg-primary rounded-lg hover:bg-opacity-90 dark:text-bodydark1"
+                onClick={() => handleClickAddFilaReglaCalculo()}
+              >
+                {' '}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={18}
+                  height={18}
+                  viewBox="0 0 448 512"
+                  className="w-[25%] fill-white"
+                >
+                  <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
+                </svg>
+                <div className="text-sm w-[60%] text-gray">Añadir una fila</div>
+              </button>
+            </div>
+          </div>
+        </div>
+        {/* Sección de previsualizacion del test */}
+        <div className="flex flex-col gap-6">
+          <h3 className="text-title-xsm pt-4 placeholder:b-4 font-semibold text-black dark:text-white">
             Test:
           </h3>
           {listaPreguntas &&
@@ -534,14 +723,17 @@ const Models = () => {
                     onDeletePregunta={handleClickDeletePregunta}
                     onAddOpcion={handleClickAddOpcion}
                     onUpdateLimiteRespuesta={handleChangeLimiteRespuesta}
-                    cambiarLimiteRespuesta={cambiarLimiteRespuesta}
                   />
                 )}
                 {pre.tipoPregunta === 'Likert' && (
                   <Likert
-                    cambiarTipoEstiloPregunta={cambiarTipoEstiloPregunta}
-                    estilosAprendizaje={tiposEstilosAprendizaje}
-                    actualizandoOpcion={actualizandoOpcion}
+                    pregunta={pre}
+                    tiposEstilosAprendizaje={tiposEstilosAprendizaje}
+                    onUpdatePregunta={handleChangePregunta}
+                    onAddOpcion={handleClickAddOpcion}
+                    onDeleteOpcion={handleClickDeleteOpcion}
+                    onDeletePregunta={handleClickDeletePregunta}
+                    onUpdateOpcion={handleChangeOpcion}
                   />
                 )}
               </div>
@@ -558,21 +750,12 @@ const Models = () => {
           />
         </div>
         <div className="flex gap-4">
-          {actualizandoPregunta ? (
-            <button
-              className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-              onClick={onActualizarPregunta}
-            >
-              Actualizar Pregunta
-            </button>
-          ) : (
-            <button
-              className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-              onClick={onAddPregunta}
-            >
-              Agregar Pregunta
-            </button>
-          )}
+          <button
+            className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+            onClick={onAddPregunta}
+          >
+            Agregar Pregunta
+          </button>
           <button
             className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
             onClick={() => onGuardarTest()}
