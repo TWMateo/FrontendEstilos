@@ -6,6 +6,8 @@ import CardList from '../../components/CardList';
 import MultiChoiceQuestion from '../../components/TypesQuestion/MultiChoiceQuestion';
 import Likert from '../../components/TypesQuestion/Likert';
 import { AlertError } from '../../components/Alerts/AlertError';
+import { AlertSucessfull } from '../../components/Alerts/AlertSuccesfull';
+import Modal from '../../components/Modal';
 
 interface Opcion {
   id: number;
@@ -70,6 +72,9 @@ const Models = () => {
   const [limiteRespuestas, setLimiteRespuestas] = useState<number>(0);
   const [encuestaCuantitativa, setEncuestaCuantitativa] = useState(false);
   const [valorPregunta, setValorPregunta] = useState(1);
+  const [guardado, setGuardado] = useState(false);
+  const [errorGuardado, setErrorGuardado] = useState(false);
+ const [isModalOpen, setIsModalOpen] = useState(false);
   const [reglaCalculo, setReglaCalculo] = useState<ReglaDeCalculo[]>([
     {
       fila: '',
@@ -77,12 +82,12 @@ const Models = () => {
     },
   ]);
 
-  const tiposPreguntas = {
+  const [tiposPreguntas, setTiposPreguntas] = useState({
     mensaje: 'Selecciona el tipo de pregunta',
     tipos: ['Selección múltiple', 'Likert'],
-  };
+  });
 
-  const tiposEstilosAprendizaje={
+  const tiposEstilosAprendizaje = {
     mensaje: 'Estilo de aprendizaje',
     tipos: estilosAprendizaje,
   };
@@ -90,11 +95,16 @@ const Models = () => {
   /* {Código relacionado al funcionamiento de las preguntas
    de opción multiple} */
   const handleClickAddOpcion = (idPregunta: number) => {
+    let nuevoIdOpcion;
     if (idPregunta === undefined) return;
     let opciones = listaPreguntas.find((pre) => pre.id === idPregunta)
       ?.opciones;
     if (opciones === undefined) return;
-    let nuevoIdOpcion = opciones[opciones?.length - 1].id + 1;
+    if (opciones.length == 0) {
+      nuevoIdOpcion = 1;
+    } else {
+      nuevoIdOpcion = opciones[opciones?.length - 1].id + 1;
+    }
     const opcion: Opcion = {
       id: nuevoIdOpcion,
       opcion: 'Opción ' + nuevoIdOpcion,
@@ -253,9 +263,7 @@ const Models = () => {
     estilo: string = '',
   ) => {
     let currentReglaCalculo = [...reglaCalculo];
-    if (estilosAprendizaje.findIndex((estilo) => estilo == estilo) == -1)
-      return;
-    if (currentReglaCalculo[indexFila].fila == estilo) return;
+    if (estilosAprendizaje.findIndex((est) => est == estilo) == -1) return;
     if (indexColumna != undefined && indexColumna >= 0) {
       currentReglaCalculo[indexFila].columnas[indexColumna] = estilo;
     }
@@ -267,24 +275,48 @@ const Models = () => {
 
   /*{Código relacionado al funcionamiento del ingreso de los datos
      del test}*/
-  //REVISANDO
   const onGuardarTest = () => {
-    if (nombreTest.length == 0) return;
-    if (autor.length == 0) return;
-    if (descripcion.length == 0) return;
-    if (nombreTest.length == 0) return;
-    if (estilosAprendizaje.length == 0) return;
-    if (listaPreguntas.length == 0) return;
+    if (
+      nombreTest.length == 0 ||
+      autor.length == 0 ||
+      descripcion.length == 0 ||
+      nombreTest.length == 0 ||
+      estilosAprendizaje.length == 0 ||
+      listaPreguntas.length == 0 ||
+      reglaCalculo.length == 0 ||
+      reglaCalculo[0].fila == '' ||
+      reglaCalculo[0].columnas[0] === ''
+    ) {
+      cambiarEstadoErrorGuardadoTemporalmente();
+      return;
+    }
+    for (const pregunta of listaPreguntas) {
+      if (pregunta.pregunta.length === 0) {
+        cambiarEstadoErrorGuardadoTemporalmente();
+        return;
+      }
+      for (const opcion of pregunta.opciones) {
+        if (opcion.estilo.length == 0) {
+          cambiarEstadoErrorGuardadoTemporalmente();
+          return;
+        }
+        if (opcion.opcion.length == 0) {
+          cambiarEstadoErrorGuardadoTemporalmente();
+          return;
+        }
+      }
+    }
     const fecha = new Date();
     const test: Test = {
       titulo: nombreTest,
       autor: autor,
       descripcion: descripcion,
-      cuantitativa: false,
+      cuantitativa: encuestaCuantitativa,
       fechaCreacion: fecha.toLocaleDateString(),
       estilosAprendizaje: estilosAprendizaje,
       preguntas: listaPreguntas,
     };
+    cambiarEstadoGuardadoTemporalmente()
     console.log(test);
   };
 
@@ -303,15 +335,27 @@ const Models = () => {
   const handleClickDeleteEstiloAprendizaje = (estilo: string) => {
     const index = estilosAprendizaje.indexOf(estilo);
     let currentEstilosAprendizaje = [...estilosAprendizaje];
+    let nuevasReglas;
+    let nuevasPreguntas: Pregunta[] = [];
     if (index != -1) {
       if (currentEstilosAprendizaje.length == 1) {
         currentEstilosAprendizaje[0] = '';
+        setListaPreguntas(nuevasPreguntas);
       } else {
+        const preguntasActualizadas = listaPreguntas.map((pregunta) => ({
+          ...pregunta,
+          opciones: pregunta.opciones.filter((opc) => opc.estilo !== estilo),
+        }));
+        setListaPreguntas(preguntasActualizadas);
         currentEstilosAprendizaje.splice(index, 1);
       }
+      nuevasReglas = reglaCalculo.filter((regla) => {
+        const valorCoincide =
+          regla.fila === estilo || regla.columnas.includes(estilo);
+        return !valorCoincide;
+      });
       setEstilosAprendizaje(currentEstilosAprendizaje);
-      
-      console.log('')
+      setReglaCalculo(nuevasReglas);
     }
   };
 
@@ -335,9 +379,11 @@ const Models = () => {
     setEstiloNuevaOpcion('');
   };
 
-  const onAddPregunta = () => {
-    if (nombreTest.length == 0) return;
-    if (estilosAprendizaje.length == 0) return;
+  const handleClickAddPregunta = () => {
+    // Añadir mas campos para evitar la adición de preguntas si
+    // no se llenan
+    // if (nombreTest.length == 0) return;
+    if (estilosAprendizaje[0] == '') return;
     let IdUltimaPregunta;
     if (listaPreguntas.length == 0) {
       IdUltimaPregunta = 1;
@@ -406,12 +452,60 @@ const Models = () => {
 
   useEffect(() => {
     if (!encuestaCuantitativa) setValorPregunta(1);
+    if (encuestaCuantitativa) {
+      setTiposPreguntas({
+        mensaje: 'Selecciona el tipo de pregunta',
+        tipos: ['Selección múltiple'],
+      });
+      setListaPreguntas([]);
+      setTipoPregunta('Selección múltiple');
+    } else {
+      setTiposPreguntas({
+        mensaje: 'Selecciona el tipo de pregunta',
+        tipos: ['Selección múltiple', 'Likert'],
+      });
+      setListaPreguntas([]);
+    }
   }, [encuestaCuantitativa]);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleConfirm = () => {
+    onGuardarTest();
+    handleCloseModal();
+  };
+
+  const cambiarEstadoGuardadoTemporalmente = () => {
+    setGuardado(true);
+    setTimeout(() => {
+      setGuardado(false);
+    }, 4000); 
+  };
+
+  const cambiarEstadoErrorGuardadoTemporalmente = () => {
+    setErrorGuardado(true);
+    setTimeout(() => {
+      setErrorGuardado(false);
+    }, 4000);
+  };
 
   // Pruebas de estados
   useEffect(() => {
+    console.log('Listado pregunta');
     console.log(listaPreguntas);
   }, [listaPreguntas]);
+
+  useEffect(() => {
+    console.log('Estilos aprendizaje');
+    console.log(estilosAprendizaje);
+  }, [estilosAprendizaje]);
+
   useEffect(() => {
     console.log(valorPregunta);
     console.log('');
@@ -419,11 +513,26 @@ const Models = () => {
 
   useEffect(() => {
     console.log(reglaCalculo);
+    console.log('tamaño regla');
+    console.log(reglaCalculo.length);
   }, [reglaCalculo]);
 
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Modelos" />
+      {guardado && (
+        <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+          <AlertSucessfull titulo="Test Guardado" mensaje="" />
+        </div>
+      )}
+      {errorGuardado && (
+        <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
+          <AlertError
+            titulo="Test no guardado"
+            mensaje="Todos los campos deben estar llenos"
+          />
+        </div>
+      )}
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-4">
           <div className="">
@@ -649,7 +758,6 @@ const Models = () => {
                             </svg>
                           </button>
                         </td>
-
                         {estilo.columnas.map((columna, indexColumna) => (
                           <td className="w-54 flex">
                             <SelectGroupOne
@@ -703,6 +811,9 @@ const Models = () => {
                 <div className="text-sm w-[60%] text-gray">Añadir una fila</div>
               </button>
             </div>
+            {reglaCalculo.length == 0 && (
+              <AlertError mensaje="La regla de calculo debe definirse" />
+            )}
           </div>
         </div>
         {/* Sección de previsualizacion del test */}
@@ -752,16 +863,22 @@ const Models = () => {
         <div className="flex gap-4">
           <button
             className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-            onClick={onAddPregunta}
+            onClick={handleClickAddPregunta}
           >
             Agregar Pregunta
           </button>
           <button
             className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-            onClick={() => onGuardarTest()}
+            onClick={handleOpenModal}
           >
             Guardar Test
           </button>
+          <Modal
+            isOpen={isModalOpen}
+            mensaje="¿Estás seguro de guardar el test?"
+            onClose={handleCloseModal}
+            onConfirm={handleConfirm}
+          />
         </div>
       </div>
     </DefaultLayout>

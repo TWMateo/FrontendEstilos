@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import Logo from '../../images/UTN/logo-utn.png';
 import LogoSidebar from '../../images/UTN/logo-utn-sidebar.png';
 import EscudoUtn from '../../images/UTN/escudo-utn.png';
+import Modal from '../Modal';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -13,7 +16,9 @@ interface SidebarProps {
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const location = useLocation();
   const { pathname } = location;
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const navigate = useNavigate();
   const trigger = useRef<any>(null);
   const sidebar = useRef<any>(null);
 
@@ -57,19 +62,45 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     }
   }, [sidebarExpanded]);
 
+  // Confirmación del modal
+  const [targetPath, setTargetPath] = useState('');
+  const [redirectTo, setRedirectTo] = useState("");
+
+  const handleNavLinkClick = (path: string, e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const shouldShowConfirmation =
+      location.pathname === '/models' && path !== '/models ';
+    if (shouldShowConfirmation) {
+      setIsModalOpen(true);
+      setRedirectTo(path)
+      e.preventDefault(); 
+    }else{
+      return true; 
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleConfirm = () => {
+    handleCloseModal();
+    navigate(redirectTo)
+    return true;
+  };
+
   return (
     <aside
       ref={sidebar}
-      className={`absolute left-0 top-0 z-9999 flex h-screen border-[1.5px] bg-bodydark1 border-stroke dark:border-none w-72.5 flex-col overflow-y-hidden duration-300 ease-linear dark:bg-black lg:static lg:translate-x-0 ${
+      className={`absolute left-0 top-0 z-9999 flex h-screen bg-bodydark1 dark:border-none w-72.5 flex-col overflow-y-hidden duration-300 ease-linear dark:bg-black lg:static lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
       {/* <!-- SIDEBAR HEADER --> */}
-      <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
+      <div className="flex items-center bg-black justify-between gap-2 px-6 py-5.5 lg:py-6.5">
         <NavLink className={''} to="/">
           <img src={EscudoUtn} alt="Logo" />
         </NavLink>
-        <h3 className="text-title-xsm w-[70%] text-center font-bold text-black dark:text-white">
+        <h3 className="text-title-xsm w-[70%] text-center font-bold text-white dark:text-white">
           UNIVERSIDAD TÉCNICA DEL NORTE
         </h3>
         <button
@@ -95,10 +126,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         </button>
       </div>
       {/* <!-- SIDEBAR HEADER --> */}
-
-      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+      <div className="no-scrollbar border-[1.5px] dark:border-none flex flex-col overflow-y-auto duration-300 ease-linear">
         {/* <!-- Sidebar Menu --> */}
-        <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
+        <nav className="mt-1 py-4 px-4 lg:mt-3 lg:px-6">
           {/* <!-- Menu Group --> */}
           <div>
             <h3 className="mb-4 ml-4 text-sm font-semibold ">MENU</h3>
@@ -233,6 +263,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     pathname.includes('profile') &&
                     'bg-black text-white dark:bg-meta-4'
                   }`}
+                  onClick={(e) => handleNavLinkClick('/profile',e)}
                 >
                   <svg
                     className="fill-current"
@@ -318,6 +349,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 'group relative flex items-center gap-2.5 rounded-md px-4 font-medium dark:text-bodydark2 duration-300 ease-in-out text-slate-500 hover:text-black dark:hover:text-white ' +
                                 (isActive && 'text-black dark:!text-white')
                               }
+                              onClick={(e) => handleNavLinkClick('/models',e)}
                             >
                               Ingresar modelos
                             </NavLink>
@@ -795,6 +827,32 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         </nav>
         {/* <!-- Sidebar Menu --> */}
       </div>
+      {/* <Modal
+        isOpen={isModalOpen}
+        mensaje="¿Estás seguro de guardar el test?"
+        onClose={handleCloseModal}
+        onConfirm={handleConfirm}
+      /> */}
+      <Dialog
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Confirmación</DialogTitle>
+        <DialogContent>
+          ¿Estás seguro de que quieres cambiar de página? Se perderán los
+          cambios no guardados.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirm} color="primary">
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </aside>
   );
 };

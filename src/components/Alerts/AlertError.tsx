@@ -7,7 +7,7 @@ interface Props {
 
 export const AlertError: React.FC<Props> = ({ titulo = null, mensaje }) => {
   return (
-    <div className={`flex w-full border-l-6 border-[#F87171] bg-[#F87171] bg-opacity-[15%] px-3 ${titulo && 'py-8 md:p-9'} py-2 rounded-b-lg shadow-md dark:bg-[#1B1B24] dark:bg-opacity-30`}>
+    <div className={`flex w-full border-l-6 border-b-[1.5px] shadow-md border-[#8f4a4a] bg-[#F87171] bg-opacity-[15%] px-3 ${titulo && 'py-5 md:p-4'} py-2 rounded-b-lg shadow-md dark:bg-[#1B1B24] dark:bg-opacity-30`}>
       <div className={`mr-2 flex ${titulo && "h-9"} w-full max-w-[36px] items-center justify-center rounded-lg bg-[#F87171]`}>
         <svg
           width="13"
@@ -25,7 +25,7 @@ export const AlertError: React.FC<Props> = ({ titulo = null, mensaje }) => {
       </div>
       <div className="w-full">
         {titulo && (
-          <h5 className="mb-3 font-semibold text-[#B45454]">{titulo}</h5>
+          <h5 className="mb-3 text-lg font-semibold text-[#B45454]">{titulo}</h5>
         )}
         <ul>
           <li className="leading-relaxed text-[#CD5D5D] sm:text-sm">{mensaje}</li>
