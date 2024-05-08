@@ -52,7 +52,6 @@ interface Props {
 
 const Models = () => {
   const [nombreTest, setNombreTest] = useState('');
-  const [test, setTest] = useState<Pregunta[]>([]);
   const [nuevaPregunta, setNuevaPregunta] = useState('');
   const [tipoPregunta, setTipoPregunta] = useState('');
   const [opcionesPregunta, setOpcionesPregunta] = useState<Opcion[]>([]);
@@ -61,15 +60,10 @@ const Models = () => {
   const [nuevaOpcion, setNuevaOpcion] = useState('');
   const [estiloNuevaOpcion, setEstiloNuevaOpcion] = useState('');
   const [actualizandoEstilo, setActualizandoEstilo] = useState(false);
-  const [actualizandoOpcion, setActualizandoOpcion] = useState(false);
   const [estiloBuscado, setEstiloBuscado] = useState('');
   const [listaPreguntas, setListaPreguntas] = useState<Pregunta[]>([]);
-  const [actualizandoPregunta, setActualizandoPregunta] = useState(false);
-  const [opcionBuscada, setOpcionBuscada] = useState('');
-  const [preguntaBuscada, setPreguntaBuscada] = useState('');
   const [autor, setAutor] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [limiteRespuestas, setLimiteRespuestas] = useState<number>(0);
   const [encuestaCuantitativa, setEncuestaCuantitativa] = useState(false);
   const [valorPregunta, setValorPregunta] = useState(1);
   const [guardado, setGuardado] = useState(false);

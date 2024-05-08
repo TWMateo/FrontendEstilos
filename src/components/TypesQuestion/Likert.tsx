@@ -62,7 +62,7 @@ const Likert: React.FC<Props> = ({
   return (
     <>
       <div className="flex flex-col gap-3">
-        {/* Conponente responsable de las afirmaciones */}
+        {/* Componente responsable de las afirmaciones */}
         <h3 className="flex justify-between text-title-xsm font-semibold text-black dark:text-white">
           <h3>Pregunta:</h3>
           <div className="">

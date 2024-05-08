@@ -12,10 +12,11 @@ import FormElements from './pages/Form/FormElements';
 import FormLayout from './pages/Form/FormLayout';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
-import Tables from './pages/Tables';
+import Home from './pages/Home';
 import Alerts from './pages/UiElements/Alerts';
 import Buttons from './pages/UiElements/Buttons';
 import Models from './pages/IModels/Models';
+import Course from './pages/Course';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -38,6 +39,15 @@ function App() {
           index
           element={
             <>
+              <PageTitle title="Inicio | UTN" />
+              <Home />
+            </>
+          }
+        />
+        <Route
+          path='/dashboard'
+          element={
+            <>
               <PageTitle title="eCommerce Dashboard | TailAdmin - Tailwind CSS Admin Dashboard Template" />
               <ECommerce />
             </>
@@ -53,22 +63,31 @@ function App() {
           }
         />
         <Route
-          path="/profile"
+          path="/perfil"
           element={
             <>
-              <PageTitle title="Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+              <PageTitle title="Perfil"/>
               <Profile />
             </>
           }
         />
         <Route
-        path='/models'
-        element={
-          <>
-          <PageTitle title='Models'/>
-          <Models/>
-          </>
-        }
+          path="/modelos/nuevo/test"
+          element={
+            <>
+              <PageTitle title="Modelos" />
+              <Models />
+            </>
+          }
+        />
+        <Route
+          path="/curso"
+          element={
+            <>
+              <PageTitle title="Cursos" />
+              <Course />
+            </>
+          }
         />
         <Route
           path="/forms/form-elements"
@@ -85,15 +104,6 @@ function App() {
             <>
               <PageTitle title="Form Layout | TailAdmin - Tailwind CSS Admin Dashboard Template" />
               <FormLayout />
-            </>
-          }
-        />
-        <Route
-          path="/tables"
-          element={
-            <>
-              <PageTitle title="Tables | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-              <Tables />
             </>
           }
         />
