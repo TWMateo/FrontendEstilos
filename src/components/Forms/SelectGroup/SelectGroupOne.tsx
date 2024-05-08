@@ -16,6 +16,7 @@ interface Props {
   opcionPorDefecto?: string;
   idPregunta?: number;
   idOpcion?: number;
+  advertencia?: string;
 }
 
 const SelectGroupOne: React.FC<Props> = ({
@@ -25,6 +26,7 @@ const SelectGroupOne: React.FC<Props> = ({
   opcionPorDefecto = '',
   idPregunta = null,
   idOpcion = null,
+  advertencia
 }) => {
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [isOptionSelected, setIsOptionSelected] = useState<boolean>(false);
@@ -54,7 +56,9 @@ const SelectGroupOne: React.FC<Props> = ({
             title={opcionPorDefecto == '' ? selectedOption : opcionPorDefecto}
             value={opcionPorDefecto == '' ? selectedOption : opcionPorDefecto}
             onChange={handleChange}
-            className={`relative z-20 w-full appearance-none rounded border border-strokedark bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
+            className={`relative z-20 w-full bg-whiten dark:bg-black appearance-none rounded ${
+              (selectedOption == ''&& advertencia=='') && 'rounded-t rounded-b-none'
+            } border border-strokedark bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
               isOptionSelected ? 'text-black dark:text-white' : ''
             }`}
           >
@@ -92,7 +96,9 @@ const SelectGroupOne: React.FC<Props> = ({
             </svg>
           </span>
         </div>
-        {selectedOption == '' && <AlertError mensaje="Selecciona" />}
+        {(selectedOption == '' && advertencia!='n') && (
+          <AlertError mensaje="Selecciona" />
+        )}
       </div>
     </div>
   );
