@@ -73,7 +73,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
   ) => {
     const shouldShowConfirmation =
-      location.pathname === '/models' && path !== '/models ';
+      location.pathname === '/modelos/nuevo/test' && path !== '/modelos/nuevo/test ';
     if (shouldShowConfirmation) {
       setIsModalOpen(true);
       setRedirectTo(path);

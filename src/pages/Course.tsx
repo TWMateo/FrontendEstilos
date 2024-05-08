@@ -2,6 +2,7 @@ import React from 'react'
 import DefaultLayout from '../layout/DefaultLayout';
 import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import { TableGeneral } from '../components/Tables/TableGeneral';
+import SelectGroupOne from '../components/Forms/SelectGroup/SelectGroupOne';
 
 const Course = () => {
     const listadoTests = [
@@ -29,7 +30,6 @@ const Course = () => {
     <DefaultLayout>
       <Breadcrumb pageName="Cursos" />
       <div className="flex flex-col gap-8">
-        
       </div>
     </DefaultLayout>
   )
