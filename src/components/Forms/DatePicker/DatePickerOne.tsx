@@ -1,36 +1,52 @@
-import { locale } from 'dayjs';
+import { DatePickerProps } from '@mui/x-date-pickers';
 import flatpickr from 'flatpickr';
-import {Spanish} from 'flatpickr/dist/l10n/es.js'
-import { useEffect } from 'react';
+import { Spanish } from 'flatpickr/dist/l10n/es.js';
+import { ChangeEvent, useEffect, useState } from 'react';
 
-const DatePickerOne = () => {
+interface Props {
+  setFechaActual: (fecha: string) => void;
+}
+
+const DatePickerOne: React.FC<Props> = ({ setFechaActual }) => {
+  // const [fechaActual, setFechaActual] = useState('');
+
   useEffect(() => {
-    // Init flatpickr
-    flatpickr('.form-datepicker', {
-      locale:Spanish,
-      mode: 'single',
-      static: true,
-      monthSelectorType: 'static',
-      dateFormat: 'M j, Y',
-      prevArrow:
-        '<svg className="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M5.4 10.8l1.4-1.4-4-4 4-4L5.4 0 0 5.4z" /></svg>',
-      nextArrow:
-        '<svg className="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M1.4 10.8L0 9.4l4-4-4-4L1.4 0l5.4 5.4z" /></svg>',
-    });    
+    let flatpickrInstance: any;
+    const initializeFlatpickr = () => {
+      flatpickrInstance = flatpickr('.form-datepicker', {
+        locale: Spanish,
+        mode: 'single',
+        dateFormat: 'F j, Y',
+        onChange: (selectedDates: Date[]) => {
+          if (selectedDates && selectedDates.length > 0) {
+            setFechaActual(selectedDates[0].toISOString().slice(0, 10));
+          }
+        },
+      });
+    };
+
+    initializeFlatpickr();
+
+    return () => {
+      if (flatpickrInstance) {
+        flatpickrInstance.destroy();
+      }
+    };
   }, []);
+
+  // useEffect(() => {
+  //   console.log(fechaActual);
+  // }, [fechaActual]);
 
   return (
     <div>
-      {/* <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-        Date picker
-      </label> */}
       <div className="relative">
         <input
           className="form-datepicker w-full rounded border-[1.5px] border-black bg-transparent px-5 py-3 font-normal outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
           placeholder="mm/dd/yyyy"
+          type="text"
           data-class="flatpickr-right"
         />
-
         <div className="pointer-events-none absolute inset-0 left-auto right-5 flex items-center">
           <svg
             width="18"
@@ -51,3 +67,6 @@ const DatePickerOne = () => {
 };
 
 export default DatePickerOne;
+function initializeFlatpickr() {
+  throw new Error('Function not implemented.');
+}

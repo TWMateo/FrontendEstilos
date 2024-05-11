@@ -1,4 +1,3 @@
-import { Props } from 'react-apexcharts';
 import * as React from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
