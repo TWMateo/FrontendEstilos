@@ -1,6 +1,6 @@
-import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
-import DefaultLayout from '../layout/DefaultLayout';
-import { TableGeneral } from '../components/Tables/TableGeneral';
+import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import DefaultLayout from '../../layout/DefaultLayout';
+import { TableGeneral } from '../../components/Tables/TableGeneral';
 
 const Home= () => {
   const listadoTests = [

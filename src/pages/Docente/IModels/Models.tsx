@@ -1,13 +1,13 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
-import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import DefaultLayout from '../../layout/DefaultLayout';
-import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
-import CardList from '../../components/CardList';
-import MultiChoiceQuestion from '../../components/TypesQuestion/MultiChoiceQuestion';
-import Likert from '../../components/TypesQuestion/Likert';
-import { AlertError } from '../../components/Alerts/AlertError';
-import { AlertSucessfull } from '../../components/Alerts/AlertSuccesfull';
-import Modal from '../../components/Modal';
+import Breadcrumb from '../../../components/Breadcrumbs/Breadcrumb';
+import DefaultLayout from '../../../layout/DefaultLayout';
+import SelectGroupOne from '../../../components/Forms/SelectGroup/SelectGroupOne';
+import CardList from '../../../components/CardList';
+import MultiChoiceQuestion from '../../../components/TypesQuestion/MultiChoiceQuestion';
+import Likert from '../../../components/TypesQuestion/Likert';
+import { AlertError } from '../../../components/Alerts/AlertError';
+import { AlertSucessfull } from '../../../components/Alerts/AlertSuccesfull';
+import Modal from '../../../components/Modal';
 
 interface Opcion {
   id: number;

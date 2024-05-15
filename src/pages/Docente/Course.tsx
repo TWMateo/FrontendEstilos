@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import DefaultLayout from '../layout/DefaultLayout';
-import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
-import SelectGroupOne from '../components/Forms/SelectGroup/SelectGroupOne';
-import { AlertSucessfull } from '../components/Alerts/AlertSuccesfull';
+import DefaultLayout from '../../layout/DefaultLayout';
+import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
+import { AlertSucessfull } from '../../components/Alerts/AlertSuccesfull';
 // FECHAS
-import DatePickerOne from '../components/Forms/DatePicker/DatePickerOne';
-import { AlertError } from '../components/Alerts/AlertError';
+import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
+import { AlertError } from '../../components/Alerts/AlertError';
 
 interface Asignacion {
   fecha: string;
@@ -151,7 +151,10 @@ const Course = () => {
     const index = listaCursos.findIndex(
       (list) => list.datosCombinados == cursoSeleccionado,
     );
-    if (index == -1) return;
+    if (index == -1) {
+      cambiarEstadoGuardadoTemporalmente('error');
+      setMensajeError('Selecciona el curso para actualizar');
+      return};
     setActualizandoCurso(true);
     setCarrera(listaCursos[index].carrera);
     setSemestre(listaCursos[index].semestre);
@@ -203,21 +206,21 @@ const Course = () => {
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Cursos" />
-      <div className="flex flex-row justify-between gap-80 sticky top-20 z-50 ">
-        <div className="">
+      <div className="flex flex-row justify-between gap-80 sticky top-20 z-50">
+        <div className="w-100">
           {succesfull && (
-            <div className="w-100 z-50 animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+            <div className="z-50 animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
               <AlertSucessfull titulo="Curso agregado" mensaje="" />
             </div>
           )}
           {error && (
-            <div className="w-100 z-50 animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+            <div className="z-50 animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
               <AlertError titulo={mensajeError} mensaje="" />
             </div>
           )}
         </div>
         <button
-          className="rounded-b-lg w-40 min-h-14 max-h-14 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+          className="rounded-b-lg w-90 min-h-14 max-h-14 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
           onClick={handleAgregarActualizarCurso}
         >
           {actualizandoCurso ? 'Actualizar Curso' : 'Agregar curso'}

@@ -36,6 +36,7 @@ interface Props {
   listado: Dato[];
   titulo: string;
   icono: string;
+  crear?: boolean;
   path?: string;
 }
 
@@ -43,6 +44,7 @@ export const TableGeneral: React.FC<Props> = ({
   listado,
   titulo,
   icono,
+  crear='true',
   path,
 }) => {
   const navigate = useNavigate();
@@ -59,27 +61,29 @@ export const TableGeneral: React.FC<Props> = ({
         <h4 className="text-xl font-semibold text-black dark:text-white">
           {titulo}
         </h4>
-        <Stack direction="row" spacing={1}>
-          <Button
-            style={{ color: 'black' }}
-            variant="contained"
-            color="inherit"
-            startIcon={<AddCircleOutlineRoundedIcon />}
-            onClick={redirectTo}
-          >
-            <div className="text-black font-bold">Añadir</div>
-          </Button>
-        </Stack>
+        {crear && (
+          <Stack direction="row" spacing={1}>
+            <Button
+              style={{ color: 'black' }}
+              variant="contained"
+              color="inherit"
+              startIcon={<AddCircleOutlineRoundedIcon />}
+              onClick={redirectTo}
+            >
+              <div className="text-black font-bold">Añadir</div>
+            </Button>
+          </Stack>
+        )}
       </div>
       <ThemeProvider theme={theme}>
         <List
           sx={{ width: '100%', bgcolor: 'background.paper' }}
-          className="flex overflow-auto bg-stroke dark:bg-boxdark"
+          className="flex overflow-auto  cursor-pointer bg-stroke dark:bg-boxdark"
         >
           {listado.map((test) => (
             <ListItem
               className="flex gap-3 hover:bg-black rounded-lg text-black dark:text-slate-400 hover:text-white dark:hover:text-white"
-              sx={{width:'100%', minWidth: 280}}
+              sx={{ width: '100%', minWidth: 280 }}
             >
               <ListItemAvatar className="">
                 <Avatar style={{ width: '75px', height: '75px' }}>
@@ -99,9 +103,9 @@ export const TableGeneral: React.FC<Props> = ({
               </ListItemAvatar>
               <ListItemText
                 style={{
-                  width: '100px',               
-                  whiteSpace:'wrap',
-                  textAlign:'center'
+                  width: '100px',
+                  whiteSpace: 'wrap',
+                  textAlign: 'center',
                 }}
                 primary={test.titulo}
                 secondary={test.descripcion}

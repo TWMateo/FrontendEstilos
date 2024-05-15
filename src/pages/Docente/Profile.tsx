@@ -1,12 +1,10 @@
-import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
-import DefaultLayout from '../layout/DefaultLayout';
-import CoverUtn from '../images/cover/cover-utn.png';
-import userSix from '../images/user/user-06.png';
-import { Link } from 'react-router-dom';
+import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import DefaultLayout from '../../layout/DefaultLayout';
+import CoverUtn from '../../images/cover/cover-utn.png';
 import { useEffect, useState } from 'react';
-import SwitcherThree from '../components/Switchers/SwitcherThree';
-import { AlertError } from '../components/Alerts/AlertError';
-import { AlertSucessfull } from '../components/Alerts/AlertSuccesfull';
+import SwitcherThree from '../../components/Switchers/SwitcherThree';
+import { AlertError } from '../../components/Alerts/AlertError';
+import { AlertSucessfull } from '../../components/Alerts/AlertSuccesfull';
 
 interface Usuario {
   cedula: string;
