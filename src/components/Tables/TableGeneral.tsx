@@ -56,7 +56,7 @@ export const TableGeneral: React.FC<Props> = ({
   };
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-5 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+    <div className="rounded-xl border border-stroke bg-white px-5 pt-5 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="flex justify-between mb-2">
         <h4 className="text-xl font-semibold text-black dark:text-white">
           {titulo}

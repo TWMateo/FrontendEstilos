@@ -1,10 +1,11 @@
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import DefaultLayout from '../../layout/DefaultLayout';
 import CoverUtn from '../../images/cover/cover-utn.png';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import SwitcherThree from '../../components/Switchers/SwitcherThree';
 import { AlertError } from '../../components/Alerts/AlertError';
 import { AlertSucessfull } from '../../components/Alerts/AlertSuccesfull';
+import { SessionContext } from '../../Context/SessionContext';
 
 interface Usuario {
   cedula: string;
@@ -18,6 +19,7 @@ const ProfileEstudiante = () => {
   const [password, setPassword] = useState('1234567890');
   const [usuario, setUsuario] = useState<Usuario>();
   const [actualizando, setActualizando] = useState(false);
+  const {rolContext, userContext,setNewUserContext,passwordContext,setNewUserPassword} = useContext(SessionContext)
 
   const handleContraseñaVisible = () => {
     setPasswordVisible(!passwordVisible);
@@ -32,16 +34,16 @@ const ProfileEstudiante = () => {
     actualizandoCampo();
   };
 
-  useEffect(() => {
-    let contraseña = '1234567890';
-    setUsuario({
-      cedula: '1050197118',
-      nombres: 'Mateo Chancosi',
-      contraseña: contraseña,
-      descripcion: 'jaja',
-    });
-    setPassword(password);
-  }, []);
+  // useEffect(() => {
+  //   let contraseña = '1234567890';
+  //   setUsuario({
+  //     cedula: '1050197118',
+  //     nombres: 'Mateo Chancosi',
+  //     contraseña: contraseña,
+  //     descripcion: 'jaja',
+  //   });
+  //   setPassword(password);
+  // }, []);
 
   const actualizandoCampo = () => {
     setActualizando(true);
@@ -77,9 +79,9 @@ const ProfileEstudiante = () => {
           </div>
           <div className="mt-4 flex flex-col items-center">
             <h3 className="mb-1.5 text-2xl font-semibold text-black dark:text-white">
-              NOMBRE DE USUARIO
+              {userContext}
             </h3>
-            <p className="font-medium">ROL DE USUARIO</p>
+            <p className="font-medium">{rolContext}</p>
             <div className="mx-auto p-5 mt-4.5 mb-5.5 grid max-w-94 grid-cols-1 rounded-md border border-stroke py-2.5 shadow-1 dark:border-strokedark dark:bg-[#37404F]">
               <span className="text-sm">
                 <div className="font-bold">Descripción: </div>
@@ -97,7 +99,7 @@ const ProfileEstudiante = () => {
                 Cedula:
               </label>
               <input
-                value={usuario?.cedula}
+                value={'1050197118'}
                 type="text"
                 id="cedula"
                 disabled={true}
@@ -107,7 +109,7 @@ const ProfileEstudiante = () => {
                 Nombres:
               </label>
               <input
-                value={usuario?.nombres}
+                value={'Mateo Chancosi'}
                 type="text"
                 id="nombre"
                 disabled={true}
@@ -119,7 +121,7 @@ const ProfileEstudiante = () => {
                 </label>
                 <div className="flex flex-col items-center mb-2">
                   <input
-                    value={password}
+                    value={passwordContext}
                     type={passwordVisible ? 'text' : 'password'}
                     id="contraseña"
                     minLength={10}

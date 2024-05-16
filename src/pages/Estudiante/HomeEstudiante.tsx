@@ -32,10 +32,6 @@ const HomeEstudiante= () => {
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Inicio" />
-      <button onClick={()=>login()}>Ingresar</button>
-      <button onClick={()=>logout()}>Salir</button>
-      <div>{isLoggedIn==true ? 'Inicio':'salida'}</div>
-      <div>Probando</div>
       <div className="flex flex-col gap-8">
         <TableGeneral listado={listadoTests} titulo='Tests Asignados' icono='test' path='/modelos/nuevo/test' crear={false}/>    
         <TableGeneral listado={listadoCursos} titulo='Cursos Asignados' icono='curso' path='/perfil' crear={false} />
