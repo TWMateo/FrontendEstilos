@@ -73,7 +73,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
   ) => {
     const shouldShowConfirmation =
-      location.pathname === '/modelos/nuevo/test' && path !== '/modelos/nuevo/test ';
+      location.pathname === '/modelos/nuevo/test' &&
+      path !== '/modelos/nuevo/test ';
     if (shouldShowConfirmation) {
       setIsModalOpen(true);
       setRedirectTo(path);
@@ -160,6 +161,92 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   Inicio
                 </NavLink>
               </li>
+              <SidebarLinkGroup
+                activeCondition={
+                  pathname === '/test' || pathname.includes('test')
+                }
+              >
+                {(handleClick, open) => {
+                  return (
+                    <React.Fragment>
+                      <NavLink
+                        to="#"
+                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium dark:text-bodydark1 duration-300 ease-in-out text-black hover:bg-black hover:text-white dark:hover:text-white dark:hover:bg-meta-4 ${
+                          pathname.includes('models') &&
+                          'bg-black text-white dark:bg-meta-4'
+                        }`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          sidebarExpanded
+                            ? handleClick()
+                            : setSidebarExpanded(true);
+                        }}
+                      >
+                        <svg
+                          className="fill-current"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 640 512"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M160 64c0-35.3 28.7-64 64-64H576c35.3 0 64 28.7 64 64V352c0 35.3-28.7 64-64 64H336.8c-11.8-25.5-29.9-47.5-52.4-64H384V320c0-17.7 14.3-32 32-32h64c17.7 0 32 14.3 32 32v32h64V64L224 64v49.1C205.2 102.2 183.3 96 160 96V64zm0 64a96 96 0 1 1 0 192 96 96 0 1 1 0-192zM133.3 352h53.3C260.3 352 320 411.7 320 485.3c0 14.7-11.9 26.7-26.7 26.7H26.7C11.9 512 0 500.1 0 485.3C0 411.7 59.7 352 133.3 352z" />
+                        </svg>
+                        Tests
+                        <svg
+                          className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
+                            open && 'rotate-180'
+                          }`}
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z"
+                            fill=""
+                          />
+                        </svg>
+                      </NavLink>
+                      <div
+                        className={`translate transform overflow-hidden ${
+                          !open && 'hidden'
+                        }`}
+                      >
+                        <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
+                          <li>
+                            <NavLink
+                              to="/test"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium dark:text-bodydark2 duration-300 ease-in-out text-slate-500 hover:text-black dark:hover:text-white ' +
+                                (isActive && 'text-black dark:!text-white')
+                              }
+                              onClick={(e) => handleNavLinkClick('/test', e)}
+                            >
+                              Test Asignados
+                            </NavLink>
+                          </li>
+                          <li>
+                            <NavLink
+                              to="/resultados"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium dark:text-bodydark2 duration-300 ease-in-out text-slate-500 hover:text-black dark:hover:text-white ' +
+                                (isActive && 'text-black dark:!text-white')
+                              }
+                              onClick={(e) => handleNavLinkClick('/resultados', e)}
+                            >
+                              Resultados
+                            </NavLink>
+                          </li>
+                        </ul>
+                      </div>
+                    </React.Fragment>
+                  );
+                }}
+              </SidebarLinkGroup>
               {/* <!-- Menu Item Inicio --> */}
               {/** <!--Input Modelos--> */}
               {/* <SidebarLinkGroup
@@ -333,7 +420,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </h3>
 
             <ul className="mb-6 flex flex-col gap-1.5">
-
               {/* <!-- Menu Item Ui Elements --> */}
               <SidebarLinkGroup
                 activeCondition={pathname === '/ui' || pathname.includes('ui')}

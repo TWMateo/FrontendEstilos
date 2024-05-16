@@ -1,7 +1,7 @@
-import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import DefaultLayout from '../../layout/DefaultLayout';
-import { TableGeneral } from '../../components/Tables/TableGeneral';
-import { SessionContext } from '../../Context/SessionContext';
+import Breadcrumb from '../../../components/Breadcrumbs/Breadcrumb';
+import DefaultLayout from '../../../layout/DefaultLayout';
+import { TableGeneral } from '../../../components/Tables/TableGeneral';
+import { SessionContext } from '../../../Context/SessionContext';
 import { useContext } from 'react';
 
 const HomeEstudiante= () => {
@@ -31,7 +31,7 @@ const HomeEstudiante= () => {
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Inicio" />
+      <Breadcrumb pageName="Resultados" />
       <div className="flex flex-col gap-8">
         <TableGeneral listado={listadoTests} titulo='Tests Asignados' icono='test' path='/modelos/nuevo/test' crear={false}/>    
         <TableGeneral listado={listadoCursos} titulo='Cursos Asignados' icono='curso' path='/perfil' crear={false} />

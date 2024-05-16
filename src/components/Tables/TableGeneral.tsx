@@ -78,7 +78,7 @@ export const TableGeneral: React.FC<Props> = ({
       <ThemeProvider theme={theme}>
         <List
           sx={{ width: '100%', bgcolor: 'background.paper' }}
-          className="flex overflow-auto  cursor-pointer bg-stroke dark:bg-boxdark"
+          className="flex overflow-auto cursor-pointer bg-stroke dark:bg-boxdark"
         >
           {listado.map((test) => (
             <ListItem
