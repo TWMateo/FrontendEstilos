@@ -20,8 +20,9 @@ import Course from './pages/Docente/Course';
 import HomeEstudiante from './pages/Estudiante/HomeEstudiante';
 import ProfileEstudiante from './pages/Estudiante/ProfileEstudiante';
 import { SessionContext } from './Context/SessionContext';
-import Test from '../src/pages/Estudiante/Tests/Test';
+import ListTest from './pages/Estudiante/Tests/ListTest';
 import TestResults from '../src/pages/Estudiante/Tests/TestResults';
+import Test from './pages/Estudiante/Tests/Test';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -162,20 +163,29 @@ function App() {
           }
         />
         <Route
-          path="/test"
+          path="/testsAsignados"
           element={
             <>
-              <PageTitle title="Test | Estudiante" />
-              <Test />
+              <PageTitle title="Tests Asignados | Estudiante" />
+              <ListTest />
             </>
           }
         />
-         <Route
+        <Route
           path="/resultados"
           element={
             <>
               <PageTitle title="Resultados | Estudiante" />
               <TestResults />
+            </>
+          }
+        />
+        <Route
+          path="/test/:id"
+          element={
+            <>
+              <PageTitle title="Test | Estudiante" />
+              <Test />
             </>
           }
         />

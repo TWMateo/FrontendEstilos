@@ -47,7 +47,7 @@ const DropdownUser = () => {
           <span className="block text-sm font-medium text-white">
             {userContext}
           </span>
-          <span className="block text-xs">{rolContext}</span>
+          <span className="block text-xs text-white">{rolContext}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full bg-white flex justify-center items-center">

@@ -73,8 +73,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
   ) => {
     const shouldShowConfirmation =
-      location.pathname === '/modelos/nuevo/test' &&
-      path !== '/modelos/nuevo/test ';
+      location.pathname === '/test' &&
+      path !== '/test';
     if (shouldShowConfirmation) {
       setIsModalOpen(true);
       setRedirectTo(path);
@@ -114,7 +114,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-controls="sidebar"
           aria-expanded={sidebarOpen}
-          className="block lg:hidden"
+          className="block lg:hidden text-white"
         >
           <svg
             className="fill-current"
@@ -219,12 +219,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
                           <li>
                             <NavLink
-                              to="/test"
+                              to="/testsAsignados"
                               className={({ isActive }) =>
                                 'group relative flex items-center gap-2.5 rounded-md px-4 font-medium dark:text-bodydark2 duration-300 ease-in-out text-slate-500 hover:text-black dark:hover:text-white ' +
                                 (isActive && 'text-black dark:!text-white')
                               }
-                              onClick={(e) => handleNavLinkClick('/test', e)}
+                              onClick={(e) => handleNavLinkClick('/testsAsignados', e)}
                             >
                               Test Asignados
                             </NavLink>
@@ -388,7 +388,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     pathname.includes('perfil') &&
                     'bg-black text-white dark:bg-meta-4'
                   }`}
-                  onClick={(e) => handleNavLinkClick('/profile', e)}
+                  onClick={(e) => handleNavLinkClick('/perfil', e)}
                 >
                   <svg
                     className="fill-current"

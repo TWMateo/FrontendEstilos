@@ -48,11 +48,11 @@ const Likert: React.FC<Props> = ({
   onUpdateOpcion
 }) => {
   const [escalas, setEscalas] = useState([
-    'Muy insatisfecho',
-    'Insatisfecho',
+    'Totalmente en desacuerdo',
+    'En desacuerdo',
     'Neutral',
-    'Satisfecho',
-    'Muy satisfecho',
+    'De acuerdo',
+    'Totalmente de acuerdo',
   ]);
   const [afirmaciones, setAfirmaciones] = useState([
     'Afirmación',

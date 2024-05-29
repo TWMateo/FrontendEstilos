@@ -3,8 +3,8 @@ import Breadcrumb from '../../../components/Breadcrumbs/Breadcrumb';
 import DefaultLayout from '../../../layout/DefaultLayout';
 import SelectGroupOne from '../../../components/Forms/SelectGroup/SelectGroupOne';
 import CardList from '../../../components/CardList';
-import MultiChoiceQuestion from '../../../components/TypesQuestion/MultiChoiceQuestion';
-import Likert from '../../../components/TypesQuestion/Likert';
+import MultiChoiceQuestion from '../../../components/TypesQuestionInput/MultiChoiceQuestion';
+import Likert from '../../../components/TypesQuestionInput/Likert';
 import { AlertError } from '../../../components/Alerts/AlertError';
 import { AlertSucessfull } from '../../../components/Alerts/AlertSuccesfull';
 import Modal from '../../../components/Modal';
@@ -27,7 +27,9 @@ interface Test {
   cuantitativa: boolean;
   fechaCreacion: string;
   estilosAprendizaje: string[];
+  valorPregunta: number;
   preguntas: Pregunta[];
+  reglaCalculo: ReglaDeCalculo
 }
 
 interface Pregunta {
@@ -68,7 +70,7 @@ const Models = () => {
   const [valorPregunta, setValorPregunta] = useState(1);
   const [guardado, setGuardado] = useState(false);
   const [errorGuardado, setErrorGuardado] = useState(false);
- const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [reglaCalculo, setReglaCalculo] = useState<ReglaDeCalculo[]>([
     {
       fila: '',
@@ -193,7 +195,7 @@ const Models = () => {
     setListaPreguntas(currentListaPreguntas);
   };
 
-  const handleChangeValorRespuesta = (
+  const handleChangeValorPregunta = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     let valor = parseInt(e.target.value);
@@ -308,9 +310,11 @@ const Models = () => {
       cuantitativa: encuestaCuantitativa,
       fechaCreacion: fecha.toLocaleDateString(),
       estilosAprendizaje: estilosAprendizaje,
+      valorPregunta: valorPregunta,
       preguntas: listaPreguntas,
+      reglaCalculo:reglaCalculo,
     };
-    cambiarEstadoGuardadoTemporalmente()
+    cambiarEstadoGuardadoTemporalmente();
     console.log(test);
   };
 
@@ -479,7 +483,7 @@ const Models = () => {
     setGuardado(true);
     setTimeout(() => {
       setGuardado(false);
-    }, 4000); 
+    }, 4000);
   };
 
   const cambiarEstadoErrorGuardadoTemporalmente = () => {
@@ -650,7 +654,7 @@ const Models = () => {
             type="number"
             placeholder="Valor cuantitativo"
             value={valorPregunta}
-            onChange={handleChangeValorRespuesta}
+            onChange={handleChangeValorPregunta}
             className="rounded-lg w-full h-13 border-[1.5px] border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
         </div>
