@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SelectGroupOne from '../Forms/SelectGroup/SelectGroupOne';
 
 interface tiposEstilosAprendizaje {
@@ -25,6 +25,16 @@ interface Pregunta {
 
 interface Props {
   pregunta: Pregunta;
+  selectedOptions: Record<string, string>;
+  setSelectedOptions: React.Dispatch<
+    React.SetStateAction<Record<string, string>>
+  >;
+  onAddResponse: (
+    preguntaId: number,
+    opcionId: number,
+    valorOpc?: number,
+    estilo?:string
+  ) => void;
   //   tiposEstilosAprendizaje: tiposEstilosAprendizaje;
   //   onUpdatePregunta: (idPregunta: number, pregunta: string) => void;
   //   onAddOpcion: (idPregunta: number) => void;
@@ -40,6 +50,9 @@ interface Props {
 
 const LikertResponse: React.FC<Props> = ({
   pregunta,
+  selectedOptions,
+  setSelectedOptions,
+  onAddResponse
   //   tiposEstilosAprendizaje,
   //   onUpdatePregunta,
   //   onAddOpcion,
@@ -59,6 +72,21 @@ const LikertResponse: React.FC<Props> = ({
     'Afirmación',
   ]);
 
+  const handleOptionChange = (opcionEstilo: string, value: string, opcion:string,opcionId:number) => {
+    let valorOpc
+    let indexEscala = pregunta.escalas.findIndex((esc)=>esc === value)
+    valorOpc=indexEscala+1;
+    setSelectedOptions((prev) => ({
+      ...prev,
+      [opcionEstilo]: value,
+    }));
+    onAddResponse(pregunta.id,opcionId,valorOpc,opcionEstilo)
+  };
+
+  useEffect(() => {
+    console.log(selectedOptions);
+  }, [selectedOptions]);
+
   return (
     <>
       <div className="flex flex-col gap-3 p-3">
@@ -70,13 +98,13 @@ const LikertResponse: React.FC<Props> = ({
             {pregunta.pregunta}
           </h3>
         </h3>
-          <div>
-            {pregunta.max
-              ? `Selecciona maximo ${pregunta.max}`
-              : pregunta.min
-              ? `Selecciona minimo ${pregunta.min}`
-              : 'Selecciona 1 respuesta por cada opción.'}
-          </div>
+        <div>
+          {pregunta.max
+            ? `Selecciona maximo ${pregunta.max}`
+            : pregunta.min
+            ? `Selecciona minimo ${pregunta.min}`
+            : 'Selecciona 1 respuesta por cada opción.'}
+        </div>
         <div className="flex flex-col gap-5 rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition dark:border-form-strokedark">
           <div className="flex flex-col overflow-auto">
             {/* Tabla completa */}
@@ -84,22 +112,20 @@ const LikertResponse: React.FC<Props> = ({
               {/* Header */}
               <thead className="flex">
                 <tr
-                  className={`flex gap-8 p-1 ${
+                  className={`flex items-center gap-1 p-1 w-[100%] ${
                     escalas.length <= 3 && 'w-full'
                   } border-t border-l border-r rounded-lg border-stroke dark:border-none bg-primary`}
                 >
-                  <th className="w-50 p-2 text-bodydark1">Instrucción</th>
+                  <th className="w-30 p-5 text-bodydark1">Instrucción</th>
                   {pregunta.escalas.map((opc, index) => (
-                    <th className="w-30 lg:w-50 p-1 text-bodydark1">
-                      <div className="flex gap-2">
-                        <input
-                          className="rounded-md w-30 lg:w-50 text-black text-center border-strokedark bg-slate-100 py-1 px-1 outline-none transition focus:border-primary focus:border-[1px] active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          value={opc}
+                    <th className="w-25 p-1 text-bodydark1">
+                      <div className="flex">
+                        <h3
+                          className="rounded-md text-xs lg:text-sm w-30 lg:w-25 min-h-17 text-black text-center content-center border-strokedark bg-slate-100 py-1 px-1 outline-none transition focus:border-primary focus:border-[1px] active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           title={opc}
-                          disabled={true}
-                          placeholder={opc}
-                          type="text"
-                        />
+                        >
+                          {opc}
+                        </h3>
                       </div>
                     </th>
                   ))}
@@ -107,25 +133,30 @@ const LikertResponse: React.FC<Props> = ({
                 </tr>
               </thead>
               <tbody>
-                {pregunta.opciones.map((opc) => (
-                  <tr className="flex gap-8 p-1 w-50 border border-none border-stroke">
-                    <td className="flex flex-col gap-2">
-                      <div className="flex flex-row w-50">
+                {pregunta.opciones.map((opcion, indexOpc) => (
+                  <tr className="flex gap-2 p-3 border border-none border-stroke w-[96%]">
+                    <td className="flex flex-col w-25">
+                      <div className="flex flex-row">
                         <h3
                           title="Opción"
-                          className="rounded-lg w-50 text-center  bg-transparent py-2 px-1 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          className="rounded-lg text-xs lg:text-sm w-25 text-center bg-transparent py-2 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                         >
-                          {opc.opcion}
+                          {opcion.opcion}
                         </h3>
                       </div>
                       <div className="text-black dark:text-white"></div>
                     </td>
-                    {escalas.map((opc) => (
-                      <td className="w-30 pl-14 pr-14 lg:pl-25 lg:pr-25 content-center">
+                    {pregunta.escalas.map((escala, index) => (
+                      <td key={index} className="flex justify-center w-25">
                         <input
                           title="Opción"
                           type="radio"
-                          disabled={true}
+                          name={`escalaOptions-${opcion.id}`}
+                          value={escala}
+                          checked={selectedOptions[opcion.estilo] === escala}
+                          onChange={() =>
+                            handleOptionChange(opcion.estilo, escala,opcion.opcion,opcion.id)
+                          }
                         ></input>
                       </td>
                     ))}

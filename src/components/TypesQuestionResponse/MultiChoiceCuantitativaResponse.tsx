@@ -24,12 +24,7 @@ interface Props {
   //   tiposEstilosAprendizaje: { mensaje: string; tipos: string[] };
   pregunta: Pregunta;
   indice: number;
-  onAddResponse: (
-    preguntaId: number,
-    opcionId: number,
-    valorOpc?: number,
-    estilo?:string
-  ) => void;
+  onAddResponse: (preguntaId: number, opcionId:number) => void;
   //   onUpdatePregunta: (idPregunta: number, pregunta: string) => void;
   //   onUpdateOpcion: (
   //     idPregunta: number,
@@ -47,7 +42,7 @@ interface Props {
   //   ) => void;
 }
 
-const MultiChoiceResponse: React.FC<Props> = ({
+const MultiChoiceCuantitativaResponse: React.FC<Props> = ({
   pregunta,
   indice,
   onAddResponse,
@@ -56,7 +51,7 @@ const MultiChoiceResponse: React.FC<Props> = ({
   const [idOptions, setIdOptions] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const handleCheckboxChange = (opcion: string, idOpcion: number,estiloOpcion:string) => {
+  const handleCheckboxChange = (opcion: string, idOpcion: number) => {
     let updatedOptions;
     let updatedIdOptions;
 
@@ -79,7 +74,9 @@ const MultiChoiceResponse: React.FC<Props> = ({
     }
     setIdOptions(updatedIdOptions);
     setSelectedOptions(updatedOptions);
-    onAddResponse(pregunta.id, idOpcion,1,estiloOpcion);
+    console.log('MULTICHOICE')
+    console.log(updatedIdOptions)
+    onAddResponse(pregunta.id,idOpcion);
     setError(null);
   };
 
@@ -126,7 +123,7 @@ const MultiChoiceResponse: React.FC<Props> = ({
         )}
       </div>
       <h3 className="font-semibold text-black dark:text-white pt-3 pb-2">
-        Opciones:
+        Opciones CUANTITATIVA:
       </h3>
       <div className="grid grid-cols-2 w-full">
         {pregunta.opciones?.map((opc) => (
@@ -135,7 +132,7 @@ const MultiChoiceResponse: React.FC<Props> = ({
               <input
                 type="checkbox"
                 checked={selectedOptions.includes(opc.opcion)}
-                onChange={() => handleCheckboxChange(opc.opcion, opc.id,opc.estilo)}
+                onChange={() => handleCheckboxChange(opc.opcion, opc.id)}
                 className={`border-strokedark w-20 bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
               />
               {opc.opcion}
@@ -154,4 +151,4 @@ const MultiChoiceResponse: React.FC<Props> = ({
   );
 };
 
-export default MultiChoiceResponse;
+export default MultiChoiceCuantitativaResponse;
