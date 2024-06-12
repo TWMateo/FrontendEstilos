@@ -8,6 +8,7 @@ import Likert from '../../../components/TypesQuestionInput/Likert';
 import { AlertError } from '../../../components/Alerts/AlertError';
 import { AlertSucessfull } from '../../../components/Alerts/AlertSuccesfull';
 import Modal from '../../../components/Modal';
+import RuleComponent from './ReglaCalculo/RuleComponent';
 
 interface Opcion {
   id: number;
@@ -29,7 +30,7 @@ interface Test {
   estilosAprendizaje: string[];
   valorPregunta: number;
   preguntas: Pregunta[];
-  reglaCalculo: ReglaDeCalculo
+  reglaCalculo: Rule[];
 }
 
 interface Pregunta {
@@ -48,6 +49,23 @@ interface ReglaDeCalculo {
   columnas: string[];
 }
 
+interface Column {
+  value: string[];
+  operacion: string;
+}
+
+interface Condition {
+  parametros: Column[];
+  condicion: string;
+  valor: number;
+  comparacion: string;
+}
+
+interface Rule {
+  estilo: string;
+  condiciones: Condition[];
+}
+
 interface Props {
   onGuardarTest: (test: Pregunta[]) => void;
 }
@@ -58,11 +76,16 @@ const Models = () => {
   const [tipoPregunta, setTipoPregunta] = useState('');
   const [opcionesPregunta, setOpcionesPregunta] = useState<Opcion[]>([]);
   const [estilosAprendizaje, setEstilosAprendizaje] = useState(['']);
+  const [estilosAprendizajeAux, setEstilosAprendizajeAux] = useState(['']);
   const [nuevoEstiloAprendizaje, setNuevoEstiloAprendizaje] = useState('');
+  const [parametrosAprendizaje, setParametrosAprendizaje] = useState(['']);
   const [nuevaOpcion, setNuevaOpcion] = useState('');
   const [estiloNuevaOpcion, setEstiloNuevaOpcion] = useState('');
   const [actualizandoEstilo, setActualizandoEstilo] = useState(false);
   const [estiloBuscado, setEstiloBuscado] = useState('');
+  const [nuevoParametro, setNuevoParametro] = useState('');
+  const [parametroBuscado, setParametroBuscado] = useState('');
+  const [actualizandoParametro, setActualizandoParametro] = useState(false);
   const [listaPreguntas, setListaPreguntas] = useState<Pregunta[]>([]);
   const [autor, setAutor] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -71,12 +94,14 @@ const Models = () => {
   const [guardado, setGuardado] = useState(false);
   const [errorGuardado, setErrorGuardado] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [errorRegla, setErrorRegla] = useState(false);
   const [reglaCalculo, setReglaCalculo] = useState<ReglaDeCalculo[]>([
     {
       fila: '',
       columnas: [''],
     },
   ]);
+  const [errorCamposGuardar, setErrorCamposGuardar] = useState(false);
 
   const [tiposPreguntas, setTiposPreguntas] = useState({
     mensaje: 'Selecciona el tipo de pregunta',
@@ -207,68 +232,6 @@ const Models = () => {
     setValorPregunta(valor);
   };
 
-  /*{Código relacionado al funcionamiento del registro de las reglas 
-    de cálculo
-  }*/
-
-  const handleClickAddFilaReglaCalculo = () => {
-    if (reglaCalculo.length >= tiposEstilosAprendizaje.tipos.length) return;
-    let currentReglaCalculo = reglaCalculo;
-    let nuevaReglaCalculo = currentReglaCalculo.concat({
-      fila: '',
-      columnas: [''],
-    });
-    setReglaCalculo(nuevaReglaCalculo);
-  };
-
-  const handleClickAddColumnaReglaCalculo = (indexFila: number) => {
-    let currentFila = reglaCalculo[indexFila];
-    if (currentFila.columnas.length >= tiposEstilosAprendizaje.tipos.length)
-      return;
-    let nuevasColumnas = currentFila.columnas.concat('');
-    currentFila.columnas = nuevasColumnas;
-    let currentReglaCalculo = [...reglaCalculo];
-    currentReglaCalculo[indexFila] = currentFila;
-    setReglaCalculo(currentReglaCalculo);
-  };
-
-  const handleClickDeleteReglaCalculo = (
-    indexFila: number,
-    indexColumna?: number,
-  ) => {
-    if (indexFila == undefined) return;
-    let currentFila = reglaCalculo[indexFila];
-    let currentReglaCalculo = [...reglaCalculo];
-    if (indexFila != undefined && indexColumna != undefined) {
-      if (currentFila.columnas.length == 1) return;
-      currentFila.columnas.splice(indexColumna, 1);
-      currentReglaCalculo[indexFila] = currentFila;
-      setReglaCalculo(currentReglaCalculo);
-    }
-    if (indexFila != undefined && indexColumna == undefined) {
-      if (currentReglaCalculo.length == 1) return;
-      currentReglaCalculo.splice(indexFila, 1);
-      setReglaCalculo(currentReglaCalculo);
-    }
-  };
-
-  const handleChangeReglaCalculo = (
-    indexFila: number,
-    indexColumna: number,
-    opcion: string = '',
-    estilo: string = '',
-  ) => {
-    let currentReglaCalculo = [...reglaCalculo];
-    if (estilosAprendizaje.findIndex((est) => est == estilo) == -1) return;
-    if (indexColumna != undefined && indexColumna >= 0) {
-      currentReglaCalculo[indexFila].columnas[indexColumna] = estilo;
-    }
-    if (indexColumna < 0) {
-      currentReglaCalculo[indexFila].fila = estilo;
-    }
-    setReglaCalculo(currentReglaCalculo);
-  };
-
   /*{Código relacionado al funcionamiento del ingreso de los datos
      del test}*/
   const onGuardarTest = () => {
@@ -279,10 +242,9 @@ const Models = () => {
       nombreTest.length == 0 ||
       estilosAprendizaje.length == 0 ||
       listaPreguntas.length == 0 ||
-      reglaCalculo.length == 0 ||
-      reglaCalculo[0].fila == '' ||
-      reglaCalculo[0].columnas[0] === ''
+      rules.length == 0
     ) {
+      setErrorCamposGuardar(true);
       cambiarEstadoErrorGuardadoTemporalmente();
       return;
     }
@@ -312,30 +274,72 @@ const Models = () => {
       estilosAprendizaje: estilosAprendizaje,
       valorPregunta: valorPregunta,
       preguntas: listaPreguntas,
-      reglaCalculo:reglaCalculo,
+      reglaCalculo: rules,
     };
     cambiarEstadoGuardadoTemporalmente();
     console.log(test);
   };
 
-  const onGuardarNuevoEstiloAprendizaje = () => {
-    if (!nuevoEstiloAprendizaje) return;
+  const onGuardarNuevoEstiloAprendizaje = (dim: string) => {
     const estilo = nuevoEstiloAprendizaje.toLowerCase();
+    const nuevoParam = nuevoParametro.toLowerCase();
     if (estilosAprendizaje[0].length == 0) {
-      setEstilosAprendizaje([estilo]);
+      console.log('INICIANDO');
+      if (parametrosAprendizaje[0].length == 0 && dim == 'dimension') {
+        console.log('ini par');
+        setEstilosAprendizaje([nuevoParam]);
+        setParametrosAprendizaje([nuevoParam]);
+      }
+      if (estilosAprendizajeAux[0].length == 0 && dim == '') {
+        setEstilosAprendizaje([estilo]);
+        console.log('ini est');
+        setEstilosAprendizajeAux([estilo]);
+      }
     } else {
-      if (!estilosAprendizaje.find((estiloA) => estiloA === estilo)) {
+      console.log('GUARDANDO');
+      if (
+        dim == '' &&
+        !estilosAprendizaje.find((estiloA) => estiloA === estilo)
+      ) {
         setEstilosAprendizaje((prevState) => [...prevState, estilo]);
+        console.log('NUEVO ESTILO AUX');
+        console.log(estilo);
+        let aux = [...estilosAprendizajeAux];
+        if (aux.length == 1 && aux[0].length == 0) {
+          aux[0] = estilo;
+          setEstilosAprendizajeAux(aux);
+        } else {
+          setEstilosAprendizajeAux((prevState) => [...prevState, estilo]);
+        }
+      }
+      if (
+        dim == 'dimension' &&
+        !estilosAprendizaje.find((estiloA) => estiloA === nuevoParam)
+      ) {
+        setEstilosAprendizaje((prevState) => [...prevState, nuevoParam]);
+        console.log('NUEVA DIMENSION');
+        let aux = [...parametrosAprendizaje];
+        if (aux.length == 1 && aux[0].length == 0) {
+          aux[0] = nuevoParam;
+          setParametrosAprendizaje(aux);
+        } else {
+          setParametrosAprendizaje((prevState) => [...prevState, nuevoParam]);
+        }
       }
     }
   };
 
   const handleClickDeleteEstiloAprendizaje = (estilo: string) => {
     const index = estilosAprendizaje.indexOf(estilo);
+    const indexAux = estilosAprendizajeAux.indexOf(estilo);
     let currentEstilosAprendizaje = [...estilosAprendizaje];
+    let currentEstilosAux = [...estilosAprendizajeAux];
     let nuevasReglas;
     let nuevasPreguntas: Pregunta[] = [];
     if (index != -1) {
+      if (currentEstilosAux.length == 1) {
+        currentEstilosAux[0] = '';
+      }
       if (currentEstilosAprendizaje.length == 1) {
         currentEstilosAprendizaje[0] = '';
         setListaPreguntas(nuevasPreguntas);
@@ -346,28 +350,111 @@ const Models = () => {
         }));
         setListaPreguntas(preguntasActualizadas);
         currentEstilosAprendizaje.splice(index, 1);
+        currentEstilosAux.splice(indexAux, 1);
       }
       nuevasReglas = reglaCalculo.filter((regla) => {
         const valorCoincide =
           regla.fila === estilo || regla.columnas.includes(estilo);
         return !valorCoincide;
       });
+      const updatedRules = rules.filter(
+        (rule) =>
+          rule.estilo !== estilo &&
+          !rule.condiciones.some((condicion) =>
+            condicion.parametros.some((col) => col.value.includes(estilo)),
+          ),
+      );
+      setRules(updatedRules);
       setEstilosAprendizaje(currentEstilosAprendizaje);
+      setEstilosAprendizajeAux(currentEstilosAux);
       setReglaCalculo(nuevasReglas);
     }
   };
 
-  const onActualizarEstiloAprendizaje = () => {
-    const posicion = estilosAprendizaje.indexOf(estiloBuscado);
-    estilosAprendizaje[posicion] = nuevoEstiloAprendizaje;
-    setEstilosAprendizaje(estilosAprendizaje);
-    setActualizandoEstilo(false);
+  const handleClickDeleteParametroAprendizaje = (estilo: string) => {
+    const index = estilosAprendizaje.indexOf(estilo);
+    const indexAux = parametrosAprendizaje.indexOf(estilo);
+    let currentEstilosAprendizaje = [...estilosAprendizaje];
+    let currentParametrosAux = [...parametrosAprendizaje];
+    let nuevasReglas;
+    let nuevasPreguntas: Pregunta[] = [];
+    if (index != -1) {
+      if (currentParametrosAux.length == 1) {
+        currentParametrosAux[0] = '';
+      }
+      if (currentEstilosAprendizaje.length == 1) {
+        currentEstilosAprendizaje[0] = '';
+        setListaPreguntas(nuevasPreguntas);
+      } else {
+        const preguntasActualizadas = listaPreguntas.map((pregunta) => ({
+          ...pregunta,
+          opciones: pregunta.opciones.filter((opc) => opc.estilo !== estilo),
+        }));
+        setListaPreguntas(preguntasActualizadas);
+        currentEstilosAprendizaje.splice(index, 1);
+        currentParametrosAux.splice(indexAux, 1);
+      }
+      nuevasReglas = reglaCalculo.filter((regla) => {
+        const valorCoincide =
+          regla.fila === estilo || regla.columnas.includes(estilo);
+        return !valorCoincide;
+      });
+      const updatedRules = rules.filter(
+        (rule) =>
+          !rule.condiciones.some((condicion) =>
+            condicion.parametros.some((col) => col.value.includes(estilo)),
+          ),
+      );
+      setRules(updatedRules);
+      setEstilosAprendizaje(currentEstilosAprendizaje);
+      setParametrosAprendizaje(currentParametrosAux);
+      setReglaCalculo(nuevasReglas);
+    }
+  };
+
+  const onActualizarEstiloAprendizaje = (dim: string) => {
+    let posicion;
+    if (dim == 'dimension') {
+      posicion = estilosAprendizaje.indexOf(parametroBuscado);
+    } else {
+      posicion = estilosAprendizaje.indexOf(estiloBuscado);
+    }
+    const auxEstilosAprendizaje = [...estilosAprendizaje];
+    auxEstilosAprendizaje[posicion] = nuevoEstiloAprendizaje;
+    setEstilosAprendizaje(auxEstilosAprendizaje);
+    if (dim == 'dimension') {
+      const posicionAux = parametrosAprendizaje.indexOf(parametroBuscado);
+      const parametrosAux = [...parametrosAprendizaje];
+      parametrosAux[posicionAux] = nuevoParametro;
+      setParametrosAprendizaje(parametrosAux);
+      setActualizandoParametro(false);
+    } else {
+      const posicionAux = estilosAprendizajeAux.indexOf(estiloBuscado);
+      const estilosAprendizajeAuxDos = [...estilosAprendizajeAux];
+      estilosAprendizajeAuxDos[posicionAux] = nuevoEstiloAprendizaje;
+      setEstilosAprendizajeAux(estilosAprendizajeAuxDos);
+      setActualizandoEstilo(false);
+    }
+  };
+
+  const onActualizarParametroAprendizaje = () => {
+    const posicion = parametrosAprendizaje.indexOf(parametroBuscado);
+    const auxParam = [...parametrosAprendizaje];
+    auxParam[posicion] = nuevoParametro;
+    setParametrosAprendizaje(auxParam);
+    setActualizandoParametro(false);
   };
 
   const prepararActualizacionEstilo = (valor: string) => {
     setActualizandoEstilo(true);
     setNuevoEstiloAprendizaje(valor);
     setEstiloBuscado(valor);
+  };
+
+  const prepararActualizacionParametro = (valor: string) => {
+    setActualizandoParametro(true);
+    setNuevoParametro(valor);
+    setParametroBuscado(valor);
   };
 
   const cambiarTipoPregunta = (valor: string) => {
@@ -448,6 +535,34 @@ const Models = () => {
     setListaPreguntas(nuevaLista);
   };
 
+  /*{Código relacionado al funcionamiento del registro de las reglas 
+    de cálculo
+  }*/
+  const [rules, setRules] = useState<Rule[]>([]);
+  const addRule = () => {
+    const newRule: Rule = { estilo: '', condiciones: [] };
+    setRules([...rules, newRule]);
+  };
+
+  const deleteRule = (index: number) => {
+    const newRules = [...rules];
+    newRules.splice(index, 1);
+    setRules(newRules);
+  };
+
+  const handleRuleChange = (index: number, updatedRule: Rule) => {
+    const updatedRules = [...rules];
+    updatedRules[index] = updatedRule;
+    setRules(updatedRules);
+  };
+
+  useEffect(() => {
+    console.log('REGLASS');
+    console.log(rules);
+    console.log(rules.length);
+  }, [rules]);
+  // -------------------------
+
   useEffect(() => {
     if (!encuestaCuantitativa) setValorPregunta(1);
     if (encuestaCuantitativa) {
@@ -502,6 +617,10 @@ const Models = () => {
   useEffect(() => {
     console.log('Estilos aprendizaje');
     console.log(estilosAprendizaje);
+    console.log('Auxiliar');
+    console.log(estilosAprendizajeAux);
+    console.log('Parametros');
+    console.log(parametrosAprendizaje);
   }, [estilosAprendizaje]);
 
   useEffect(() => {
@@ -512,8 +631,16 @@ const Models = () => {
   useEffect(() => {
     console.log(reglaCalculo);
     console.log('tamaño regla');
-    console.log(reglaCalculo.length);
-  }, [reglaCalculo]);
+    console.log(rules);
+    console.log(rules.length);
+  }, [rules]);
+
+  useEffect(() => {
+    if (parametrosAprendizaje.length > 0) {
+      const newRules = rules.map((rul) => ({ ...rul, condiciones: [] }));
+      setRules(newRules);
+    }
+  }, [parametrosAprendizaje]);
 
   return (
     <DefaultLayout>
@@ -521,6 +648,14 @@ const Models = () => {
       {guardado && (
         <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
           <AlertSucessfull titulo="Test Guardado" mensaje="" />
+        </div>
+      )}
+      {errorRegla && (
+        <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+          <AlertError
+            titulo="Agregue al menos un estilo de aprendizaje"
+            mensaje=""
+          />
         </div>
       )}
       {errorGuardado && (
@@ -544,10 +679,12 @@ const Models = () => {
               value={nombreTest.length > 0 ? nombreTest : ''}
               onChange={(e) => setNombreTest(e.target.value)}
               className={`w-full ${
-                nombreTest.length == 0 ? 'rounded-t-lg' : 'rounded-lg'
+                errorCamposGuardar && nombreTest.length == 0
+                  ? 'rounded-t-lg'
+                  : 'rounded-lg'
               } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
             />
-            {nombreTest.length == 0 && (
+            {errorCamposGuardar && nombreTest.length == 0 && (
               <AlertError mensaje="El campo no debe estar vacío" />
             )}
           </div>
@@ -562,10 +699,12 @@ const Models = () => {
               maxLength={100}
               onChange={(e) => setAutor(e.target.value)}
               className={`w-full ${
-                autor.length == 0 ? 'rounded-t-lg' : 'rounded-lg'
+                errorCamposGuardar && autor.length == 0
+                  ? 'rounded-t-lg'
+                  : 'rounded-lg'
               } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
             />
-            {autor.length == 0 && (
+            {errorCamposGuardar && autor.length == 0 && (
               <AlertError mensaje="El campo no debe estar vacío" />
             )}
           </div>
@@ -638,10 +777,12 @@ const Models = () => {
               onChange={(e) => setDescripcion(e.target.value)}
               maxLength={100}
               className={`w-full h-[83%] ${
-                descripcion.length == 0 ? 'rounded-t-lg' : 'rounded-lg'
+                errorCamposGuardar && descripcion.length == 0
+                  ? 'rounded-t-lg'
+                  : 'rounded-lg'
               } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
             />
-            {descripcion.length == 0 && (
+            {errorCamposGuardar && descripcion.length == 0 && (
               <AlertError mensaje="El campo no debe estar vacío" />
             )}
           </div>
@@ -658,7 +799,7 @@ const Models = () => {
             className="rounded-lg w-full h-13 border-[1.5px] border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-5 ">
           <div className="flex flex-col">
             <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
               Estilos de aprendizaje:
@@ -670,34 +811,89 @@ const Models = () => {
                 value={nuevoEstiloAprendizaje}
                 onChange={(e) => setNuevoEstiloAprendizaje(e.target.value)}
                 className={`w-[50%] ${
-                  estilosAprendizaje[0] == '' ? 'rounded-tl-lg' : 'rounded-l-lg'
+                  errorCamposGuardar && estilosAprendizaje[0] == ''
+                    ? 'rounded-tl-lg'
+                    : 'rounded-l-lg'
                 } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
               />
               {actualizandoEstilo === true ? (
                 <button
                   className={`flex w-[50%] justify-center bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
-                  onClick={() => onActualizarEstiloAprendizaje()}
+                  onClick={() => onActualizarEstiloAprendizaje('')}
                 >
                   Actualizar Estilo de Aprendizaje
                 </button>
               ) : (
                 <button
-                  className="flex w-[50%] justify-center rounded-r-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-                  onClick={() => onGuardarNuevoEstiloAprendizaje()}
+                  className={`flex w-[50%] justify-center rounded-r-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
+                  onClick={() => onGuardarNuevoEstiloAprendizaje('')}
                 >
                   Agregar Estilo de Aprendizaje
                 </button>
               )}
             </div>
-            {estilosAprendizaje[0] == '' && (
-              <AlertError mensaje="La lista no debe estar vacío" />
-            )}
+            {estilosAprendizajeAux.length > 0 &&
+              errorCamposGuardar &&
+              estilosAprendizajeAux[0] == '' && (
+                <AlertError mensaje="La lista no debe estar vacía" />
+              )}
             <ul className="grid grid-cols-3 gap-4 pt-3">
-              {estilosAprendizaje[0].length > 0 &&
-                estilosAprendizaje.map((estilo) => (
+              {estilosAprendizajeAux.length > 0 &&
+                estilosAprendizajeAux[0].length > 0 &&
+                estilosAprendizajeAux.map((estilo) => (
                   <CardList
                     actualizar={prepararActualizacionEstilo}
                     eliminar={handleClickDeleteEstiloAprendizaje}
+                    valor={estilo}
+                    limite={11}
+                  />
+                ))}
+            </ul>
+          </div>
+          <div className="flex flex-col">
+            <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
+              Dimensiones de aprendizaje:
+            </h3>
+            <div className="flex flex-row">
+              <input
+                type="text"
+                placeholder="Agregar nuevo estilo"
+                value={nuevoParametro}
+                onChange={(e) => setNuevoParametro(e.target.value)}
+                className={`w-[50%] ${
+                  errorCamposGuardar && estilosAprendizaje[0] == ''
+                    ? 'rounded-tl-lg'
+                    : 'rounded-l-lg'
+                } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+              />
+              {actualizandoEstilo === true ? (
+                <button
+                  className={`flex w-[50%] justify-center bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
+                  onClick={() => onActualizarEstiloAprendizaje('dimension')}
+                >
+                  Actualizar Dimensión de aprendizaje
+                </button>
+              ) : (
+                <button
+                  className="flex w-[50%] justify-center rounded-r-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  onClick={() => onGuardarNuevoEstiloAprendizaje('dimension')}
+                >
+                  Agregar Dimensión de Aprendizaje
+                </button>
+              )}
+            </div>
+            {/* {parametrosAprendizaje.length > 0 &&
+              errorCamposGuardar &&
+              parametrosAprendizaje[0] == '' && (
+                <AlertError mensaje="La lista no debe estar vacía" />
+              )} */}
+            <ul className="grid grid-cols-3 gap-4 pt-3">
+              {parametrosAprendizaje.length > 0 &&
+                parametrosAprendizaje[0].length > 0 &&
+                parametrosAprendizaje.map((estilo) => (
+                  <CardList
+                    actualizar={prepararActualizacionParametro}
+                    eliminar={handleClickDeleteParametroAprendizaje}
                     valor={estilo}
                     limite={11}
                   />
@@ -709,106 +905,57 @@ const Models = () => {
             <h3 className="text-title-xsm pt-3 pb-3 font-semibold text-black dark:text-white">
               Regla de cálculo:
             </h3>
-            <div className="flex flex-col bg-whiten dark:bg-form-input gap-5 rounded-lg border-[1.5px] border-black py-8 px-5 dark:text-white outline-none transition dark:border-form-strokedark">
-              <div className="flex flex-col overflow-auto">
-                <table>
-                  <tbody>
-                    {reglaCalculo.map((estilo, index) => (
-                      <tr className="flex">
-                        <td className="flex w-65 flex-row content-center">
-                          <SelectGroupOne
-                            onChangeTwo={handleChangeReglaCalculo}
-                            opciones={tiposEstilosAprendizaje}
-                            idPregunta={index}
-                            idOpcion={-1}
-                          />
-                          <button
-                            title="Añadir"
-                            className="rounded-md hover:bg-opacity-90"
-                            onClick={() =>
-                              handleClickAddColumnaReglaCalculo(index)
-                            }
-                          >
-                            {' '}
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width={18}
-                              height={18}
-                              className="fill-black ml-3 mb-5 dark:fill-bodydark1"
-                              viewBox="0 0 448 512"
-                            >
-                              <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
-                            </svg>
-                          </button>
-                          <button
-                            title="Borrar"
-                            className={`w-[5%] pt-1 ml-3 mb-5`}
-                            onClick={() => handleClickDeleteReglaCalculo(index)}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width={18}
-                              height={18}
-                              className="dark:fill-bodydark1"
-                              viewBox="0 0 448 512"
-                            >
-                              <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z" />
-                            </svg>
-                          </button>
-                        </td>
-                        {estilo.columnas.map((columna, indexColumna) => (
-                          <td className="w-54 flex">
-                            <SelectGroupOne
-                              onChangeTwo={handleChangeReglaCalculo}
-                              opciones={tiposEstilosAprendizaje}
-                              idPregunta={index}
-                              idOpcion={indexColumna}
-                            />
-                            <button
-                              title="Borrar"
-                              className={`w-[5%] pt-1 ml-3 mb-5`}
-                              onClick={() =>
-                                handleClickDeleteReglaCalculo(
-                                  index,
-                                  indexColumna,
-                                )
-                              }
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width={18}
-                                height={18}
-                                className="dark:fill-bodydark1"
-                                viewBox="0 0 448 512"
-                              >
-                                <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z" />
-                              </svg>
-                            </button>
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <button
-                title="Añadir"
-                className="flex rigth items-center pt-1 pb-1 w-[25%] lg:p-2 lg:pt-2 lg:pb-2 bg-primary rounded-lg hover:bg-opacity-90 dark:text-bodydark1"
-                onClick={() => handleClickAddFilaReglaCalculo()}
-              >
-                {' '}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={18}
-                  height={18}
-                  viewBox="0 0 448 512"
-                  className="w-[25%] fill-white"
+            <div className="flex flex-col bg-whiten dark:bg-form-input gap-5 rounded-t-lg border-[1.5px] border-black py-8 px-5 dark:text-white outline-none transition dark:border-form-strokedark">
+              {/* INGRESO DE REGLA ESPECIAL */}
+              <div className="App flex flex-col gap-10">
+                {rules.map((rule, index) => (
+                  <div>
+                    <div className="font-bold text-black dark:text-white text-lg mb-5">
+                      Regla {index + 1} :
+                    </div>
+                    <RuleComponent
+                      key={index}
+                      rule={rule}
+                      onChange={(updatedRule) =>
+                        handleRuleChange(index, updatedRule)
+                      }
+                      onDelete={() => deleteRule(index)}
+                      estilosAprendizaje={estilosAprendizajeAux} // Aquí debes proporcionar los estilos de aprendizaje disponibles
+                      parametrosAprendizaje={
+                        parametrosAprendizaje.every((param) => param === '')
+                          ? estilosAprendizajeAux
+                          : parametrosAprendizaje
+                      }
+                    />
+                  </div>
+                ))}
+                <button
+                  className={`flex justify-center lg:justify-between items-center w-[40%] lg:w-[20%] gap-3 ${`rounded-lg`} bg-primary p-2 font-medium text-gray hover:bg-opacity-90`}
+                  onClick={addRule}
+                  disabled={
+                    estilosAprendizajeAux.length == 0 ||
+                    estilosAprendizajeAux[0].length == 0
+                      ? true
+                      : false
+                  }
                 >
-                  <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z" />
-                </svg>
-                <div className="text-sm w-[60%] text-gray">Añadir una fila</div>
-              </button>
+                  <div className="lg:w-[12%] flex items-center h-1">
+                    <svg
+                      className="fill-white dark:fill-bodydark1 w-5"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 512 612"
+                    >
+                      <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z" />
+                    </svg>
+                  </div>
+                  <div className={`flex w-[100%]`}>Crear Regla</div>
+                </button>
+              </div>
             </div>
+            {errorCamposGuardar && rules.length == 0 && (
+              <AlertError mensaje="Debe determinar una regla de calculo" />
+            )}
+
             {reglaCalculo.length == 0 && (
               <AlertError mensaje="La regla de calculo debe definirse" />
             )}

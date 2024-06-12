@@ -30,26 +30,10 @@ interface Props {
     valorOpc?: number,
     estilo?:string
   ) => void;
-  //   onUpdatePregunta: (idPregunta: number, pregunta: string) => void;
-  //   onUpdateOpcion: (
-  //     idPregunta: number,
-  //     idOpcion: number,
-  //     opcion: string,
-  //     estilo?: string,
-  //   ) => void;
-  //   onDeleteOpcion: (idPregunta: number, idOpcion: number) => void;
-  //   onDeletePregunta: (idPregunta: number) => void;
-  //   onAddOpcion: (idPregunta: number) => void;
-  //   onUpdateLimiteRespuesta: (
-  //     idPregunta: number,
-  //     indicador: string,
-  //     valor: number,
-  //   ) => void;
 }
 
 const MultiChoiceResponse: React.FC<Props> = ({
   pregunta,
-  indice,
   onAddResponse,
 }) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
@@ -84,15 +68,6 @@ const MultiChoiceResponse: React.FC<Props> = ({
   };
 
   useEffect(() => {
-    // console.log(indice);
-    // console.log('Opciones');
-    // console.log(selectedOptions);
-    // console.log('IDs');
-    // console.log(idOptions);
-    // onAddResponse(pregunta.id,idOptions);
-  }, [idOptions]);
-
-  useEffect(() => {
     if (selectedOptions.length > pregunta.max) {
       setSelectedOptions(selectedOptions.slice(0, pregunta.max));
     }
@@ -116,10 +91,10 @@ const MultiChoiceResponse: React.FC<Props> = ({
         </div>
         <div>
           {pregunta.max
-            ? `Selecciona maximo ${pregunta.max} respuesta(s)`
+            ? `*Selecciona maximo ${pregunta.max} respuesta(s)`
             : pregunta.min
-            ? `Selecciona minimo ${pregunta.min} respuesta(s)`
-            : 'Selecciona una respuesta'}
+            ? `*Selecciona minimo ${pregunta.min} respuesta(s)`
+            : '*Selecciona una respuesta'}
         </div>
         {pregunta.pregunta.length == 0 && (
           <AlertError mensaje="El campo no debe estar vacío " />

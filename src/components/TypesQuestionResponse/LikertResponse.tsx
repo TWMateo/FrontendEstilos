@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import SelectGroupOne from '../Forms/SelectGroup/SelectGroupOne';
+import { AlertError } from '../Alerts/AlertError';
 
 interface tiposEstilosAprendizaje {
   mensaje: string;
@@ -23,6 +24,13 @@ interface Pregunta {
   max: number;
 }
 
+interface Respuesta {
+  opcionEstilo: string;
+  value: string;
+  opcion: string;
+  opcionId: number;
+}
+
 interface Props {
   pregunta: Pregunta;
   selectedOptions: Record<string, string>;
@@ -33,7 +41,7 @@ interface Props {
     preguntaId: number,
     opcionId: number,
     valorOpc?: number,
-    estilo?:string
+    estilo?: string,
   ) => void;
   //   tiposEstilosAprendizaje: tiposEstilosAprendizaje;
   //   onUpdatePregunta: (idPregunta: number, pregunta: string) => void;
@@ -52,7 +60,7 @@ const LikertResponse: React.FC<Props> = ({
   pregunta,
   selectedOptions,
   setSelectedOptions,
-  onAddResponse
+  onAddResponse,
   //   tiposEstilosAprendizaje,
   //   onUpdatePregunta,
   //   onAddOpcion,
@@ -71,16 +79,25 @@ const LikertResponse: React.FC<Props> = ({
     'Afirmación',
     'Afirmación',
   ]);
+  const [selectedOptionsCurrent, setSelectedOptionsCurrent] = useState<
+    string[]
+  >([]);
 
-  const handleOptionChange = (opcionEstilo: string, value: string, opcion:string,opcionId:number) => {
-    let valorOpc
-    let indexEscala = pregunta.escalas.findIndex((esc)=>esc === value)
-    valorOpc=indexEscala+1;
+  const handleOptionChange = (
+    opcionEstilo: string,
+    value: string,
+    opcionId: number,
+  ) => {
+    let valorOpc;
+    let indexEscala = pregunta.escalas.findIndex((esc) => esc === value);
+
+    // Envio al componente padre
+    valorOpc = indexEscala + 1;
     setSelectedOptions((prev) => ({
       ...prev,
       [opcionEstilo]: value,
     }));
-    onAddResponse(pregunta.id,opcionId,valorOpc,opcionEstilo)
+    onAddResponse(pregunta.id, opcionId, valorOpc, opcionEstilo);
   };
 
   useEffect(() => {
@@ -100,10 +117,10 @@ const LikertResponse: React.FC<Props> = ({
         </h3>
         <div>
           {pregunta.max
-            ? `Selecciona maximo ${pregunta.max}`
+            ? `*Selecciona maximo ${pregunta.max} respuesta(s)`
             : pregunta.min
-            ? `Selecciona minimo ${pregunta.min}`
-            : 'Selecciona 1 respuesta por cada opción.'}
+            ? `*Selecciona minimo ${pregunta.min} respuesta(s)`
+            : '*Selecciona 1 respuesta por cada opción.'}
         </div>
         <div className="flex flex-col gap-5 rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition dark:border-form-strokedark">
           <div className="flex flex-col overflow-auto">
@@ -155,7 +172,7 @@ const LikertResponse: React.FC<Props> = ({
                           value={escala}
                           checked={selectedOptions[opcion.estilo] === escala}
                           onChange={() =>
-                            handleOptionChange(opcion.estilo, escala,opcion.opcion,opcion.id)
+                            handleOptionChange(opcion.estilo, escala, opcion.id)
                           }
                         ></input>
                       </td>
@@ -165,6 +182,17 @@ const LikertResponse: React.FC<Props> = ({
               </tbody>
             </table>
           </div>
+          {pregunta.max
+            ? Object.keys(selectedOptions).length == 0 && (
+                <AlertError mensaje="Completa" />
+              )
+            : pregunta.min
+            ? Object.keys(selectedOptions).length != pregunta.min && (
+                <AlertError mensaje="Completa" />
+              )
+            : Object.keys(selectedOptions).length == 0 && (
+                <AlertError mensaje="Completa" />
+              )}
         </div>
       </div>
     </>

@@ -19,6 +19,9 @@ import { useParams } from 'react-router-dom';
 import MultiChoiceResponse from '../../../components/TypesQuestionResponse/MultiChoiceResponse';
 import LikertResponse from '../../../components/TypesQuestionResponse/LikertResponse';
 import MultiChoiceCuantitativaResponse from '../../../components/TypesQuestionResponse/MultiChoiceCuantitativaResponse';
+import { AlertSucessfull } from '../../../components/Alerts/AlertSuccesfull';
+import { AlertError } from '../../../components/Alerts/AlertError';
+import Modal from '../../../components/Modal';
 
 interface Respuesta {
   usuarioId: number;
@@ -42,6 +45,10 @@ const Test = () => {
   const [selectedOptions, setSelectedOptions] = useState<
     Record<string, string>
   >({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [errorSave, setErrorSave] = useState(false);
+  const [guardado, setGuardado] = useState(false);
+  const [errorGuardado, setErrorGuardado] = useState(false);
   const listadoTests = [
     { titulo: 'Kolb', descripcion: 'Jan 9, 2014' },
     { titulo: 'Honney y Alonso', descripcion: 'Jan 9, 2014' },
@@ -105,12 +112,12 @@ const Test = () => {
         tipoPregunta: 'Selección múltiple',
         opciones: [
           {
-            id: 1,
+            id: 3,
             opcion: 'Opción 1',
             estilo: 'visual',
           },
           {
-            id: 2,
+            id: 4,
             opcion: 'Opción 2',
             estilo: 'kinestesico',
           },
@@ -126,12 +133,12 @@ const Test = () => {
         tipoPregunta: 'Likert',
         opciones: [
           {
-            id: 1,
+            id: 5,
             opcion: 'Dibujando',
             estilo: 'kinestesico',
           },
           {
-            id: 2,
+            id: 6,
             opcion: 'Con gráficos',
             estilo: 'visual',
           },
@@ -143,7 +150,8 @@ const Test = () => {
           'De acuerdo',
           'Totalmente de acuerdo',
         ],
-        min: 0,
+        // Todas las preguntas de likert deben tener el valor de min igual a la cantidad de opciones
+        min: 2,
         max: 0,
       },
     ],
@@ -151,10 +159,12 @@ const Test = () => {
       {
         fila: 'kinestesico',
         columnas: ['kinestesico'],
+        // operacion: ['suma']
       },
       {
         fila: 'visual',
         columnas: ['visual'],
+        // operacion:['suma']
       },
     ],
   };
@@ -256,10 +266,61 @@ const Test = () => {
     console.log(selectedOptions);
   }, [selectedOptions]);
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleConfirm = () => {
+    handleSendTest();
+    handleCloseModal();
+  };
+
+  const cambiarEstadoErrorGuardadoTemporalmente = () => {
+    setErrorGuardado(true);
+    setTimeout(() => {
+      setErrorGuardado(false);
+    }, 4000);
+  };
+
+  const cambiarEstadoGuardadoTemporalmente = () => {
+    setGuardado(true);
+    setTimeout(() => {
+      setGuardado(false);
+    }, 4000);
+  };
+
   const handleSendTest = () => {
     const res = respuestas;
     const reglaCalculo = testAsignado.reglaCalculo;
-
+    // Controlar que todas las preguntas tengan las respuestas especificadas
+    let preguntas = testAsignado.preguntas;
+    let preguntaId;
+    let cantidadRespuestas;
+    preguntas.forEach((element) => {
+      if (element.min != 0) {
+        cantidadRespuestas = respuestas.filter(
+          (resp) => resp.preguntaId === element.id,
+        );
+        if (cantidadRespuestas.length != element.min) {
+          cambiarEstadoErrorGuardadoTemporalmente();
+          return;
+        }
+      } else if (element.max != 0) {
+        cantidadRespuestas = respuestas.filter(
+          (resp) => resp.preguntaId === element.id,
+        );
+        if (cantidadRespuestas.length == 0) {
+          cambiarEstadoErrorGuardadoTemporalmente();
+          return;
+        }
+      }
+      cambiarEstadoGuardadoTemporalmente();
+    });
+    //
     const conteoEstilos: ConteoEstilos = {};
 
     reglaCalculo.forEach((regla) => {
@@ -317,6 +378,19 @@ const Test = () => {
     <Loader />
   ) : (
     <DefaultLayout>
+      {guardado && (
+        <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+          <AlertSucessfull titulo="Test Guardado" mensaje="" />
+        </div>
+      )}
+      {errorGuardado && (
+        <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
+          <AlertError
+            titulo="Test no guardado"
+            mensaje="Todos las preguntas deben ser respondidas"
+          />
+        </div>
+      )}
       <div className="flex flex-col justify-center items-center w-[100%] gap-8 bg-stroke dark:bg-transparent">
         <h3 className="text-xl font-semibold text-black dark:text-white">
           Test de {testAsignado.titulo}
@@ -365,10 +439,16 @@ const Test = () => {
             <div className="cursor-none"></div>
             <button
               className="flex w-[40%] justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-              onClick={() => handleSendTest()}
+              onClick={handleOpenModal}
             >
               Enviar
             </button>
+            <Modal
+              isOpen={isModalOpen}
+              mensaje="¿Estás seguro de guardar el test?"
+              onClose={handleCloseModal}
+              onConfirm={handleConfirm}
+            />
           </div>
         </div>
       </div>
