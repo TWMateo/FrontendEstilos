@@ -1,7 +1,4 @@
-import React, { HtmlHTMLAttributes, useEffect, useState } from 'react';
-import SelectGroupOne from '../Forms/SelectGroup/SelectGroupOne';
-import { AlertError } from '../Alerts/AlertError';
-import { parsePath } from 'react-router-dom';
+import React, { useState } from 'react';
 
 interface Opcion {
   id: number;
@@ -13,96 +10,70 @@ interface Pregunta {
   id: number;
   orden: number;
   pregunta: string;
-  tipoPregunta: string;
   opciones: Opcion[];
-  escalas?: string[];
-  min: number;
-  max: number;
 }
 
-interface Props {
-  //   tiposEstilosAprendizaje: { mensaje: string; tipos: string[] };
+interface MultiChoiceCuantitativaResponseProps {
   pregunta: Pregunta;
-  indice: number;
-  onAddResponse: (preguntaId: number, opcionId:number) => void;
-  //   onUpdatePregunta: (idPregunta: number, pregunta: string) => void;
-  //   onUpdateOpcion: (
-  //     idPregunta: number,
-  //     idOpcion: number,
-  //     opcion: string,
-  //     estilo?: string,
-  //   ) => void;
-  //   onDeleteOpcion: (idPregunta: number, idOpcion: number) => void;
-  //   onDeletePregunta: (idPregunta: number) => void;
-  //   onAddOpcion: (idPregunta: number) => void;
-  //   onUpdateLimiteRespuesta: (
-  //     idPregunta: number,
-  //     indicador: string,
-  //     valor: number,
-  //   ) => void;
+  valor: number;
+  onAddResponse: (
+    preguntaId: number,
+    opcionId: number,
+    valorOpc: number,
+    estilo: string,
+  ) => void;
 }
 
-const MultiChoiceCuantitativaResponse: React.FC<Props> = ({
-  pregunta,
-  indice,
-  onAddResponse,
-}) => {
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const [idOptions, setIdOptions] = useState<number[]>([]);
+const MultiChoiceCuantitativaResponse: React.FC<
+  MultiChoiceCuantitativaResponseProps
+> = ({ pregunta, valor, onAddResponse }) => {
+  const [respuestas, setRespuestas] = useState<Record<number, number>>({});
   const [error, setError] = useState<string | null>(null);
 
-  const handleCheckboxChange = (opcion: string, idOpcion: number) => {
-    let updatedOptions;
-    let updatedIdOptions;
+  const handleChange = (
+    opcionId: number,
+    estilo: string,
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const newValue = parseInt(event.target.value);
+    console.log('NEW VALUE')
+    console.log(newValue)
+    if (!isNaN(newValue) && newValue >= 0) {
+      const nuevasRespuestas = {
+        ...respuestas,
+        [opcionId]: newValue,
+      };
+      console.log('NEW VAL 2')
+      console.log(newValue)
+      const sumaRespuestas = Object.values(nuevasRespuestas).reduce(
+        (total, value) => total + value,
+        0,
+      );
 
-    if (selectedOptions.includes(opcion)) {
-      updatedOptions = selectedOptions.filter((item) => item !== opcion);
-      updatedIdOptions = idOptions.filter((item) => item !== idOpcion);
-    } else {
-      if (pregunta.max != 0 && selectedOptions.length < pregunta.max) {
-        updatedOptions = [...selectedOptions, opcion];
-        updatedIdOptions = [...idOptions, idOpcion];
-      } else if (pregunta.min != 0 && selectedOptions.length < pregunta.min) {
-        updatedOptions = [...selectedOptions, opcion];
-        updatedIdOptions = [...idOptions, idOpcion];
+      if (sumaRespuestas <= valor) {
+        const valorRespuesta = respuestas[opcionId] || 0;
+        console.log(valorRespuesta)
+        console.log(respuestas)
+        console.log('VAL 3')
+        console.log(newValue)
+        setRespuestas(nuevasRespuestas);
+        onAddResponse(pregunta.id, opcionId, newValue, estilo);
+        setError(null);
       } else {
-        updatedOptions = selectedOptions;
-        updatedIdOptions = idOptions;
-        setError(`Solo puedes seleccionar hasta ${pregunta.max} opciones.`);
-        return;
+        setError(`La suma de los valores no puede exceder ${valor}`);
       }
     }
-    setIdOptions(updatedIdOptions);
-    setSelectedOptions(updatedOptions);
-    console.log('MULTICHOICE')
-    console.log(updatedIdOptions)
-    onAddResponse(pregunta.id,idOpcion);
-    setError(null);
   };
 
-  useEffect(() => {
-    // console.log(indice);
-    // console.log('Opciones');
-    // console.log(selectedOptions);
-    // console.log('IDs');
-    // console.log(idOptions);
-    // onAddResponse(pregunta.id,idOptions);
-  }, [idOptions]);
-
-  useEffect(() => {
-    if (selectedOptions.length > pregunta.max) {
-      setSelectedOptions(selectedOptions.slice(0, pregunta.max));
-    }
-  }, [pregunta.max]);
-
-  useEffect(() => {
-    if (pregunta.max) {
-    } else if (pregunta.min) {
-    }
-  }, []);
+  const handleBlur = (opcionId: number) => {
+    const valorRespuesta = respuestas[opcionId] || 0;
+    console.log('handleBlur');
+    // onAddResponse(pregunta.id, opcionId, valorRespuesta, '');
+  };
 
   return (
     <div className="flex flex-col rounded-lg p-3">
+      <div>CUANTITATIVAS</div>
       <div className="flex flex-col">
         <div className="flex w-full items-start pb-3">
           <h3 className="w-[95%] text- font-semibold text-black dark:text-white">
@@ -111,42 +82,28 @@ const MultiChoiceCuantitativaResponse: React.FC<Props> = ({
             {pregunta.pregunta}
           </h3>
         </div>
-        <div>
-          {pregunta.max
-            ? `Selecciona maximo ${pregunta.max} respuesta(s)`
-            : pregunta.min
-            ? `Selecciona minimo ${pregunta.min} respuesta(s)`
-            : 'Selecciona una respuesta'}
-        </div>
-        {pregunta.pregunta.length == 0 && (
-          <AlertError mensaje="El campo no debe estar vacío " />
-        )}
+        <div>{`Valor máximo total: ${valor}`}</div>
       </div>
-      <h3 className="font-semibold text-black dark:text-white pt-3 pb-2">
-        Opciones CUANTITATIVA:
-      </h3>
       <div className="grid grid-cols-2 w-full">
         {pregunta.opciones?.map((opc) => (
-          <div className="rounded-l-lg py-2 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
-            <label className="flex">
+          <div
+            key={opc.id}
+            className="rounded-l-lg py-2 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          >
+            <label className="flex justify-center items-center gap-5">
               <input
-                type="checkbox"
-                checked={selectedOptions.includes(opc.opcion)}
-                onChange={() => handleCheckboxChange(opc.opcion, opc.id)}
-                className={`border-strokedark w-20 bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+                type="number"
+                value={respuestas[opc.id] || ''}
+                onChange={(e) => handleChange(opc.id,opc.estilo, e)}
+                // onBlur={() => handleBlur(opc.id)}
+                className="border-strokedark w-20 border rounded-lg bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               />
               {opc.opcion}
             </label>
           </div>
         ))}
       </div>
-      {pregunta.max
-        ? selectedOptions.length == 0 && <AlertError mensaje="Completa" />
-        : pregunta.min
-        ? selectedOptions.length != pregunta.min && (
-            <AlertError mensaje="Completa" />
-          )
-        : selectedOptions.length == 0 && <AlertError mensaje="Completa" />}
+      {error && <div className="text-red-500">{error}</div>}
     </div>
   );
 };

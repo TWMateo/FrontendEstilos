@@ -36,6 +36,30 @@ interface ConteoEstilos {
   [key: string]: number;
 }
 
+interface ResultadosTest {
+  [key: string]: boolean;
+}
+
+type Operacion = 'suma' | 'resta' | 'multiplicacion' | 'division';
+
+interface Parametro {
+  value: string[];
+  operacion: Operacion;
+}
+
+interface Condicion {
+  parametros: Parametro[];
+  condicion:
+    | 'mayor'
+    | 'menor'
+    | 'mayor o igual'
+    | 'menor o igual'
+    | 'igual'
+    | 'ninguna';
+  valor: number;
+  comparacion: 'and' | 'or';
+}
+
 const Test = () => {
   const { id } = useParams<{ id: string }>();
   const [loadingTest, setLoadingTest] = useState(true);
@@ -73,16 +97,17 @@ const Test = () => {
     id: number;
     opcion: string;
     estilo: string;
+    valorNumerico?: number; // Nuevo campo para el valor numérico
   }
 
-  let testAsignado = {
+  let testAsignadoS = {
     titulo: 'Kolb',
     autor: 'Kolb',
     descripcion: 'Kolb',
-    cuantitativa: false,
+    cuantitativa: true,
     fechaCreacion: '20/5/2024',
     estilosAprendizaje: ['visual', 'kinestesico'],
-    valorPregunta: 1,
+    valorPregunta: 2,
     preguntas: [
       {
         id: 1,
@@ -126,34 +151,34 @@ const Test = () => {
         min: 0,
         max: 2,
       },
-      {
-        id: 3,
-        orden: 3,
-        pregunta: 'Como considera que aprende mejor?',
-        tipoPregunta: 'Likert',
-        opciones: [
-          {
-            id: 5,
-            opcion: 'Dibujando',
-            estilo: 'kinestesico',
-          },
-          {
-            id: 6,
-            opcion: 'Con gráficos',
-            estilo: 'visual',
-          },
-        ],
-        escalas: [
-          'Totalmente en desacuerdo',
-          'En desacuerdo',
-          'Neutral',
-          'De acuerdo',
-          'Totalmente de acuerdo',
-        ],
-        // Todas las preguntas de likert deben tener el valor de min igual a la cantidad de opciones
-        min: 2,
-        max: 0,
-      },
+      // {
+      //   id: 3,
+      //   orden: 3,
+      //   pregunta: 'Como considera que aprende mejor?',
+      //   tipoPregunta: 'Likert',
+      //   opciones: [
+      //     {
+      //       id: 5,
+      //       opcion: 'Dibujando',
+      //       estilo: 'kinestesico',
+      //     },
+      //     {
+      //       id: 6,
+      //       opcion: 'Con gráficos',
+      //       estilo: 'visual',
+      //     },
+      //   ],
+      //   escalas: [
+      //     'Totalmente en desacuerdo',
+      //     'En desacuerdo',
+      //     'Neutral',
+      //     'De acuerdo',
+      //     'Totalmente de acuerdo',
+      //   ],
+      //   // Todas las preguntas de likert deben tener el valor de min igual a la cantidad de opciones
+      //   min: 2,
+      //   max: 0,
+      // },
     ],
     reglaCalculo: [
       {
@@ -169,6 +194,325 @@ const Test = () => {
     ],
   };
 
+  let testAsignado = {
+    titulo: 'Kolb',
+    autor: 'David Kolb',
+    descripcion:
+      'A continuación se presenta un inventario compuesto por nueve filas horizontales.',
+    cuantitativa: true,
+    fechaCreacion: '12/6/2024',
+    estilosAprendizaje: [
+      'acomodador',
+      'divergente',
+      'convergente',
+      'asimilador',
+      'experiencia concreta',
+      'observacion reflexiva',
+      'conceptualización abstracta',
+      'experimentación activa',
+    ],
+    valorPregunta: 10,
+    preguntas: [
+      {
+        id: 1,
+        orden: 1,
+        pregunta: 'Cuando aprendo...',
+        tipoPregunta: 'Selección múltiple',
+        opciones: [
+          {
+            id: 1,
+            opcion: 'Me gusta vivir sensaciones',
+            estilo: 'experiencia concreta',
+          },
+          {
+            id: 2,
+            opcion: 'Me gusta pensar sobre ideas',
+            estilo: 'observacion reflexiva',
+          },
+          {
+            id: 3,
+            opcion: 'Me gusta estar haciendo cosas',
+            estilo: 'conceptualización abstracta',
+          },
+          {
+            id: 4,
+            opcion: 'Me gusta observar y escuchar',
+            estilo: 'experimentación activa',
+          },
+        ],
+        escalas: [],
+        min: 4,
+        max: 0,
+      },
+      {
+        id: 2,
+        orden: 2,
+        pregunta: 'Aprendo mejor cuando...',
+        tipoPregunta: 'Selección múltiple',
+        opciones: [
+          {
+            id: 1,
+            opcion: 'escucho y observo cuidadosamente',
+            estilo: 'experiencia concreta',
+          },
+          {
+            id: 2,
+            opcion: 'confio en el pensamiento logico',
+            estilo: 'observacion reflexiva',
+          },
+          {
+            id: 3,
+            opcion: 'confio en mi intuicion',
+            estilo: 'conceptualización abstracta',
+          },
+          {
+            id: 4,
+            opcion: 'trabajo duro',
+            estilo: 'experimentación activa',
+          },
+        ],
+        escalas: [],
+        min: 4,
+        max: 0,
+      },
+      {
+        id: 3,
+        orden: 3,
+        pregunta: 'Cuando estoy aprendiendo',
+        tipoPregunta: 'Selección múltiple',
+        opciones: [
+          {
+            id: 1,
+            opcion: 'tiendo a usar el razonamiento',
+            estilo: 'experiencia concreta',
+          },
+          {
+            id: 2,
+            opcion: 'soy responsable',
+            estilo: 'observacion reflexiva',
+          },
+          {
+            id: 3,
+            opcion: 'Soy reservado',
+            estilo: 'conceptualización abstracta',
+          },
+          {
+            id: 4,
+            opcion: 'tengo fuertes reacciones',
+            estilo: 'experimentación activa',
+          },
+        ],
+        escalas: [],
+        min: 4,
+        max: 0,
+      },
+      {
+        id: 4,
+        orden: 4,
+        pregunta: 'Yo aprendo...',
+        tipoPregunta: 'Selección múltiple',
+        opciones: [
+          {
+            id: 1,
+            opcion: 'Sintiendo',
+            estilo: 'experiencia concreta',
+          },
+          {
+            id: 2,
+            opcion: 'haciendo',
+            estilo: 'observacion reflexiva',
+          },
+          {
+            id: 3,
+            opcion: 'observando',
+            estilo: 'conceptualización abstracta',
+          },
+          {
+            id: 4,
+            opcion: 'pensando',
+            estilo: 'experimentación activa',
+          },
+        ],
+        escalas: [],
+        min: 4,
+        max: 0,
+      },
+      {
+        id: 5,
+        orden: 5,
+        pregunta: 'Cuando aprendo...',
+        tipoPregunta: 'Selección múltiple',
+        opciones: [
+          {
+            id: 1,
+            opcion: 'estoy abierto a nuevas experiencias',
+            estilo: 'experiencia concreta',
+          },
+          {
+            id: 2,
+            opcion: 'observo todos los aspectos',
+            estilo: 'observacion reflexiva',
+          },
+          {
+            id: 3,
+            opcion: 'me gusta analizar las cosas',
+            estilo: 'conceptualización abstracta',
+          },
+          {
+            id: 4,
+            opcion: 'me gusta probar las cosas',
+            estilo: 'experimentación activa',
+          },
+        ],
+        escalas: [],
+        min: 4,
+        max: 0,
+      },
+    ],
+    reglaCalculo: [
+      {
+        estilo: 'asimilador',
+        condiciones: [
+          {
+            parametros: [
+              {
+                value: ['conceptualización abstracta'],
+                operacion: 'resta',
+              },
+              {
+                value: ['experiencia concreta'],
+                operacion: 'suma',
+              },
+            ],
+            condicion: 'menor',
+            valor: 0,
+            comparacion: 'and',
+          },
+          {
+            parametros: [
+              {
+                value: ['experimentación activa'],
+                operacion: 'resta',
+              },
+              {
+                value: ['observacion reflexiva'],
+                operacion: 'suma',
+              },
+            ],
+            condicion: 'mayor',
+            valor: 0,
+            comparacion: 'and',
+          },
+        ],
+      },
+      {
+        estilo: 'divergente',
+        condiciones: [
+          {
+            parametros: [
+              {
+                value: ['conceptualización abstracta'],
+                operacion: 'resta',
+              },
+              {
+                value: ['experiencia concreta'],
+                operacion: 'suma',
+              },
+            ],
+            condicion: 'mayor',
+            valor: 0,
+            comparacion: 'and',
+          },
+          {
+            parametros: [
+              {
+                value: ['experimentación activa'],
+                operacion: 'resta',
+              },
+              {
+                value: ['observacion reflexiva'],
+                operacion: 'suma',
+              },
+            ],
+            condicion: 'mayor',
+            valor: 0,
+            comparacion: 'and',
+          },
+        ],
+      },
+      {
+        estilo: 'acomodador',
+        condiciones: [
+          {
+            parametros: [
+              {
+                value: ['conceptualización abstracta'],
+                operacion: 'resta',
+              },
+              {
+                value: ['experiencia concreta'],
+                operacion: 'suma',
+              },
+            ],
+            condicion: 'mayor',
+            valor: 0,
+            comparacion: 'and',
+          },
+          {
+            parametros: [
+              {
+                value: ['experimentación activa'],
+                operacion: 'resta',
+              },
+              {
+                value: ['observacion reflexiva'],
+                operacion: 'suma',
+              },
+            ],
+            condicion: 'menor',
+            valor: 0,
+            comparacion: 'and',
+          },
+        ],
+      },
+      {
+        estilo: 'convergente',
+        condiciones: [
+          {
+            parametros: [
+              {
+                value: ['conceptualización abstracta'],
+                operacion: 'resta',
+              },
+              {
+                value: ['experiencia concreta'],
+                operacion: 'suma',
+              },
+            ],
+            condicion: 'menor',
+            valor: 0,
+            comparacion: 'and',
+          },
+          {
+            parametros: [
+              {
+                value: ['experimentación activa'],
+                operacion: 'resta',
+              },
+              {
+                value: ['observacion reflexiva'],
+                operacion: 'suma',
+              },
+            ],
+            condicion: 'menor',
+            valor: 0,
+            comparacion: 'and',
+          },
+        ],
+      },
+    ],
+  };
+
   const handleAddRespuesta = (
     preguntaId: number,
     opcionId: number,
@@ -176,6 +520,8 @@ const Test = () => {
     estiloI?: string,
   ) => {
     //Dato quemados
+    console.log('cambiando datos');
+
     let usuarioId = 1;
     //-----------------
     if (!idTest) return;
@@ -185,7 +531,7 @@ const Test = () => {
       usuarioId: usuarioId,
       preguntaId: preguntaId,
       opcionId: opcionId,
-      valorOpc: valorOpc ? valorOpc : 1,
+      valorOpc: valorOpc ? valorOpc : 0,
       estilo: estiloI,
     };
     let exists = currentResponses.some(
@@ -196,15 +542,26 @@ const Test = () => {
         respuesta.opcionId === nuevaRespuesta.opcionId,
     );
     if (exists) {
-      currentResponses = currentResponses.filter(
-        (respuesta) =>
-          !(
-            respuesta.encuestaId === nuevaRespuesta.encuestaId &&
-            respuesta.usuarioId === nuevaRespuesta.usuarioId &&
-            respuesta.preguntaId === nuevaRespuesta.preguntaId &&
-            respuesta.opcionId === nuevaRespuesta.opcionId
-          ),
-      );
+      if (testAsignado.cuantitativa) {
+        let index = currentResponses.findIndex(
+          (resp) =>
+            resp.encuestaId === nuevaRespuesta.encuestaId &&
+            resp.usuarioId === nuevaRespuesta.usuarioId &&
+            resp.preguntaId === nuevaRespuesta.preguntaId &&
+            resp.opcionId === nuevaRespuesta.opcionId,
+        );
+        currentResponses[index] = nuevaRespuesta;
+      } else {
+        currentResponses = currentResponses.filter(
+          (respuesta) =>
+            !(
+              respuesta.encuestaId === nuevaRespuesta.encuestaId &&
+              respuesta.usuarioId === nuevaRespuesta.usuarioId &&
+              respuesta.preguntaId === nuevaRespuesta.preguntaId &&
+              respuesta.opcionId === nuevaRespuesta.opcionId
+            ),
+        );
+      }
     } else {
       currentResponses.push(nuevaRespuesta);
     }
@@ -294,6 +651,7 @@ const Test = () => {
   };
 
   const handleSendTest = () => {
+    console.log(respuestas);
     const res = respuestas;
     const reglaCalculo = testAsignado.reglaCalculo;
     // Controlar que todas las preguntas tengan las respuestas especificadas
@@ -321,41 +679,179 @@ const Test = () => {
       cambiarEstadoGuardadoTemporalmente();
     });
     //
-    const conteoEstilos: ConteoEstilos = {};
+    // const conteoEstilos: ConteoEstilos = {};
 
+    // testAsignado.estilosAprendizaje.forEach((regla) => {
+    //   conteoEstilos[regla] = 0;
+    // });
+
+    // res.forEach((respuesta) => {
+    //   const { estilo, valorOpc } = respuesta;
+
+    //   if (!estilo) return;
+    //   if (!valorOpc) return;
+
+    //   testAsignado.estilosAprendizaje.forEach((est) => {
+    //     if (est.includes(estilo)) {
+    //       conteoEstilos[est] += valorOpc;
+    //     }
+    //   });
+    // });
+
+    // let estiloPredominante = null;
+    // let maxValor = 0;
+
+    // for (const estilo in conteoEstilos) {
+    //   if (conteoEstilos[estilo] > maxValor) {
+    //     maxValor = conteoEstilos[estilo];
+    //     estiloPredominante = estilo;
+    //   }
+    // }
+
+    // console.log(
+    //   'El estilo de aprendizaje predominante es:',
+    //   estiloPredominante,
+    // );
+    // console.log(conteoEstilos);
+    // console.log(respuestas);
+    //VERSION PRUEBA---------------------------------
+    const conteoEstiloS: ResultadosTest = {};
+    const conteoParametros: ConteoEstilos = {};
     reglaCalculo.forEach((regla) => {
-      conteoEstilos[regla.fila] = 0;
+      conteoEstiloS[regla.estilo] = false;
     });
 
     res.forEach((respuesta) => {
       const { estilo, valorOpc } = respuesta;
-
       if (!estilo) return;
       if (!valorOpc) return;
+      if (!conteoParametros.hasOwnProperty(estilo)) {
+        conteoParametros[estilo] = 0;
+      }
+    });
 
-      reglaCalculo.forEach((regla) => {
-        if (regla.columnas.includes(estilo)) {
-          conteoEstilos[regla.fila] += valorOpc;
+    reglaCalculo.forEach((regla) => {
+      let sumaCondiciones = 0;
+      let operacion: string;
+      let operadores: boolean[] = [];
+      let condiciones: string[] = [];
+
+      regla.condiciones.forEach((condicion) => {
+        let primerParametro = true;
+        let sumaParametros = 0;
+        let operadoresParciales = '';
+        let contadorParam = 0;
+        condicion.parametros.forEach((parametro) => {
+          let sumaRespuestas = 0;
+          console.log(parametro);
+          contadorParam++;
+          operadoresParciales += parametro.value + ' ' + operacion + ' ';
+          res.forEach((respuesta) => {
+            const { estilo, valorOpc } = respuesta;
+            if (!estilo) return;
+            if (!valorOpc) return;
+            if (parametro.value.includes(estilo)) {
+              sumaRespuestas += valorOpc;
+            }
+          });
+          conteoParametros[parametro.value[0]] = sumaRespuestas;
+          console.log(sumaRespuestas);
+          if (primerParametro) {
+            sumaParametros = sumaRespuestas;
+            primerParametro = false;
+            operacion = parametro.operacion;
+          } else {
+            sumaParametros = aplicarOperacion(
+              sumaParametros,
+              sumaRespuestas,
+              operacion,
+            );
+            console.log(sumaParametros);
+            operacion = parametro.operacion;
+          }
+        });
+        if (
+          !evaluarCondicion(
+            sumaParametros,
+            condicion.condicion,
+            condicion.valor,
+          )
+        ) {
+          operadores.push(false);
+        } else {
+          operadores.push(true);
+          sumaCondiciones += sumaParametros;
         }
+        condiciones.push(condicion.comparacion);
       });
+      let resultado = evaluateConditions(operadores, condiciones);
+      operadores = [];
+      conteoEstiloS[regla.estilo] = resultado;
     });
 
     let estiloPredominante = null;
-    let maxValor = 0;
-
-    for (const estilo in conteoEstilos) {
-      if (conteoEstilos[estilo] > maxValor) {
-        maxValor = conteoEstilos[estilo];
-        estiloPredominante = estilo;
-      }
-    }
 
     console.log(
       'El estilo de aprendizaje predominante es:',
       estiloPredominante,
     );
-    console.log(conteoEstilos);
-    console.log(respuestas);
+    console.log(conteoEstiloS);
+    console.log(conteoParametros);
+    console.log(res);
+  };
+
+  const evaluateConditions = (conditions: boolean[], operators: string[]) => {
+    let result = conditions[0];
+
+    for (let i = 0; i < operators.length - 1; i++) {
+      if (operators[i] === 'and') {
+        result = result && conditions[i + 1];
+      } else if (operators[i] === 'or') {
+        result = result || conditions[i + 1];
+      } else {
+        console.log('error');
+        throw new Error(`Operador desconocido: ${operators[i]}`);
+      }
+    }
+    return result;
+  };
+
+  const aplicarOperacion = (
+    acumulado: number,
+    valor: number,
+    operacion: string,
+  ) => {
+    switch (operacion) {
+      case 'suma':
+        return acumulado + valor;
+      case 'resta':
+        return acumulado - valor;
+      case 'multiplicacion':
+        return acumulado * valor;
+      case 'division':
+        return acumulado / valor;
+      default:
+        return acumulado;
+    }
+  };
+
+  const evaluarCondicion = (suma: number, condicion: string, valor: number) => {
+    switch (condicion) {
+      case 'mayor':
+        return suma > valor;
+      case 'igual':
+        return suma === valor;
+      case 'menor':
+        return suma < valor;
+      case 'mayor o igual que':
+        return suma >= valor;
+      case 'menor o igual que':
+        return suma <= valor;
+      case 'ninguna':
+        return true; // No se toma en cuenta la condición
+      default:
+        return false;
+    }
   };
 
   const theme = createTheme({
@@ -411,7 +907,8 @@ const Test = () => {
               testAsignado.cuantitativa ? (
                 <MultiChoiceCuantitativaResponse
                   pregunta={preg}
-                  indice={index}
+                  // indice={index}
+                  valor={testAsignado.valorPregunta}
                   onAddResponse={handleAddRespuesta}
                   key={index}
                 />

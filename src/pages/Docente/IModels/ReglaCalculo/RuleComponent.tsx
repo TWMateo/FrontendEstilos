@@ -82,14 +82,13 @@ const RuleComponent: React.FC<RuleComponentProps> = ({
       <div className="flex justify-between">
         <select
           title="fila"
-          // className="border rounded-lg p-2 w-[90%] lg:w-[85%]"
           className={`relative p-2 z-20 w-[90%] lg:w-[85%] bg-whiten appearance-none rounded border border-strokedark bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}
-          name="fila"
+          name="estilo"
           value={rule.estilo}
           onChange={handleChange}
         >
-          {estilosAprendizaje.map((estilo) => (
-            <option key={estilo} value={estilo}>
+          {estilosAprendizaje.map((estilo,index) => (
+            <option key={estilo+'-'+index} value={estilo}>
               {estilo}
             </option>
           ))}
