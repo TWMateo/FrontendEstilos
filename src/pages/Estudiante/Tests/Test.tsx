@@ -715,89 +715,91 @@ const Test = () => {
     // console.log(conteoEstilos);
     // console.log(respuestas);
     //VERSION PRUEBA---------------------------------
-    const conteoEstiloS: ResultadosTest = {};
-    const conteoParametros: ConteoEstilos = {};
-    reglaCalculo.forEach((regla) => {
-      conteoEstiloS[regla.estilo] = false;
-    });
+    if (testAsignado.cuantitativa) {
+      const conteoEstiloS: ResultadosTest = {};
+      const conteoParametros: ConteoEstilos = {};
+      reglaCalculo.forEach((regla) => {
+        conteoEstiloS[regla.estilo] = false;
+      });
 
-    res.forEach((respuesta) => {
-      const { estilo, valorOpc } = respuesta;
-      if (!estilo) return;
-      if (!valorOpc) return;
-      if (!conteoParametros.hasOwnProperty(estilo)) {
-        conteoParametros[estilo] = 0;
-      }
-    });
+      res.forEach((respuesta) => {
+        const { estilo, valorOpc } = respuesta;
+        if (!estilo) return;
+        if (!valorOpc) return;
+        if (!conteoParametros.hasOwnProperty(estilo)) {
+          conteoParametros[estilo] = 0;
+        }
+      });
 
-    reglaCalculo.forEach((regla) => {
-      let sumaCondiciones = 0;
-      let operacion: string;
-      let operadores: boolean[] = [];
-      let condiciones: string[] = [];
+      reglaCalculo.forEach((regla) => {
+        let sumaCondiciones = 0;
+        let operacion: string;
+        let operadores: boolean[] = [];
+        let condiciones: string[] = [];
 
-      regla.condiciones.forEach((condicion) => {
-        let primerParametro = true;
-        let sumaParametros = 0;
-        let operadoresParciales = '';
-        let contadorParam = 0;
-        condicion.parametros.forEach((parametro) => {
-          let sumaRespuestas = 0;
-          console.log(parametro);
-          contadorParam++;
-          operadoresParciales += parametro.value + ' ' + operacion + ' ';
-          res.forEach((respuesta) => {
-            const { estilo, valorOpc } = respuesta;
-            if (!estilo) return;
-            if (!valorOpc) return;
-            if (parametro.value.includes(estilo)) {
-              sumaRespuestas += valorOpc;
+        regla.condiciones.forEach((condicion) => {
+          let primerParametro = true;
+          let sumaParametros = 0;
+          let operadoresParciales = '';
+          let contadorParam = 0;
+          condicion.parametros.forEach((parametro) => {
+            let sumaRespuestas = 0;
+            console.log(parametro);
+            contadorParam++;
+            operadoresParciales += parametro.value + ' ' + operacion + ' ';
+            res.forEach((respuesta) => {
+              const { estilo, valorOpc } = respuesta;
+              if (!estilo) return;
+              if (!valorOpc) return;
+              if (parametro.value.includes(estilo)) {
+                sumaRespuestas += valorOpc;
+              }
+            });
+            conteoParametros[parametro.value[0]] = sumaRespuestas;
+            console.log(sumaRespuestas);
+            if (primerParametro) {
+              sumaParametros = sumaRespuestas;
+              primerParametro = false;
+              operacion = parametro.operacion;
+            } else {
+              sumaParametros = aplicarOperacion(
+                sumaParametros,
+                sumaRespuestas,
+                operacion,
+              );
+              console.log(sumaParametros);
+              operacion = parametro.operacion;
             }
           });
-          conteoParametros[parametro.value[0]] = sumaRespuestas;
-          console.log(sumaRespuestas);
-          if (primerParametro) {
-            sumaParametros = sumaRespuestas;
-            primerParametro = false;
-            operacion = parametro.operacion;
-          } else {
-            sumaParametros = aplicarOperacion(
+          if (
+            !evaluarCondicion(
               sumaParametros,
-              sumaRespuestas,
-              operacion,
-            );
-            console.log(sumaParametros);
-            operacion = parametro.operacion;
+              condicion.condicion,
+              condicion.valor,
+            )
+          ) {
+            operadores.push(false);
+          } else {
+            operadores.push(true);
+            sumaCondiciones += sumaParametros;
           }
+          condiciones.push(condicion.comparacion);
         });
-        if (
-          !evaluarCondicion(
-            sumaParametros,
-            condicion.condicion,
-            condicion.valor,
-          )
-        ) {
-          operadores.push(false);
-        } else {
-          operadores.push(true);
-          sumaCondiciones += sumaParametros;
-        }
-        condiciones.push(condicion.comparacion);
+        let resultado = evaluateConditions(operadores, condiciones);
+        operadores = [];
+        conteoEstiloS[regla.estilo] = resultado;
       });
-      let resultado = evaluateConditions(operadores, condiciones);
-      operadores = [];
-      conteoEstiloS[regla.estilo] = resultado;
-    });
 
-    let estiloPredominante = null;
+      let estiloPredominante = null;
 
-    console.log(
-      'El estilo de aprendizaje predominante es:',
-      estiloPredominante,
-    );
-    console.log(conteoEstiloS);
-    console.log(conteoParametros);
-    console.log(res);
+      console.log(
+        'El estilo de aprendizaje predominante es:',
+        estiloPredominante,
+      );
+      console.log(conteoEstiloS);
+      console.log(conteoParametros);
+      console.log(res);
+    }
   };
 
   const evaluateConditions = (conditions: boolean[], operators: string[]) => {
