@@ -194,317 +194,410 @@ const Test = () => {
     ],
   };
 
+  // let testAsignado = {
+  //   titulo: 'Kolb',
+  //   autor: 'David Kolb',
+  //   descripcion:
+  //     'A continuación se presenta un inventario compuesto por nueve filas horizontales.',
+  //   cuantitativa: true,
+  //   fechaCreacion: '12/6/2024',
+  //   estilosAprendizaje: [
+  //     'acomodador',
+  //     'divergente',
+  //     'convergente',
+  //     'asimilador',
+  //     'experiencia concreta',
+  //     'observacion reflexiva',
+  //     'conceptualización abstracta',
+  //     'experimentación activa',
+  //   ],
+  //   valorPregunta: 10,
+  //   preguntas: [
+  //     {
+  //       id: 1,
+  //       orden: 1,
+  //       pregunta: 'Cuando aprendo...',
+  //       tipoPregunta: 'Selección múltiple',
+  //       opciones: [
+  //         {
+  //           id: 1,
+  //           opcion: 'Me gusta vivir sensaciones',
+  //           estilo: 'experiencia concreta',
+  //         },
+  //         {
+  //           id: 2,
+  //           opcion: 'Me gusta pensar sobre ideas',
+  //           estilo: 'observacion reflexiva',
+  //         },
+  //         {
+  //           id: 3,
+  //           opcion: 'Me gusta estar haciendo cosas',
+  //           estilo: 'conceptualización abstracta',
+  //         },
+  //         {
+  //           id: 4,
+  //           opcion: 'Me gusta observar y escuchar',
+  //           estilo: 'experimentación activa',
+  //         },
+  //       ],
+  //       escalas: [],
+  //       min: 4,
+  //       max: 0,
+  //     },
+  //     {
+  //       id: 2,
+  //       orden: 2,
+  //       pregunta: 'Aprendo mejor cuando...',
+  //       tipoPregunta: 'Selección múltiple',
+  //       opciones: [
+  //         {
+  //           id: 1,
+  //           opcion: 'escucho y observo cuidadosamente',
+  //           estilo: 'experiencia concreta',
+  //         },
+  //         {
+  //           id: 2,
+  //           opcion: 'confio en el pensamiento logico',
+  //           estilo: 'observacion reflexiva',
+  //         },
+  //         {
+  //           id: 3,
+  //           opcion: 'confio en mi intuicion',
+  //           estilo: 'conceptualización abstracta',
+  //         },
+  //         {
+  //           id: 4,
+  //           opcion: 'trabajo duro',
+  //           estilo: 'experimentación activa',
+  //         },
+  //       ],
+  //       escalas: [],
+  //       min: 4,
+  //       max: 0,
+  //     },
+  //     {
+  //       id: 3,
+  //       orden: 3,
+  //       pregunta: 'Cuando estoy aprendiendo',
+  //       tipoPregunta: 'Selección múltiple',
+  //       opciones: [
+  //         {
+  //           id: 1,
+  //           opcion: 'tiendo a usar el razonamiento',
+  //           estilo: 'experiencia concreta',
+  //         },
+  //         {
+  //           id: 2,
+  //           opcion: 'soy responsable',
+  //           estilo: 'observacion reflexiva',
+  //         },
+  //         {
+  //           id: 3,
+  //           opcion: 'Soy reservado',
+  //           estilo: 'conceptualización abstracta',
+  //         },
+  //         {
+  //           id: 4,
+  //           opcion: 'tengo fuertes reacciones',
+  //           estilo: 'experimentación activa',
+  //         },
+  //       ],
+  //       escalas: [],
+  //       min: 4,
+  //       max: 0,
+  //     },
+  //     {
+  //       id: 4,
+  //       orden: 4,
+  //       pregunta: 'Yo aprendo...',
+  //       tipoPregunta: 'Selección múltiple',
+  //       opciones: [
+  //         {
+  //           id: 1,
+  //           opcion: 'Sintiendo',
+  //           estilo: 'experiencia concreta',
+  //         },
+  //         {
+  //           id: 2,
+  //           opcion: 'haciendo',
+  //           estilo: 'observacion reflexiva',
+  //         },
+  //         {
+  //           id: 3,
+  //           opcion: 'observando',
+  //           estilo: 'conceptualización abstracta',
+  //         },
+  //         {
+  //           id: 4,
+  //           opcion: 'pensando',
+  //           estilo: 'experimentación activa',
+  //         },
+  //       ],
+  //       escalas: [],
+  //       min: 4,
+  //       max: 0,
+  //     },
+  //     {
+  //       id: 5,
+  //       orden: 5,
+  //       pregunta: 'Cuando aprendo...',
+  //       tipoPregunta: 'Selección múltiple',
+  //       opciones: [
+  //         {
+  //           id: 1,
+  //           opcion: 'estoy abierto a nuevas experiencias',
+  //           estilo: 'experiencia concreta',
+  //         },
+  //         {
+  //           id: 2,
+  //           opcion: 'observo todos los aspectos',
+  //           estilo: 'observacion reflexiva',
+  //         },
+  //         {
+  //           id: 3,
+  //           opcion: 'me gusta analizar las cosas',
+  //           estilo: 'conceptualización abstracta',
+  //         },
+  //         {
+  //           id: 4,
+  //           opcion: 'me gusta probar las cosas',
+  //           estilo: 'experimentación activa',
+  //         },
+  //       ],
+  //       escalas: [],
+  //       min: 4,
+  //       max: 0,
+  //     },
+  //   ],
+  //   reglaCalculo: [
+  //     {
+  //       estilo: 'asimilador',
+  //       condiciones: [
+  //         {
+  //           parametros: [
+  //             {
+  //               value: ['conceptualización abstracta'],
+  //               operacion: 'resta',
+  //             },
+  //             {
+  //               value: ['experiencia concreta'],
+  //               operacion: 'suma',
+  //             },
+  //           ],
+  //           condicion: 'menor',
+  //           valor: 0,
+  //           comparacion: 'and',
+  //         },
+  //         {
+  //           parametros: [
+  //             {
+  //               value: ['experimentación activa'],
+  //               operacion: 'resta',
+  //             },
+  //             {
+  //               value: ['observacion reflexiva'],
+  //               operacion: 'suma',
+  //             },
+  //           ],
+  //           condicion: 'mayor',
+  //           valor: 0,
+  //           comparacion: 'and',
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       estilo: 'divergente',
+  //       condiciones: [
+  //         {
+  //           parametros: [
+  //             {
+  //               value: ['conceptualización abstracta'],
+  //               operacion: 'resta',
+  //             },
+  //             {
+  //               value: ['experiencia concreta'],
+  //               operacion: 'suma',
+  //             },
+  //           ],
+  //           condicion: 'mayor',
+  //           valor: 0,
+  //           comparacion: 'and',
+  //         },
+  //         {
+  //           parametros: [
+  //             {
+  //               value: ['experimentación activa'],
+  //               operacion: 'resta',
+  //             },
+  //             {
+  //               value: ['observacion reflexiva'],
+  //               operacion: 'suma',
+  //             },
+  //           ],
+  //           condicion: 'mayor',
+  //           valor: 0,
+  //           comparacion: 'and',
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       estilo: 'acomodador',
+  //       condiciones: [
+  //         {
+  //           parametros: [
+  //             {
+  //               value: ['conceptualización abstracta'],
+  //               operacion: 'resta',
+  //             },
+  //             {
+  //               value: ['experiencia concreta'],
+  //               operacion: 'suma',
+  //             },
+  //           ],
+  //           condicion: 'mayor',
+  //           valor: 0,
+  //           comparacion: 'and',
+  //         },
+  //         {
+  //           parametros: [
+  //             {
+  //               value: ['experimentación activa'],
+  //               operacion: 'resta',
+  //             },
+  //             {
+  //               value: ['observacion reflexiva'],
+  //               operacion: 'suma',
+  //             },
+  //           ],
+  //           condicion: 'menor',
+  //           valor: 0,
+  //           comparacion: 'and',
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       estilo: 'convergente',
+  //       condiciones: [
+  //         {
+  //           parametros: [
+  //             {
+  //               value: ['conceptualización abstracta'],
+  //               operacion: 'resta',
+  //             },
+  //             {
+  //               value: ['experiencia concreta'],
+  //               operacion: 'suma',
+  //             },
+  //           ],
+  //           condicion: 'menor',
+  //           valor: 0,
+  //           comparacion: 'and',
+  //         },
+  //         {
+  //           parametros: [
+  //             {
+  //               value: ['experimentación activa'],
+  //               operacion: 'resta',
+  //             },
+  //             {
+  //               value: ['observacion reflexiva'],
+  //               operacion: 'suma',
+  //             },
+  //           ],
+  //           condicion: 'menor',
+  //           valor: 0,
+  //           comparacion: 'and',
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // };
   let testAsignado = {
-    titulo: 'Kolb',
-    autor: 'David Kolb',
-    descripcion:
-      'A continuación se presenta un inventario compuesto por nueve filas horizontales.',
-    cuantitativa: true,
-    fechaCreacion: '12/6/2024',
-    estilosAprendizaje: [
-      'acomodador',
-      'divergente',
-      'convergente',
-      'asimilador',
-      'experiencia concreta',
-      'observacion reflexiva',
-      'conceptualización abstracta',
-      'experimentación activa',
-    ],
-    valorPregunta: 10,
+    titulo: 'Kolb 2',
+    autor: 'Kolb 2',
+    descripcion: 'Vamos a testear el producto',
+    cuantitativa: false,
+    fechaCreacion: '23/6/2024',
+    estilosAprendizaje: ['visual', 'kinestesico'],
+    valorPregunta: 1,
     preguntas: [
       {
         id: 1,
         orden: 1,
-        pregunta: 'Cuando aprendo...',
+        pregunta: 'Pregunta 1',
         tipoPregunta: 'Selección múltiple',
         opciones: [
           {
             id: 1,
-            opcion: 'Me gusta vivir sensaciones',
-            estilo: 'experiencia concreta',
+            opcion: 'Opción 1',
+            estilo: 'visual',
           },
           {
             id: 2,
-            opcion: 'Me gusta pensar sobre ideas',
-            estilo: 'observacion reflexiva',
-          },
-          {
-            id: 3,
-            opcion: 'Me gusta estar haciendo cosas',
-            estilo: 'conceptualización abstracta',
-          },
-          {
-            id: 4,
-            opcion: 'Me gusta observar y escuchar',
-            estilo: 'experimentación activa',
+            opcion: 'Opción 2',
+            estilo: 'kinestesico',
           },
         ],
         escalas: [],
-        min: 4,
+        min: 0,
         max: 0,
       },
       {
         id: 2,
         orden: 2,
-        pregunta: 'Aprendo mejor cuando...',
-        tipoPregunta: 'Selección múltiple',
+        pregunta: 'Pregunta 2',
+        tipoPregunta: 'Likert',
         opciones: [
           {
             id: 1,
-            opcion: 'escucho y observo cuidadosamente',
-            estilo: 'experiencia concreta',
+            opcion: 'Opción 1',
+            estilo: 'visual',
           },
           {
             id: 2,
-            opcion: 'confio en el pensamiento logico',
-            estilo: 'observacion reflexiva',
-          },
-          {
-            id: 3,
-            opcion: 'confio en mi intuicion',
-            estilo: 'conceptualización abstracta',
-          },
-          {
-            id: 4,
-            opcion: 'trabajo duro',
-            estilo: 'experimentación activa',
+            opcion: 'Opción 2',
+            estilo: 'kinestesico',
           },
         ],
-        escalas: [],
-        min: 4,
-        max: 0,
-      },
-      {
-        id: 3,
-        orden: 3,
-        pregunta: 'Cuando estoy aprendiendo',
-        tipoPregunta: 'Selección múltiple',
-        opciones: [
-          {
-            id: 1,
-            opcion: 'tiendo a usar el razonamiento',
-            estilo: 'experiencia concreta',
-          },
-          {
-            id: 2,
-            opcion: 'soy responsable',
-            estilo: 'observacion reflexiva',
-          },
-          {
-            id: 3,
-            opcion: 'Soy reservado',
-            estilo: 'conceptualización abstracta',
-          },
-          {
-            id: 4,
-            opcion: 'tengo fuertes reacciones',
-            estilo: 'experimentación activa',
-          },
+        escalas: [
+          'Muy insatisfecho',
+          'Insatisfecho',
+          'Neutral',
+          'Satisfecho',
+          'Muy satisfecho',
         ],
-        escalas: [],
-        min: 4,
-        max: 0,
-      },
-      {
-        id: 4,
-        orden: 4,
-        pregunta: 'Yo aprendo...',
-        tipoPregunta: 'Selección múltiple',
-        opciones: [
-          {
-            id: 1,
-            opcion: 'Sintiendo',
-            estilo: 'experiencia concreta',
-          },
-          {
-            id: 2,
-            opcion: 'haciendo',
-            estilo: 'observacion reflexiva',
-          },
-          {
-            id: 3,
-            opcion: 'observando',
-            estilo: 'conceptualización abstracta',
-          },
-          {
-            id: 4,
-            opcion: 'pensando',
-            estilo: 'experimentación activa',
-          },
-        ],
-        escalas: [],
-        min: 4,
-        max: 0,
-      },
-      {
-        id: 5,
-        orden: 5,
-        pregunta: 'Cuando aprendo...',
-        tipoPregunta: 'Selección múltiple',
-        opciones: [
-          {
-            id: 1,
-            opcion: 'estoy abierto a nuevas experiencias',
-            estilo: 'experiencia concreta',
-          },
-          {
-            id: 2,
-            opcion: 'observo todos los aspectos',
-            estilo: 'observacion reflexiva',
-          },
-          {
-            id: 3,
-            opcion: 'me gusta analizar las cosas',
-            estilo: 'conceptualización abstracta',
-          },
-          {
-            id: 4,
-            opcion: 'me gusta probar las cosas',
-            estilo: 'experimentación activa',
-          },
-        ],
-        escalas: [],
-        min: 4,
+        min: 0,
         max: 0,
       },
     ],
     reglaCalculo: [
       {
-        estilo: 'asimilador',
+        estilo: 'visual',
         condiciones: [
           {
             parametros: [
               {
-                value: ['conceptualización abstracta'],
-                operacion: 'resta',
-              },
-              {
-                value: ['experiencia concreta'],
+                value: ['visual'],
                 operacion: 'suma',
               },
             ],
-            condicion: 'menor',
-            valor: 0,
-            comparacion: 'and',
-          },
-          {
-            parametros: [
-              {
-                value: ['experimentación activa'],
-                operacion: 'resta',
-              },
-              {
-                value: ['observacion reflexiva'],
-                operacion: 'suma',
-              },
-            ],
-            condicion: 'mayor',
+            condicion: 'ninguna',
             valor: 0,
             comparacion: 'and',
           },
         ],
       },
       {
-        estilo: 'divergente',
+        estilo: 'kinestesico',
         condiciones: [
           {
             parametros: [
               {
-                value: ['conceptualización abstracta'],
-                operacion: 'resta',
-              },
-              {
-                value: ['experiencia concreta'],
+                value: ['visual'],
                 operacion: 'suma',
               },
             ],
-            condicion: 'mayor',
-            valor: 0,
-            comparacion: 'and',
-          },
-          {
-            parametros: [
-              {
-                value: ['experimentación activa'],
-                operacion: 'resta',
-              },
-              {
-                value: ['observacion reflexiva'],
-                operacion: 'suma',
-              },
-            ],
-            condicion: 'mayor',
-            valor: 0,
-            comparacion: 'and',
-          },
-        ],
-      },
-      {
-        estilo: 'acomodador',
-        condiciones: [
-          {
-            parametros: [
-              {
-                value: ['conceptualización abstracta'],
-                operacion: 'resta',
-              },
-              {
-                value: ['experiencia concreta'],
-                operacion: 'suma',
-              },
-            ],
-            condicion: 'mayor',
-            valor: 0,
-            comparacion: 'and',
-          },
-          {
-            parametros: [
-              {
-                value: ['experimentación activa'],
-                operacion: 'resta',
-              },
-              {
-                value: ['observacion reflexiva'],
-                operacion: 'suma',
-              },
-            ],
-            condicion: 'menor',
-            valor: 0,
-            comparacion: 'and',
-          },
-        ],
-      },
-      {
-        estilo: 'convergente',
-        condiciones: [
-          {
-            parametros: [
-              {
-                value: ['conceptualización abstracta'],
-                operacion: 'resta',
-              },
-              {
-                value: ['experiencia concreta'],
-                operacion: 'suma',
-              },
-            ],
-            condicion: 'menor',
-            valor: 0,
-            comparacion: 'and',
-          },
-          {
-            parametros: [
-              {
-                value: ['experimentación activa'],
-                operacion: 'resta',
-              },
-              {
-                value: ['observacion reflexiva'],
-                operacion: 'suma',
-              },
-            ],
-            condicion: 'menor',
+            condicion: 'ninguna',
             valor: 0,
             comparacion: 'and',
           },
@@ -678,42 +771,7 @@ const Test = () => {
       }
       cambiarEstadoGuardadoTemporalmente();
     });
-    //
-    // const conteoEstilos: ConteoEstilos = {};
 
-    // testAsignado.estilosAprendizaje.forEach((regla) => {
-    //   conteoEstilos[regla] = 0;
-    // });
-
-    // res.forEach((respuesta) => {
-    //   const { estilo, valorOpc } = respuesta;
-
-    //   if (!estilo) return;
-    //   if (!valorOpc) return;
-
-    //   testAsignado.estilosAprendizaje.forEach((est) => {
-    //     if (est.includes(estilo)) {
-    //       conteoEstilos[est] += valorOpc;
-    //     }
-    //   });
-    // });
-
-    // let estiloPredominante = null;
-    // let maxValor = 0;
-
-    // for (const estilo in conteoEstilos) {
-    //   if (conteoEstilos[estilo] > maxValor) {
-    //     maxValor = conteoEstilos[estilo];
-    //     estiloPredominante = estilo;
-    //   }
-    // }
-
-    // console.log(
-    //   'El estilo de aprendizaje predominante es:',
-    //   estiloPredominante,
-    // );
-    // console.log(conteoEstilos);
-    // console.log(respuestas);
     //VERSION PRUEBA---------------------------------
     if (testAsignado.cuantitativa) {
       const conteoEstiloS: ResultadosTest = {};
@@ -799,6 +857,42 @@ const Test = () => {
       console.log(conteoEstiloS);
       console.log(conteoParametros);
       console.log(res);
+    } else {
+      const conteoEstilos: ConteoEstilos = {};
+
+      testAsignado.estilosAprendizaje.forEach((regla) => {
+        conteoEstilos[regla] = 0;
+      });
+
+      res.forEach((respuesta) => {
+        const { estilo, valorOpc } = respuesta;
+
+        if (!estilo) return;
+        if (!valorOpc) return;
+
+        testAsignado.estilosAprendizaje.forEach((est) => {
+          if (est.includes(estilo)) {
+            conteoEstilos[est] += valorOpc;
+          }
+        });
+      });
+
+      let estiloPredominante = null;
+      let maxValor = 0;
+
+      for (const estilo in conteoEstilos) {
+        if (conteoEstilos[estilo] > maxValor) {
+          maxValor = conteoEstilos[estilo];
+          estiloPredominante = estilo;
+        }
+      }
+
+      console.log(
+        'El estilo de aprendizaje predominante es:',
+        estiloPredominante,
+      );
+      console.log(conteoEstilos);
+      console.log(respuestas);
     }
   };
 

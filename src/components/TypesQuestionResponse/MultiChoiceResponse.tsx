@@ -28,27 +28,37 @@ interface Props {
     preguntaId: number,
     opcionId: number,
     valorOpc?: number,
-    estilo?:string
+    estilo?: string,
   ) => void;
 }
 
-const MultiChoiceResponse: React.FC<Props> = ({
-  pregunta,
-  onAddResponse,
-}) => {
+const MultiChoiceResponse: React.FC<Props> = ({ pregunta, onAddResponse }) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [idOptions, setIdOptions] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const handleCheckboxChange = (opcion: string, idOpcion: number,estiloOpcion:string) => {
+  const handleCheckboxChange = (
+    opcion: string,
+    idOpcion: number,
+    estiloOpcion: string,
+  ) => {
     let updatedOptions;
     let updatedIdOptions;
-
     if (selectedOptions.includes(opcion)) {
       updatedOptions = selectedOptions.filter((item) => item !== opcion);
       updatedIdOptions = idOptions.filter((item) => item !== idOpcion);
     } else {
-      if (pregunta.max != 0 && selectedOptions.length < pregunta.max) {
+      console.log('ENTRO');
+      console.log(pregunta.max);
+      console.log(selectedOptions.length);
+      console.log(pregunta.min);
+      console.log(opcion);
+      console.log(idOpcion);
+      console.log(estiloOpcion);
+      if (pregunta.max == 0 && pregunta.min == 0) {
+        updatedOptions = [...selectedOptions, opcion];
+        updatedIdOptions = [...idOptions, idOpcion];
+      } else if (pregunta.max != 0 && selectedOptions.length < pregunta.max) {
         updatedOptions = [...selectedOptions, opcion];
         updatedIdOptions = [...idOptions, idOpcion];
       } else if (pregunta.min != 0 && selectedOptions.length < pregunta.min) {
@@ -61,9 +71,10 @@ const MultiChoiceResponse: React.FC<Props> = ({
         return;
       }
     }
+    console.log('SALIO');
     setIdOptions(updatedIdOptions);
     setSelectedOptions(updatedOptions);
-    onAddResponse(pregunta.id, idOpcion,1,estiloOpcion);
+    onAddResponse(pregunta.id, idOpcion, 1, estiloOpcion);
     setError(null);
   };
 
@@ -110,7 +121,9 @@ const MultiChoiceResponse: React.FC<Props> = ({
               <input
                 type="checkbox"
                 checked={selectedOptions.includes(opc.opcion)}
-                onChange={() => handleCheckboxChange(opc.opcion, opc.id,opc.estilo)}
+                onChange={() =>
+                  handleCheckboxChange(opc.opcion, opc.id, opc.estilo)
+                }
                 className={`border-strokedark w-20 bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
               />
               {opc.opcion}

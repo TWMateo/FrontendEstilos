@@ -9,6 +9,7 @@ import { AlertError } from '../../../components/Alerts/AlertError';
 import { AlertSucessfull } from '../../../components/Alerts/AlertSuccesfull';
 import Modal from '../../../components/Modal';
 import RuleComponent from './ReglaCalculo/RuleComponent';
+import { Hidden } from '@mui/material';
 
 interface Opcion {
   id: number;
@@ -101,6 +102,7 @@ const Models = () => {
       columnas: [''],
     },
   ]);
+  
   const [errorCamposGuardar, setErrorCamposGuardar] = useState(false);
 
   const [tiposPreguntas, setTiposPreguntas] = useState({
@@ -564,6 +566,10 @@ const Models = () => {
   // -------------------------
 
   useEffect(() => {
+    setValorPregunta(1);
+  }, [encuestaCuantitativa]);
+
+  useEffect(() => {
     if (!encuestaCuantitativa) setValorPregunta(1);
     if (encuestaCuantitativa) {
       setTiposPreguntas({
@@ -787,7 +793,7 @@ const Models = () => {
             )}
           </div>
         </div>
-        <div className="gap-4">
+        <div className={`gap-4 ${encuestaCuantitativa && 'hidden'}`}>
           <h3 className="text-title-xsm pt-2 pb-4 font-semibold text-black dark:text-white">
             Valor de preguntas:
           </h3>
