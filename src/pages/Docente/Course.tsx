@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ChangeEvent } from 'react';
 import DefaultLayout from '../../layout/DefaultLayout';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
@@ -6,10 +6,17 @@ import { AlertSucessfull } from '../../components/Alerts/AlertSuccesfull';
 // FECHAS
 import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
 import { AlertError } from '../../components/Alerts/AlertError';
+import * as XLSX from 'xlsx';
 
 interface Asignacion {
   fecha: string;
   periodo: string;
+}
+
+interface Student {
+  cedula: string;
+  nombre: string;
+  [key: string]: any;
 }
 
 interface Curso {
@@ -62,11 +69,95 @@ const Course = () => {
     mensaje: 'Listado de Tests',
     tipos: ['Kolb', 'Sperry'],
   };
+  const [errorListado, setErrorListado] = useState<string | null>(null);
+  const [students, setStudents] = useState<Student[]>([]);
+
+  const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target?.result as ArrayBuffer);
+      const workbook = XLSX.read(data, { type: 'array' });
+
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+        header: 1,
+      }) as any[][];
+
+      try {
+        const studentData = extractStudentData(jsonData);
+        setStudents(studentData);
+        setErrorListado(null); 
+        console.log(studentData);
+      } catch (err: any) {
+        setErrorListado(err.message);
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+
+  const extractStudentData = (data: any[][]): Student[] => {
+    const headers = data[0];
+    const studentData: Student[] = [];
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const student: Student = {} as Student;
+      headers.forEach((header: string, index: number) => {
+        student[header] = row[index];
+      });
+
+      // Validar que la cédula tenga exactamente 10 dígitos
+      if (!/^\d{10}$/.test(student.cedula)) {
+        throw new Error(`La cédula en la fila ${i + 1} no tiene 10 dígitos: ${student.cedula}`);
+      }
+
+      studentData.push(student);
+    }
+
+    return studentData;
+  };
+
+  const saveStudents = async () => {
+    if (students.length === 0) return;
+
+    try {
+      // const response = await fetch('/save-students', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   },
+      //   body: JSON.stringify(students)
+      // });
+
+      // if (response.ok) {
+      console.log(students);
+      console.log('Estudiantes guardados con éxito');
+      // } else {
+      //   console.error('Error al guardar los estudiantes');
+      // }
+    } catch (error) {
+      console.error('Error al guardar los estudiantes:', error);
+    }
+  };
 
   const handleAgregarActualizarCurso = () => {
+    console.log('hh')
     if (carrera == '' || semestre == '' || asignatura == '' || test == '') {
       cambiarEstadoGuardadoTemporalmente('error');
       setMensajeError('Todos los datos del curso deben ser llenados');
+      return;
+    }
+    if(errorListado!=null){
+      setMensajeError('El listado de los datos debe contener los datos correctos.');
       return;
     }
     let datosCombinados: string =
@@ -74,7 +165,7 @@ const Course = () => {
     let indexDuplicado = listaCursos.findIndex(
       (cur) => cur.datosCombinados == datosCombinados,
     );
-    if (indexDuplicado != -1) {
+    if (indexDuplicado != -1 && actualizandoCurso == false) {
       cambiarEstadoGuardadoTemporalmente('error');
       setMensajeError('Ya existe un curso con estos datos');
       return;
@@ -154,7 +245,8 @@ const Course = () => {
     if (index == -1) {
       cambiarEstadoGuardadoTemporalmente('error');
       setMensajeError('Selecciona el curso para actualizar');
-      return};
+      return;
+    }
     setActualizandoCurso(true);
     setCarrera(listaCursos[index].carrera);
     setSemestre(listaCursos[index].semestre);
@@ -259,6 +351,19 @@ const Course = () => {
           onChange={setTest}
           opcionPorDefecto={test}
         />
+        <div className="flex flex-col gap-5">
+          <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+            Listado de estudiantes:
+          </h3>
+          {errorListado && <div style={{ color: 'red' }}>{errorListado}</div>}
+          <input
+            title="Listado estudiantes"
+            accept=".xlsx, .xls"
+            onChange={handleFileUpload}
+            type="file"
+            className="rounded-b-lg w-[45%] col-span-1 h-13 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+          />
+        </div>
         <h2 className="text-title-xsm font-semibold text-black dark:text-white">
           Aginaciones:
         </h2>
