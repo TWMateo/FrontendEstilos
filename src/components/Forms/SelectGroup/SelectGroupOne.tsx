@@ -11,13 +11,18 @@ interface Props {
   ) => void;
   opciones: {
     mensaje: string;
-    tipos: string[];
+    tipos: Opcion[];
   };
   opcionPorDefecto?: string;
   idPregunta?: number;
   idOpcion?: number;
   advertencia?: string;
 }
+
+type Opcion = {
+  tipo: string;
+  valor: string;
+};
 
 const SelectGroupOne: React.FC<Props> = ({
   onChange,
@@ -68,11 +73,11 @@ const SelectGroupOne: React.FC<Props> = ({
             {opciones.tipos &&
               opciones.tipos.map((item, index) => (
                 <option
-                  value={item}
+                  value={item.valor}
                   className="text-body dark:text-bodydark"
                   key={index}
                 >
-                  {item}
+                  {item.tipo}
                 </option>
               ))}
           </select>

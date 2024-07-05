@@ -18,12 +18,17 @@ interface Rule {
   condiciones: Condition[];
 }
 
+type Opcion = {
+  tipo: string;
+  valor: string;
+};
+
 interface RuleComponentProps {
   rule: Rule;
   onChange: (updatedRule: Rule) => void;
   onDelete: () => void;
-  estilosAprendizaje: string[];
-  parametrosAprendizaje: string[];
+  estilosAprendizaje: Opcion[];
+  parametrosAprendizaje: Opcion[];
 }
 
 const RuleComponent: React.FC<RuleComponentProps> = ({
@@ -52,7 +57,7 @@ const RuleComponent: React.FC<RuleComponentProps> = ({
 
   const addCondition = () => {
     const newCondition: Condition = {
-      parametros: [{ value: [parametrosAprendizaje[0]], operacion: 'suma' }],
+      parametros: [{ value: [parametrosAprendizaje[0].tipo], operacion: 'suma' }],
       condicion: 'ninguna',
       valor: 0,
       comparacion: 'and',
@@ -72,7 +77,7 @@ const RuleComponent: React.FC<RuleComponentProps> = ({
 
   useEffect(()=>{
     if(estilosAprendizaje.length>0){
-      rule.estilo=estilosAprendizaje[0]
+      rule.estilo=estilosAprendizaje[0].tipo
     }
   },[])
 
@@ -88,8 +93,8 @@ const RuleComponent: React.FC<RuleComponentProps> = ({
           onChange={handleChange}
         >
           {estilosAprendizaje.map((estilo,index) => (
-            <option key={estilo+'-'+index} value={estilo}>
-              {estilo}
+            <option key={estilo+'-'+index} value={estilo.tipo}>
+              {estilo.tipo}
             </option>
           ))}
         </select>

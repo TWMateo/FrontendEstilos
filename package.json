@@ -20,6 +20,7 @@
     "@mui/material": "^5.15.16",
     "@mui/x-date-pickers": "^7.3.2",
     "apexcharts": "^3.41.0",
+    "axios": "^1.7.2",
     "dayjs": "^1.11.11",
     "flatpickr": "^4.6.13",
     "headlessui": "^0.0.0",

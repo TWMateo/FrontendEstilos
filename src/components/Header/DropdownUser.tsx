@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SessionContext } from '../../Context/SessionContext';
+import {useNavigate} from 'react-router-dom'
 import UserOne from '../../images/user/user-01.jpg';
 
 const DropdownUser = () => {
@@ -8,7 +9,7 @@ const DropdownUser = () => {
   const { userContext, rolContext, logout } = useContext(SessionContext);
   const trigger = useRef<any>(null);
   const dropdown = useRef<any>(null);
-
+  const navigate = useNavigate();
   // close on click outside
   useEffect(() => {
     const clickHandler = ({ target }: MouseEvent) => {
@@ -24,6 +25,11 @@ const DropdownUser = () => {
     document.addEventListener('click', clickHandler);
     return () => document.removeEventListener('click', clickHandler);
   });
+
+  const handleLogoutClick = () => {
+    logout();
+    navigate('/'); 
+  };
 
   // close if the esc key is pressed
   useEffect(() => {
@@ -171,7 +177,7 @@ const DropdownUser = () => {
           </li> */}
         </ul>
         <button
-          onClick={() => logout()}
+          onClick={handleLogoutClick}
           className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
         >
           <svg

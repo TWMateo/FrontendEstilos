@@ -15,47 +15,65 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
   const [errorStatus, setErrorStatus] = useState(false);
   const [succesfullStatus, setSuccesfullStatus] = useState();
 
-  const { isLoggedIn, userContext,setNewUserContext,passwordContext,setNewUserPassword,rolContext,setNewUserRol,login, logout } = useContext(SessionContext);
- 
+  const {
+    isLoggedIn,
+    setNewUserContext,
+    setNewUserPassword,
+    setNewUserRol,
+    login,
+    setNewSessionToken,
+    setNewUsuCedula,
+    setNewUsuId,
+    setNewCurId
+  } = useContext(SessionContext);
+
+  // Función para iniciar sesión
+  const authenticateUser = async () => {
+    try {
+      const response = await fetch(
+        'http://127.0.0.1:5000/estilos/api/v1/auth/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            usu_usuario: user,
+            usu_password: password,
+          }),
+        },
+      );
+
+      console.log(response.status);
+      if (response.status != 200) {
+        throw new Error('Error en la solicitud');
+      }
+
+      const result = await response.json();
+      const { data } = result;
+
+      if (response.status == 200) {
+        setNewUserContext(data.usu_usuario);
+        setNewUserPassword(data.usu_password);
+        setNewUserRol(data.rol_codigo);
+        setNewSessionToken(data.token);
+        setNewUsuCedula(data.per_cedula);
+        setNewUsuId(data.usu_id);
+        login(data.usu_estado);
+        setNewCurId(data.cur_id);
+        handleLogin();
+      } else {
+        cambiarStatusError();
+      }
+    } catch (error) {
+      console.error('Error en la autenticación:', error);
+      cambiarStatusError();
+    }
+  };
+
   // Se encarga del control del inicio de sesión
   const loginApp = () => {
-    // let rol;
-    if (user == 'e' && password == 'e') {
-      handleLogin();
-      setNewUserContext(user)
-      setNewUserPassword(password)
-      setNewUserRol('Estudiante')
-      login();
-      return;
-    }
-    if (user == 'd' && password == 'd') {
-      // handleLogin(true, user, password, 'docente');
-      handleLogin();
-      setNewUserContext(user)
-      setNewUserPassword(password)
-      setNewUserRol('Docente')
-      login();
-      return;
-    }
-    if (user == 'a' && password == 'a') {
-      // handleLogin(true, user, password, 'administrador');
-      handleLogin();
-      setNewUserContext(user)
-      setNewUserPassword(password)
-      setNewUserRol('Administrador')
-      login();
-      return;
-    }
-    if (user == 'p' && password == 'p') {
-      // handleLogin(true, user, password, 'pruebas');
-      handleLogin();
-      setNewUserContext(user)
-      setNewUserPassword(password)
-      setNewUserRol('Pruebas')
-      login();
-      return;
-    }
-    cambiarStatusError();
+    authenticateUser();
   };
 
   useEffect(() => {

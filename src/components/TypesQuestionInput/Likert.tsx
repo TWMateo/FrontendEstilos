@@ -3,7 +3,12 @@ import SelectGroupOne from '../Forms/SelectGroup/SelectGroupOne';
 
 interface tiposEstilosAprendizaje {
   mensaje: string;
-  tipos: string[];
+  tipos: tipoValor[];
+}
+
+interface tipoValor {
+  tipo:string;
+  valor:string;
 }
 
 interface Opcion {

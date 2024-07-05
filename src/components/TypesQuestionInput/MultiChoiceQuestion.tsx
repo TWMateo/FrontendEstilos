@@ -19,8 +19,13 @@ interface Pregunta {
   max: number;
 }
 
+interface tipoValor {
+  tipo:string;
+  valor:string;
+}
+
 interface Props {
-  tiposEstilosAprendizaje: { mensaje: string; tipos: string[] };
+  tiposEstilosAprendizaje: { mensaje: string; tipos: tipoValor[] };
   pregunta: Pregunta;
   onUpdatePregunta: (idPregunta: number, pregunta: string) => void;
   onUpdateOpcion: (
@@ -51,7 +56,7 @@ const MultiChoiceQuestion: React.FC<Props> = ({
 }) => {
   const responseLimits = {
     mensaje: 'Escoge el límite de respuestas',
-    tipos: ['min', 'max'],
+    tipos: [{tipo:'min',valor:'min'}, {tipo:'max',valor:'max'}],
   };
   const [indicadorLimite, setIndicadorLimite] = useState('min');
 

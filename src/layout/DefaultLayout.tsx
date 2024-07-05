@@ -37,14 +37,14 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
       {/* <!-- ===== Page Wrapper Start ===== --> */}
       <div className="flex h-screen overflow-hidden">
         {/* <!-- ===== Sidebar Start ===== --> */}
-        {rolContext === 'Docente' ? (
+        {rolContext === 'DOC' ? (
           <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        ) : rolContext === 'Estudiante' ? (
+        ) : rolContext === 'EST' ? (
           <SidebarEstudiante
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
           />
-        ) : rolContext === 'Administrador' ? (
+        ) : rolContext === 'ADM' ? (
           <SidebarEstudiante
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}

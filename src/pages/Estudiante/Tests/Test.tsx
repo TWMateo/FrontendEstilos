@@ -113,7 +113,7 @@ const Test = () => {
         id: 1,
         orden: 1,
         pregunta: 'Nueva pregunta',
-        tipoPregunta: 'Selección múltiple',
+        tipoPregunta: 'Seleccion multiple',
         opciones: [
           {
             id: 1,
@@ -134,7 +134,7 @@ const Test = () => {
         id: 2,
         orden: 2,
         pregunta: 'Nueva pregunta',
-        tipoPregunta: 'Selección múltiple',
+        tipoPregunta: 'Seleccion multiple',
         opciones: [
           {
             id: 3,
@@ -217,7 +217,7 @@ const Test = () => {
   //       id: 1,
   //       orden: 1,
   //       pregunta: 'Cuando aprendo...',
-  //       tipoPregunta: 'Selección múltiple',
+  //       tipoPregunta: 'Seleccion multiple',
   //       opciones: [
   //         {
   //           id: 1,
@@ -248,7 +248,7 @@ const Test = () => {
   //       id: 2,
   //       orden: 2,
   //       pregunta: 'Aprendo mejor cuando...',
-  //       tipoPregunta: 'Selección múltiple',
+  //       tipoPregunta: 'Seleccion multiple',
   //       opciones: [
   //         {
   //           id: 1,
@@ -279,7 +279,7 @@ const Test = () => {
   //       id: 3,
   //       orden: 3,
   //       pregunta: 'Cuando estoy aprendiendo',
-  //       tipoPregunta: 'Selección múltiple',
+  //       tipoPregunta: 'Seleccion multiple',
   //       opciones: [
   //         {
   //           id: 1,
@@ -310,7 +310,7 @@ const Test = () => {
   //       id: 4,
   //       orden: 4,
   //       pregunta: 'Yo aprendo...',
-  //       tipoPregunta: 'Selección múltiple',
+  //       tipoPregunta: 'Seleccion multiple',
   //       opciones: [
   //         {
   //           id: 1,
@@ -341,7 +341,7 @@ const Test = () => {
   //       id: 5,
   //       orden: 5,
   //       pregunta: 'Cuando aprendo...',
-  //       tipoPregunta: 'Selección múltiple',
+  //       tipoPregunta: 'Seleccion multiple',
   //       opciones: [
   //         {
   //           id: 1,
@@ -525,7 +525,7 @@ const Test = () => {
         id: 1,
         orden: 1,
         pregunta: 'Pregunta 1',
-        tipoPregunta: 'Selección múltiple',
+        tipoPregunta: 'Seleccion multiple',
         opciones: [
           {
             id: 1,
@@ -999,7 +999,7 @@ const Test = () => {
         </h3>
         <div className="flex flex-col p-5 gap-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
           {testAsignado.preguntas.map((preg, index) =>
-            preg.tipoPregunta == 'Selección múltiple' ? (
+            preg.tipoPregunta == 'Seleccion multiple' ? (
               testAsignado.cuantitativa ? (
                 <MultiChoiceCuantitativaResponse
                   pregunta={preg}

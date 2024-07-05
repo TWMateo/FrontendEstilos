@@ -12,11 +12,16 @@ interface Condition {
   comparacion: string; // Nueva propiedad para la comparación
 }
 
+type Opcion = {
+  tipo: string;
+  valor: string;
+};
+
 interface ConditionProps {
   condicion: Condition;
   onChange: (updatedCondition: Condition) => void;
   onDelete: () => void;
-  estilosAprendizaje: string[];
+  estilosAprendizaje: Opcion[];
   hasManyCondiciones: string;
 }
 
@@ -69,7 +74,7 @@ const ConditionComponent: React.FC<ConditionProps> = ({
       ...condicion,
       parametros: [
         ...condicion.parametros,
-        { value: [estilosAprendizaje[0]], operacion: 'suma' },
+        { value: [estilosAprendizaje[0].tipo], operacion: 'suma' },
       ],
     });
   };
@@ -109,8 +114,8 @@ const ConditionComponent: React.FC<ConditionProps> = ({
               className={`w-full bg-whiten appearance-none rounded border border-strokedark bg-transparent py-3 px-1 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}
             >
               {estilosAprendizaje.map((estilo) => (
-                <option key={estilo} value={estilo}>
-                  {estilo}
+                <option key={estilo.tipo} value={estilo.tipo}>
+                  {estilo.tipo}
                 </option>
               ))}
             </select>

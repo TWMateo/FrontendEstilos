@@ -33,7 +33,6 @@ function App() {
 
   const handleLogin = () => {
     if (isLoggedIn) {
-      login();
       loadingContent();
     }
   };
@@ -56,7 +55,7 @@ function App() {
   ) : isLoggedIn ? (
     isLoadingContent ? (
       <Loader />
-    ) : rolContext == 'Docente' ? (
+    ) : rolContext == 'DOC' ? (
       <>
         <Routes>
           <Route
@@ -142,7 +141,7 @@ function App() {
           />
         </Routes>
       </>
-    ) : rolContext == 'Estudiante' ? (
+    ) : rolContext == 'EST' ? (
       <Routes>
         <Route
           index
