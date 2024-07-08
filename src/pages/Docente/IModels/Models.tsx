@@ -454,10 +454,10 @@ const Models = () => {
             let preguntaId = dataPregunta.data.pre_id;
 
             const opcionData = {
-              est_id: estiloIdNumerico, // Define una función para obtener el ID del estilo
+              est_id: estiloIdNumerico, 
               opc_texto: opcion.opcion,
-              valor_cualitativo: opcion.estilo, // Ajusta según los datos necesarios
-              valor_cuantitativo: valorPregunta, // Ajusta según los datos necesarios
+              valor_cualitativo: opcion.estilo, 
+              valor_cuantitativo: valorPregunta, 
               pre_id: preguntaId,
             };
             try {

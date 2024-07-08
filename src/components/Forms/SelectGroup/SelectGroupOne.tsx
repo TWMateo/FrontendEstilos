@@ -53,6 +53,7 @@ const SelectGroupOne: React.FC<Props> = ({
   useEffect(() => {
     if (opcionPorDefecto != '') setSelectedOption(opcionPorDefecto);
   }, []);
+
   return (
     <div className="mb-4.5">
       <div className="relative z-20 bg-transparent dark:bg-form-input">

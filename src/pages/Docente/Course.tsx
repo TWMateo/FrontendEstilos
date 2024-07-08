@@ -1,4 +1,4 @@
-import { useEffect, useState, ChangeEvent } from 'react';
+import { useEffect, useState, ChangeEvent, useContext } from 'react';
 import DefaultLayout from '../../layout/DefaultLayout';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
@@ -7,10 +7,26 @@ import { AlertSucessfull } from '../../components/Alerts/AlertSuccesfull';
 import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
 import { AlertError } from '../../components/Alerts/AlertError';
 import * as XLSX from 'xlsx';
+import { SessionContext } from '../../Context/SessionContext';
 
 interface Asignacion {
   fecha: string;
   periodo: string;
+}
+
+interface Curso {
+  cur_id: number;
+  cur_carrera: string;
+  cur_nivel: number;
+}
+
+interface Encuesta {
+  enc_id: number;
+  enc_titulo: string;
+  enc_descripcion: string;
+  enc_autor: string;
+  enc_cuantitativa: boolean;
+  enc_fecha_creacion: string;
 }
 
 interface Student {
@@ -28,6 +44,16 @@ interface Curso {
   datosCombinados: string;
 }
 
+interface valoresAsignados {
+  mensaje: string;
+  tipos: tipoValor[];
+}
+
+interface tipoValor {
+  tipo: string;
+  valor: string;
+}
+
 const Course = () => {
   const [actualizandoCurso, setActualizandoCurso] = useState(false);
   const [carrera, setCarrera] = useState('');
@@ -37,40 +63,111 @@ const Course = () => {
   const [listaCursos, setListaCursos] = useState<Curso[]>([]);
   const [succesfull, setSuccesfull] = useState(false);
   const [cursoSeleccionado, setCursoSeleccionado] = useState('');
-  const [datosCursosCombinados, setDatosCursosCombinados] = useState({
-    mensaje: 'Listado de Cursos',
-    tipos: ['datos-prueba'],
-  });
+  const [cursos, setCursos] = useState<Curso[]>([]);
+  const [datosCursosCombinados, setDatosCursosCombinados] =
+    useState<valoresAsignados>({
+      mensaje: 'Listado de Cursos',
+      tipos: [
+        { tipo: 'datos-prueba', valor: 'datos-prueba' },
+        { tipo: 'datos-prueba', valor: 'datos-prueba' },
+      ],
+    });
   const [fechaAsignacion, setFechaAsignacion] = useState('');
   const [error, setError] = useState(false);
   const [mensajeError, setMensajeError] = useState('');
   const [periodo, setPeriodo] = useState('');
+  const [encuestas, setEncuestas] = useState([]);
   const [asignacionesCursoSeleccionado, setAsignacionesCursoSeleccionado] =
     useState<Asignacion[]>([]);
   const [indiceCursoSeleccionado, setIndiceCursoSeleccionado] =
     useState<number>();
   const datosCarrera = {
     mensaje: 'Listado de Carreras',
-    tipos: ['Software', 'Telecomunicaciones', 'Textil'],
+    tipos: [
+      {
+        tipo: 'Ingeniería Mecatrónica',
+        valor: 'Ingeniería Mecatrónica',
+      },
+      {
+        tipo: 'Ingeniería en Telecomunicaciones',
+        valor: 'Ingeniería en Telecomunicaciones',
+      },
+      {
+        tipo: 'Ingeniería Textil',
+        valor: 'Ingeniería Textil',
+      },
+      {
+        tipo: 'Ingeniería Industrial',
+        valor: 'Ingeniería Industrial',
+      },
+      {
+        tipo: 'Ingeniería de Software',
+        valor: 'Ingeniería de Software',
+      },
+    ],
   };
   const datosParciales = {
     mensaje: 'Escoja el parcial',
-    tipos: ['Primer parcial', 'Segundo parcial'],
+    tipos: [
+      { tipo: 'Primer parcial', valor: 'Primer parcial' },
+      { tipo: 'Segundo parcial', valor: 'Segundo parcial' },
+    ],
   };
   const datosSemestre = {
     mensaje: 'Listado de Semestres',
-    tipos: ['1', '2', '3', '4', '5', '6', '7', '8'],
+    tipos: [
+      { tipo: '1', valor: '1' },
+      { tipo: '2', valor: '2' },
+      { tipo: '3', valor: '3' },
+      { tipo: '4', valor: '4' },
+      { tipo: '5', valor: '5' },
+      { tipo: '6', valor: '6' },
+      { tipo: '7', valor: '7' },
+      { tipo: '8', valor: '8' },
+    ],
   };
-  const datosAsignaturas = {
+  const [datosAsignaturas, setDatosAsignaturas] = useState<valoresAsignados>({
     mensaje: 'Listado de Asignaturas',
-    tipos: ['Realidad Nacional', 'Ética', 'Calculo 1'],
-  };
-  const datosTests = {
+    tipos: [
+      { tipo: 'Investigación científica', valor: 'Investigación científica' },
+      { tipo: 'Realidad nacional', valor: 'Realidad nacional' },
+      { tipo: 'Cálculo diferencial', valor: 'Cálculo diferencial' },
+      { tipo: 'Ética', valor: 'Ética' },
+    ],
+  });
+  const [datosTests, setDatosTests] = useState<valoresAsignados>({
     mensaje: 'Listado de Tests',
-    tipos: ['Kolb', 'Sperry'],
-  };
+    tipos: [
+      { tipo: 'Kolb', valor: 'Kolb' },
+      { tipo: 'Sperry', valor: 'Sperry' },
+    ],
+  });
   const [errorListado, setErrorListado] = useState<string | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { sessionToken } = useContext(SessionContext);
+
+  // const crearCurso = async (curso) => {
+  //   try {
+  //     const response = await fetch('https://tu-dominio/api/cursos', {
+  //       method: 'POST',
+  //       headers: {
+  //         Authorization: `Bearer ${tuToken}`, // Reemplaza `tuToken` con el token real
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(curso),
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+
+  //     const data = await response.json();
+  //     console.log('Curso creado exitosamente:', data);
+  //   } catch (error) {
+  //     console.error('Error al crear el curso:', error.message);
+  //   }
+  // };
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -93,7 +190,7 @@ const Course = () => {
       try {
         const studentData = extractStudentData(jsonData);
         setStudents(studentData);
-        setErrorListado(null); 
+        setErrorListado(null);
         console.log(studentData);
       } catch (err: any) {
         setErrorListado(err.message);
@@ -102,7 +199,6 @@ const Course = () => {
 
     reader.readAsArrayBuffer(file);
   };
-
 
   const extractStudentData = (data: any[][]): Student[] => {
     const headers = data[0];
@@ -117,7 +213,11 @@ const Course = () => {
 
       // Validar que la cédula tenga exactamente 10 dígitos
       if (!/^\d{10}$/.test(student.cedula)) {
-        throw new Error(`La cédula en la fila ${i + 1} no tiene 10 dígitos: ${student.cedula}`);
+        throw new Error(
+          `La cédula en la fila ${i + 1} no tiene 10 dígitos: ${
+            student.cedula
+          }`,
+        );
       }
 
       studentData.push(student);
@@ -150,60 +250,52 @@ const Course = () => {
   };
 
   const handleAgregarActualizarCurso = () => {
-    console.log('hh')
-    if (carrera == '' || semestre == '' || asignatura == '' || test == '') {
+    if (carrera == '' || semestre == '') {
       cambiarEstadoGuardadoTemporalmente('error');
       setMensajeError('Todos los datos del curso deben ser llenados');
       return;
     }
-    if(errorListado!=null){
-      setMensajeError('El listado de los datos debe contener los datos correctos.');
+    if (errorListado != null) {
+      setMensajeError(
+        'El listado de los datos debe contener los datos correctos.',
+      );
       return;
     }
-    let datosCombinados: string =
-      carrera + ' - ' + semestre + ' - ' + asignatura + ' - ' + test;
-    let indexDuplicado = listaCursos.findIndex(
-      (cur) => cur.datosCombinados == datosCombinados,
+    let datosCombinados: string = carrera + ' ' + semestre;
+    let indexDuplicado = datosCursosCombinados.tipos.findIndex(
+      (cur) => cur.tipo == datosCombinados,
     );
     if (indexDuplicado != -1 && actualizandoCurso == false) {
       cambiarEstadoGuardadoTemporalmente('error');
       setMensajeError('Ya existe un curso con estos datos');
       return;
     }
-    let nuevoCurso: Curso;
-    let listadoCursosActual = [...listaCursos];
-    let datosCombinadosActuales = datosCursosCombinados;
-    let nuevosDatosCombinados =
-      datosCombinadosActuales.tipos.concat(datosCombinados);
-
-    let nuevaListaDeCursos;
-    if (actualizandoCurso && indiceCursoSeleccionado != undefined) {
-      nuevoCurso = {
-        carrera: carrera,
-        semestre: semestre,
-        asignatura: asignatura,
-        test: test,
-        datosCombinados: datosCombinados,
-        asignaciones: listadoCursosActual[indiceCursoSeleccionado].asignaciones,
-      };
-      listadoCursosActual[indiceCursoSeleccionado] = nuevoCurso;
-      nuevaListaDeCursos = listadoCursosActual;
-      setActualizandoCurso(false);
-    } else {
-      nuevoCurso = {
-        carrera: carrera,
-        semestre: semestre,
-        asignatura: asignatura,
-        test: test,
-        datosCombinados: datosCombinados,
-        asignaciones: [],
-      };
-      nuevaListaDeCursos = listadoCursosActual.concat(nuevoCurso);
-    }
-    datosCombinadosActuales.tipos = nuevosDatosCombinados;
-    setDatosCursosCombinados(datosCombinadosActuales);
-    setListaCursos(nuevaListaDeCursos);
+    const semesteNumber = parseInt(semestre);
+    fetchCreateCursos(carrera, semesteNumber);
     cambiarEstadoGuardadoTemporalmente('ok');
+  };
+
+  const handleActualizarCurso = () => {
+    if (carrera == '' || semestre == '') {
+      cambiarEstadoGuardadoTemporalmente('error');
+      setMensajeError('Todos los datos del curso deben ser llenados');
+      return;
+    }
+    const ind = cursos.findIndex(
+      (cur) =>
+        cur.cur_carrera == carrera && cur.cur_nivel == parseInt(semestre),
+    );
+    console.log(ind);
+    if (ind != -1) {
+      cambiarEstadoGuardadoTemporalmente('error');
+      setMensajeError('Ya existe un curso con estos datos');
+      return;
+    }
+    console.log(ind);
+    fetchUpdateCurso(parseInt(cursoSeleccionado), carrera, parseInt(semestre));
+    cambiarEstadoGuardadoTemporalmente('ok');
+    setMensajeError('Curso actualizado!');
+    setActualizandoCurso(false);
   };
 
   const handleAgregarAsignacion = () => {
@@ -239,19 +331,20 @@ const Course = () => {
   };
 
   const handlePrepararActualizacionCurso = () => {
-    const index = listaCursos.findIndex(
-      (list) => list.datosCombinados == cursoSeleccionado,
+    const index = cursos.findIndex(
+      (cur) => cur.cur_id == parseInt(cursoSeleccionado),
     );
+    console.log(cursoSeleccionado);
+    console.log(listaCursos);
+    console.log(cursos);
     if (index == -1) {
       cambiarEstadoGuardadoTemporalmente('error');
       setMensajeError('Selecciona el curso para actualizar');
       return;
     }
     setActualizandoCurso(true);
-    setCarrera(listaCursos[index].carrera);
-    setSemestre(listaCursos[index].semestre);
-    setAsignatura(listaCursos[index].asignatura);
-    setTest(listaCursos[index].test);
+    setCarrera(cursos[index].cur_carrera.toString());
+    setSemestre(cursos[index].cur_nivel.toString());
   };
 
   const cambiarEstadoGuardadoTemporalmente = (estado: string) => {
@@ -269,6 +362,148 @@ const Course = () => {
     }, 4000);
   };
 
+  const fetchCursos = async () => {
+    try {
+      const response = await fetch(
+        'http://127.0.0.1:5000/estilos/api/v1/curso',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${sessionToken}`, // Reemplaza `tuToken` con el token real
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      if (response.status != 200) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: { mensaje: string; data: Curso[] } = await response.json();
+      const tipos = data.data.map((curso) => ({
+        tipo: `${curso.cur_carrera} ${curso.cur_nivel}`,
+        valor: curso.cur_id.toString(),
+      }));
+
+      setDatosCursosCombinados({
+        mensaje: 'Listado de Cursos',
+        tipos: tipos,
+      });
+
+      setCursos(data.data);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCreateCursos = async (carrera: string, nivel: number) => {
+    try {
+      const cursoData = {
+        cur_carrera: carrera,
+        cur_nivel: nivel,
+      };
+      const response = await fetch(
+        'http://127.0.0.1:5000/estilos/api/v1/curso',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${sessionToken}`, // Reemplaza `tuToken` con el token real
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(cursoData),
+        },
+      );
+
+      if (response.status != 201) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      fetchCursos();
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUpdateCurso = async (
+    cursoId: number,
+    carrera: string,
+    nivel: number,
+  ) => {
+    try {
+      console.log('VAMOS A')
+      const cursoData = {
+        cur_carrera: carrera,
+        cur_nivel: nivel,
+      };
+      const response = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/curso/${cursoId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${sessionToken}`, // Reemplaza `tuToken` con el token real
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(cursoData),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('Error al actualizar el curso');
+      }
+
+      fetchCursos();
+    } catch (error: any) {
+      setError(error.message || 'Error al procesar la solicitud');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchEncuestas = async () => {
+    try {
+      const response = await fetch(
+        'http://127.0.0.1:5000/estilos/api/v1/encuesta',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${sessionToken}`, // Reemplaza `tuToken` con el token real
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      if (!response.ok) {
+        throw new Error('Error al obtener las encuestas');
+      }
+      const data = await response.json();
+
+      const tipos = data.data.map((encuesta: Encuesta) => ({
+        tipo: `${encuesta.enc_id}. ${encuesta.enc_titulo} - ${encuesta.enc_autor}`,
+        valor: encuesta.enc_id.toString(),
+      }));
+      setDatosTests({
+        mensaje: 'Listado de Tests',
+        tipos: tipos,
+      });
+      setEncuestas(data.data);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    console.log(cursoSeleccionado);
+  }, [cursoSeleccionado]);
+
+  useEffect(() => {
+    fetchCursos();
+    fetchEncuestas();
+  }, []);
+
   useEffect(() => {
     console.log(listaCursos);
     let mensajeDatosCombinados = datosCursosCombinados.mensaje;
@@ -282,6 +517,10 @@ const Course = () => {
     };
     setDatosCursosCombinados(newCursosCombinados);
   }, [listaCursos]);
+
+  useEffect(() => {
+    console.log(semestre);
+  }, [semestre]);
 
   useEffect(() => {
     if (listaCursos.length == 0) return;
@@ -313,7 +552,11 @@ const Course = () => {
         </div>
         <button
           className="rounded-b-lg w-90 min-h-14 max-h-14 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-          onClick={handleAgregarActualizarCurso}
+          onClick={
+            actualizandoCurso
+              ? handleActualizarCurso
+              : handleAgregarActualizarCurso
+          }
         >
           {actualizandoCurso ? 'Actualizar Curso' : 'Agregar curso'}
         </button>
@@ -321,7 +564,7 @@ const Course = () => {
       <div className="flex flex-col gap-4">
         <h3 className="text-title-xsm font-semibold text-black dark:text-white">
           Carrera:
-        </h3>
+        </h3> 
         <SelectGroupOne
           opciones={datosCarrera}
           onChange={setCarrera}
@@ -335,35 +578,7 @@ const Course = () => {
           onChange={setSemestre}
           opcionPorDefecto={semestre}
         />
-        <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-          Asignatura:
-        </h3>
-        <SelectGroupOne
-          opciones={datosAsignaturas}
-          onChange={setAsignatura}
-          opcionPorDefecto={asignatura}
-        />
-        <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-          Test:
-        </h3>
-        <SelectGroupOne
-          opciones={datosTests}
-          onChange={setTest}
-          opcionPorDefecto={test}
-        />
-        <div className="flex flex-col gap-5">
-          <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-            Listado de estudiantes:
-          </h3>
-          {errorListado && <div style={{ color: 'red' }}>{errorListado}</div>}
-          <input
-            title="Listado estudiantes"
-            accept=".xlsx, .xls"
-            onChange={handleFileUpload}
-            type="file"
-            className="rounded-b-lg w-[45%] col-span-1 h-13 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-          />
-        </div>
+
         <h2 className="text-title-xsm font-semibold text-black dark:text-white">
           Aginaciones:
         </h2>
@@ -374,9 +589,9 @@ const Course = () => {
           <div className="grid grid-cols-5 gap-4">
             <div className="col-span-3">
               <SelectGroupOne
+                onChange={setCursoSeleccionado}
                 opciones={datosCursosCombinados}
                 advertencia="n"
-                onChange={setCursoSeleccionado}
               />
             </div>
             <button
@@ -392,6 +607,41 @@ const Course = () => {
             >
               Eliminar
             </button>
+          </div>
+          <div className="flex gap-5">
+            <div className="w-[50%]">
+              <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+                Asignatura:
+              </h3>
+              <SelectGroupOne
+                opciones={datosAsignaturas}
+                onChange={setAsignatura}
+                opcionPorDefecto={asignatura}
+              />
+            </div>
+            <div className="w-[50%]">
+              <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+                Test:
+              </h3>
+              <SelectGroupOne
+                opciones={datosTests}
+                onChange={setTest}
+                opcionPorDefecto={test}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-5">
+            <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+              Listado de estudiantes:
+            </h3>
+            {errorListado && <div style={{ color: 'red' }}>{errorListado}</div>}
+            <input
+              title="Listado estudiantes"
+              accept=".xlsx, .xls"
+              onChange={handleFileUpload}
+              type="file"
+              className="rounded-b-lg w-[45%] col-span-1 h-13 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+            />
           </div>
           <h3 className="text-title-xsm font-semibold text-black dark:text-white">
             Fechas de asignación:
