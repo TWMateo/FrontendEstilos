@@ -3,7 +3,6 @@ import DefaultLayout from '../../layout/DefaultLayout';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
 import { AlertSucessfull } from '../../components/Alerts/AlertSuccesfull';
-// FECHAS
 import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
 import { AlertError } from '../../components/Alerts/AlertError';
 import * as XLSX from 'xlsx';
@@ -12,6 +11,37 @@ import { SessionContext } from '../../Context/SessionContext';
 interface Asignacion {
   fecha: string;
   periodo: string;
+}
+
+interface Asignaciones {
+  asi_descripcion: string;
+  asi_fecha_completado: string;
+  cur_id: number;
+  enc_id: number;
+  usu_id: number;
+}
+
+interface Persona {
+  per_cedula: string;
+  per_nombres: string;
+  per_apellidos: string;
+  per_genero: string;
+}
+
+interface Usuario {
+  cur_id: number;
+  per_cedula: string;
+  rol_codigo: string;
+  usu_estado: boolean;
+  usu_password: string;
+  usu_usuario: string;
+}
+
+interface Student {
+  nombre: string;
+  apellido: string;
+  cedula: string;
+  genero: string;
 }
 
 interface Curso {
@@ -33,6 +63,13 @@ interface Student {
   cedula: string;
   nombre: string;
   [key: string]: any;
+}
+
+interface StudentListo {
+  nombre: string;
+  apellido: string;
+  cedula: string;
+  genero: string;
 }
 
 interface Curso {
@@ -144,8 +181,10 @@ const Course = () => {
   });
   const [errorListado, setErrorListado] = useState<string | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
+  const [studentsListo, setStudentsListo] = useState<StudentListo[]>([]);
   const [loading, setLoading] = useState(true);
-  const { sessionToken } = useContext(SessionContext);
+  const { sessionToken, usuId, usuCedula, rolContext } =
+    useContext(SessionContext);
 
   // const crearCurso = async (curso) => {
   //   try {
@@ -169,6 +208,37 @@ const Course = () => {
   //   }
   // };
 
+  // const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
+  //   if (!file) {
+  //     return;
+  //   }
+
+  //   const reader = new FileReader();
+  //   reader.onload = (e) => {
+  //     const data = new Uint8Array(e.target?.result as ArrayBuffer);
+  //     const workbook = XLSX.read(data, { type: 'array' });
+
+  //     const firstSheetName = workbook.SheetNames[0];
+  //     const worksheet = workbook.Sheets[firstSheetName];
+
+  //     const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+  //       header: 1,
+  //     }) as any[][];
+
+  //     try {
+  //       const studentData = extractStudentData(jsonData);
+  //       setStudents(studentData);
+  //       setErrorListado(null);
+  //       console.log(studentData);
+  //     } catch (err: any) {
+  //       setErrorListado(err.message);
+  //     }
+  //   };
+
+  //   reader.readAsArrayBuffer(file);
+  // };
+
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -188,16 +258,119 @@ const Course = () => {
       }) as any[][];
 
       try {
-        const studentData = extractStudentData(jsonData);
-        setStudents(studentData);
+        if (jsonData.length === 0) {
+          cambiarEstadoGuardadoTemporalmente('error');
+          setMensajeError('El archivo esta vacio');
+          throw new Error('El archivo está vacío');
+        }
+
+        const headers = jsonData[0];
+        const expectedHeaders = ['nombre', 'apellido', 'cedula', 'genero'];
+
+        const missingHeaders = expectedHeaders.filter(
+          (header) => !headers.includes(header),
+        );
+        if (missingHeaders.length > 0) {
+          cambiarEstadoGuardadoTemporalmente('error');
+          setMensajeError('Completa el formtao del documento excel.');
+          throw new Error(
+            `Faltan las siguientes columnas: ${missingHeaders.join(', ')}`,
+          );
+        }
+
+        const studentData = jsonData.slice(1).map((row) => {
+          const student: Student = {
+            nombre: row[headers.indexOf('nombre')],
+            apellido: row[headers.indexOf('apellido')],
+            cedula: row[headers.indexOf('cedula')],
+            genero: row[headers.indexOf('genero')],
+          };
+          return student;
+        });
+
+        if (studentData.length < 1) {
+          cambiarEstadoGuardadoTemporalmente('error');
+          setMensajeError('El listado debe contener estudiantes.');
+          throw new Error(`El listado debe contener estudiantes.`);
+        }
+        setStudentsListo(studentData);
+        cambiarEstadoGuardadoTemporalmente('ok');
+        setMensajeError('Los datos de estudiante fueron subidos con exito!!');
         setErrorListado(null);
         console.log(studentData);
+        return;
       } catch (err: any) {
         setErrorListado(err.message);
       }
     };
 
     reader.readAsArrayBuffer(file);
+  };
+
+  const handleSubmitAsignaciones = async () => {
+    // if (!file) {
+    //   setError('No se ha seleccionado ningún archivo');
+    //   return;
+    // }
+    setLoading(true);
+    // setError(null);
+    // setMensaje(null);
+
+    try {
+      const usuarios: Usuario[] = studentsListo.map((student) => ({
+        cur_id: 1,
+        per_cedula: student.cedula.toString(),
+        rol_codigo: 'EST',
+        usu_estado: false,
+        usu_password: student.cedula.toString(),
+        usu_usuario: `E` + student.cedula,
+      }));
+
+      const fechaISO = new Date(fechaAsignacion).toISOString();
+      const asignaciones: Asignaciones[] = studentsListo.map(
+        (student, index) => ({
+          asi_descripcion: `Asignación para ${student.nombre} ${student.apellido}`,
+          asi_fecha_completado: fechaISO,
+          cur_id: parseInt(cursoSeleccionado),
+          enc_id: parseInt(test),
+          usu_id: 0,
+        }),
+      );
+
+      for (const student of studentsListo) {
+        const persona: Persona = {
+          per_cedula: student.cedula.toString(),
+          per_nombres: `${student.nombre}`,
+          per_apellidos: `${student.apellido}`,
+          per_genero: student.genero == 'm' ? 'Masculino' : 'Femenino',
+        };
+        await crearPersona(persona);
+      }
+
+      for (let i = 0; i < usuarios.length; i++) {
+        const usuario = usuarios[i];
+        const response = await crearUsuario(usuario);
+        const usuarioCreado = await response.json();
+        asignaciones[i].usu_id = usuarioCreado.data.usu_id;
+        await registrarAsignacion(asignaciones[i]);
+      }
+      const asignacionCreador = {
+        asi_descripcion: `Asignación para ${usuCedula} con el rol ${rolContext}`,
+        asi_fecha_completado: fechaISO,
+        cur_id: parseInt(cursoSeleccionado),
+        enc_id: parseInt(test),
+        usu_id: usuId ? usuId : 0,
+      };
+      registrarAsignacion(asignacionCreador);
+      cambiarEstadoGuardadoTemporalmente('ok');
+      setMensajeError(
+        'El listado de estudiantes y la asignación fueron registrados exitosamente!!',
+      );
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const extractStudentData = (data: any[][]): Student[] => {
@@ -362,6 +535,114 @@ const Course = () => {
     }, 4000);
   };
 
+  const crearPersona = async (persona: Persona) => {
+    try {
+      // Verificar si la persona ya existe en la base de datos
+      const consultaPersona = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/persona/${persona.per_cedula}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        },
+      );
+
+      if (consultaPersona.status == 200) {
+        return;
+      }
+
+      const response = await fetch(
+        'http://127.0.0.1:5000/estilos/api/v1/persona',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(persona),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || 'Error al crear la persona');
+      }
+    } catch (error: any) {
+      throw new Error(
+        `Error al crear la persona con cédula ${persona.per_cedula}: ${error.message}`,
+      );
+    }
+  };
+
+  const crearUsuario = async (usuario: Usuario): Promise<Response> => {
+    try {
+      const responseUsuario = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/usuario/cedula/${usuario.per_cedula}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      console.log(responseUsuario);
+      if (responseUsuario.status == 200) {
+        return responseUsuario;
+      }
+
+      const response = await fetch(
+        'http://127.0.0.1:5000/estilos/api/v1/usuario',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(usuario),
+        },
+      );
+
+      if (response.status != 201) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || 'Error al crear el usuario');
+      }
+
+      return response;
+    } catch (error: any) {
+      throw new Error(
+        `Error al crear el usuario con cédula ${usuario.per_cedula}: ${error.message}`,
+      );
+    }
+  };
+
+  const registrarAsignacion = async (asignacion: Asignaciones) => {
+    try {
+      const response = await fetch(
+        'http://127.0.0.1:5000/estilos/api/v1/asignacion',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(asignacion),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || 'Error al registrar asignación');
+      }
+    } catch (error: any) {
+      throw new Error(
+        `Error al registrar la asignación para el usuario con ID ${asignacion.usu_id}: ${error.message}`,
+      );
+    }
+  };
+
   const fetchCursos = async () => {
     try {
       const response = await fetch(
@@ -433,7 +714,7 @@ const Course = () => {
     nivel: number,
   ) => {
     try {
-      console.log('VAMOS A')
+      console.log('VAMOS A');
       const cursoData = {
         cur_carrera: carrera,
         cur_nivel: nivel,
@@ -500,6 +781,13 @@ const Course = () => {
   }, [cursoSeleccionado]);
 
   useEffect(() => {
+    console.log(fechaAsignacion);
+  }, [fechaAsignacion]);
+  useEffect(() => {
+    console.log(periodo);
+  }, [periodo]);
+
+  useEffect(() => {
     fetchCursos();
     fetchEncuestas();
   }, []);
@@ -521,6 +809,10 @@ const Course = () => {
   useEffect(() => {
     console.log(semestre);
   }, [semestre]);
+
+  useEffect(() => {
+    console.log(cursoSeleccionado);
+  }, [cursoSeleccionado]);
 
   useEffect(() => {
     if (listaCursos.length == 0) return;
@@ -564,7 +856,7 @@ const Course = () => {
       <div className="flex flex-col gap-4">
         <h3 className="text-title-xsm font-semibold text-black dark:text-white">
           Carrera:
-        </h3> 
+        </h3>
         <SelectGroupOne
           opciones={datosCarrera}
           onChange={setCarrera}
@@ -681,7 +973,7 @@ const Course = () => {
             </div>
             <button
               className="rounded-b-lg col-span-1 h-13 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-              onClick={handleAgregarAsignacion}
+              onClick={handleSubmitAsignaciones}
             >
               Asignar
             </button>

@@ -44,7 +44,6 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
         },
       );
 
-      console.log(response.status);
       if (response.status != 200) {
         throw new Error('Error en la solicitud');
       }

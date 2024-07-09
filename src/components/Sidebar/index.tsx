@@ -173,7 +173,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <NavLink
                         to="#"
                         className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium dark:text-bodydark1 duration-300 ease-in-out text-black hover:bg-black hover:text-white dark:hover:text-white dark:hover:bg-meta-4 ${
-                          pathname.includes('models') &&
+                          pathname.includes('modelos') &&
                           'bg-black text-white dark:bg-meta-4'
                         }`}
                         onClick={(e) => {
@@ -225,7 +225,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 'group relative flex items-center gap-2.5 rounded-md px-4 font-medium dark:text-bodydark2 duration-300 ease-in-out text-slate-500 hover:text-black dark:hover:text-white ' +
                                 (isActive && 'text-black dark:!text-white')
                               }
-                              onClick={(e) => handleNavLinkClick('/models', e)}
+                              onClick={(e) => handleNavLinkClick('/modelos/nuevo/test', e)}
                             >
                               Ingresar modelos
                             </NavLink>
@@ -245,6 +245,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     pathname.includes('curso') &&
                     'bg-graydark text-white dark:bg-meta-4'
                   }`}
+                  onClick={(e) => handleNavLinkClick('/curso', e)}
                 >
                   <ClassIcon/>
                   Cursos
@@ -259,6 +260,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     pathname.includes('chart') &&
                     'bg-graydark text-white dark:bg-meta-4'
                   }`}
+                  onClick={(e) => handleNavLinkClick('/chart', e)}
                 >
                   <svg
                     className="fill-current"
@@ -301,7 +303,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     pathname.includes('perfil') &&
                     'bg-black text-white dark:bg-meta-4'
                   }`}
-                  onClick={(e) => handleNavLinkClick('/profile', e)}
+                  onClick={(e) => handleNavLinkClick('/perfil', e)}
                 >
                   <svg
                     className="fill-current"
@@ -327,14 +329,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </ul>
           </div>
           {/* <!-- Others Group --> */}
-          <div>
+          {/* <div>
             <h3 className="mb-4 ml-4 text-sm font-semibold dark:text-bodydark2">
               OTHERS
             </h3>
 
             <ul className="mb-6 flex flex-col gap-1.5">
 
-              {/* <!-- Menu Item Ui Elements --> */}
               <SidebarLinkGroup
                 activeCondition={pathname === '/ui' || pathname.includes('ui')}
               >
@@ -406,7 +407,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           />
                         </svg>
                       </NavLink>
-                      {/* <!-- Dropdown Menu Start --> */}
                       <div
                         className={`translate transform overflow-hidden ${
                           !open && 'hidden'
@@ -437,14 +437,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                         </ul>
                       </div>
-                      {/* <!-- Dropdown Menu End --> */}
                     </React.Fragment>
                   );
                 }}
               </SidebarLinkGroup>
-              {/* <!-- Menu Item Ui Elements --> */}
-
-              {/* <!-- Menu Item Auth Pages --> */}
               <SidebarLinkGroup
                 activeCondition={
                   pathname === '/auth' || pathname.includes('auth')
@@ -514,7 +510,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           />
                         </svg>
                       </NavLink>
-                      {/* <!-- Dropdown Menu Start --> */}
                       <div
                         className={`translate transform overflow-hidden ${
                           !open && 'hidden'
@@ -545,14 +540,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                         </ul>
                       </div>
-                      {/* <!-- Dropdown Menu End --> */}
                     </React.Fragment>
                   );
                 }}
               </SidebarLinkGroup>
-              {/* <!-- Menu Item Auth Pages --> */}
             </ul>
-          </div>
+          </div> */}
         </nav>
         {/* <!-- Sidebar Menu --> */}
       </div>
