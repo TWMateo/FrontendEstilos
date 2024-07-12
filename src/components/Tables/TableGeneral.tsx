@@ -38,6 +38,7 @@ interface Props {
   icono: string;
   crear?: boolean;
   path?: string;
+  mensaje?:string;
 }
 
 export const TableGeneral: React.FC<Props> = ({
@@ -46,6 +47,7 @@ export const TableGeneral: React.FC<Props> = ({
   icono,
   crear='true',
   path,
+  mensaje
 }) => {
   const navigate = useNavigate();
 
@@ -80,7 +82,7 @@ export const TableGeneral: React.FC<Props> = ({
           sx={{ width: '100%', bgcolor: 'background.paper' }}
           className="flex overflow-auto cursor-pointer bg-stroke dark:bg-boxdark"
         >
-          {listado.map((test) => (
+          {listado.length > 0 ? listado.map((test) => (
             <ListItem
               className="flex gap-3 hover:bg-black rounded-lg text-black dark:text-slate-400 hover:text-white dark:hover:text-white"
               sx={{ width: '100%', minWidth: 280 }}
@@ -111,7 +113,7 @@ export const TableGeneral: React.FC<Props> = ({
                 secondary={test.descripcion}
               />
             </ListItem>
-          ))}
+          )):<div className='font-bold text-xl'>{mensaje}</div>}
         </List>
       </ThemeProvider>
     </div>

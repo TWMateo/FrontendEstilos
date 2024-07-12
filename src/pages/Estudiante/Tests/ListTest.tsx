@@ -1,8 +1,5 @@
 import Breadcrumb from '../../../components/Breadcrumbs/Breadcrumb';
 import DefaultLayout from '../../../layout/DefaultLayout';
-import { TableGeneral } from '../../../components/Tables/TableGeneral';
-import { SessionContext } from '../../../Context/SessionContext';
-import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Avatar,
@@ -14,23 +11,104 @@ import {
   createTheme,
 } from '@mui/material';
 import PsychologySharpIcon from '@mui/icons-material/PsychologySharp';
+import { SessionContext } from '../../../Context/SessionContext';
+import { useContext, useEffect, useState } from 'react';
+
+interface Asignacion {
+  id: number;
+  idAsignacion:number;
+  titulo: string;
+  descripcion: string;
+}
 
 const ListTest = () => {
   const navigate = useNavigate();
-  const listadoTests = [
-    { id: 1, titulo: 'Kolb', descripcion: 'Jan 9, 2014' },
-    { id: 2, titulo: 'Honney y Alonso', descripcion: 'Jan 9, 2014' },
-    { id: 3, titulo: 'Sperry', descripcion: 'Jan 9, 2014' },
-    { id: 4, titulo: 'Kinestésico Kinestésico', descripcion: 'Jan 9, 2014' },
-    { id: 5, titulo: 'Mumford', descripcion: 'Jan 9, 2014' },
-    { id: 6, titulo: 'Sperry', descripcion: 'Jan 9, 2014' },
-    { id: 7, titulo: 'Kinestésico', descripcion: 'Jan 9, 2014' },
-    { id: 8, titulo: 'Mumford', descripcion: 'Jan 9, 2014' },
-  ];
 
-  const handleSelectTest = (idTest: number) => {
+  const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
+
+  const { sessionToken, usuId, usuCedula, rolContext } =
+    useContext(SessionContext);
+
+  const fetchAsignaciones = async () => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/asignacion/usuario/${usuId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        },
+      );
+      if (response.status != 200) {
+        throw new Error('Error al obtener las asignaciones');
+      }
+      const data = await response.json();
+      const asignacionesData = [];
+      const titulosData = [];
+
+      for (const asignacion of data.data) {
+        const cursoResponse = await fetch(
+          `http://127.0.0.1:5000/estilos/api/v1/curso/${asignacion.cur_id}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${sessionToken}`,
+            },
+          },
+        );
+        if (!cursoResponse.ok) {
+          throw new Error('Error al obtener los datos del curso');
+        }
+        const cursoData = await cursoResponse.json();
+
+        const encuestaResponse = await fetch(
+          `http://127.0.0.1:5000/estilos/api/v1/encuesta/${asignacion.enc_id}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${sessionToken}`,
+            },
+          },
+        );
+        if (encuestaResponse.status != 200) {
+          throw new Error('Error al obtener los datos de la encuesta');
+        }
+        const encuestaData = await encuestaResponse.json();
+        const fecha = new Date(asignacion.asi_fecha_completado);
+        const opcionesFecha: Intl.DateTimeFormatOptions = {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        };
+        const id = asignacion.enc_id;
+        const idAsignacion = asignacion.asi_id;
+        const titulo = `${encuestaData.data.enc_id}. ${encuestaData.data.enc_titulo} - ${cursoData.data.cur_carrera} ${cursoData.data.cur_nivel}`;
+        const descripcion = fecha.toLocaleDateString('es-ES', opcionesFecha);
+        if (!asignacion.asi_realizado) {
+          asignacionesData.push({ id, idAsignacion, titulo, descripcion });
+        }
+      }
+      setAsignaciones(asignacionesData);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  useEffect(() => {
+    console.log(asignaciones);
+  }, [asignaciones]);
+
+  useEffect(() => {
+    fetchAsignaciones();
+  }, []);
+
+  const handleSelectTest = (idTest: number,idAsignacion:number) => {
     console.log('ID TEST:' + idTest);
-    navigate("/test/"+idTest);
+    navigate('/test/' + idTest+'/'+idAsignacion);
     return true;
   };
 
@@ -49,8 +127,6 @@ const ListTest = () => {
       },
     },
   });
-  // const {login,logout,isLoggedIn} = useContext(SessionContext)
-
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Tests" />
@@ -63,11 +139,11 @@ const ListTest = () => {
             sx={{ width: '100%', bgcolor: 'background.paper' }}
             className="grid grid-cols-1 lg:grid-cols-2 cursor-pointer rounded-lg bg-stroke dark:bg-boxdark"
           >
-            {listadoTests.map((test) => (
+            {asignaciones.map((test) => (
               <ListItem
                 className="flex gap-8 hover:bg-black m-5 rounded-lg text-black dark:text-slate-400 hover:text-white dark:hover:text-white"
                 sx={{ width: '93%', minWidth: 280 }}
-                onClick={() => handleSelectTest(test.id)}
+                onClick={() => handleSelectTest(test.id, test.idAsignacion)}
               >
                 <ListItemAvatar className="">
                   <Avatar style={{ width: '75px', height: '75px' }}>

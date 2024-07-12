@@ -30,17 +30,6 @@ const Home = () => {
   const { sessionToken, usuId, usuCedula, rolContext } =
     useContext(SessionContext);
 
-  const listadoCursos = [
-    { titulo: 'Software-P1', descripcion: 'Jan 9, 2014' },
-    { titulo: 'Telecomunicaciones-P1', descripcion: 'Jan 9, 2014' },
-    { titulo: 'Software-P2', descripcion: 'Jan 9, 2014' },
-    { titulo: 'Electricidad-P2', descripcion: 'Jan 9, 2014' },
-    { titulo: 'Automotriz-P1', descripcion: 'Jan 9, 2014' },
-    { titulo: 'Textil-P1', descripcion: 'Jan 9, 2014' },
-    { titulo: 'Mecatrónica-P2', descripcion: 'Jan 9, 2014' },
-    { titulo: 'Industrial-P1', descripcion: 'Jan 9, 2014' },
-  ];
-
   const fetchEncuestas = async () => {
     try {
       const response = await fetch(
@@ -111,7 +100,6 @@ const Home = () => {
         }
         const cursoData = await cursoResponse.json();
 
-        // Obtener datos de la encuesta usando enc_id
         const encuestaResponse = await fetch(
           `http://127.0.0.1:5000/estilos/api/v1/encuesta/${asignacion.enc_id}`,
           {
@@ -137,11 +125,9 @@ const Home = () => {
         asignacionesData.push({ titulo, descripcion });
       }
 
-      // Actualizar el estado con las asignaciones formateadas
       setAsignaciones(asignacionesData);
     } catch (error) {
       console.error('Error:', error);
-      // Manejar errores aquí según sea necesario
     }
   };
 

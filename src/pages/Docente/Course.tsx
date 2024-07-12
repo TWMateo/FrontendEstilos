@@ -278,16 +278,46 @@ const Course = () => {
           );
         }
 
-        const studentData = jsonData.slice(1).map((row) => {
-          const student: Student = {
-            nombre: row[headers.indexOf('nombre')],
-            apellido: row[headers.indexOf('apellido')],
-            cedula: row[headers.indexOf('cedula')],
-            genero: row[headers.indexOf('genero')],
-          };
-          return student;
-        });
+        // const studentData = jsonData.slice(1).map((row) => {
+        //   const student: Student = {
+        //     nombre: row[headers.indexOf('nombre')],
+        //     apellido: row[headers.indexOf('apellido')],
+        //     cedula: row[headers.indexOf('cedula')],
+        //     genero: row[headers.indexOf('genero')],
+        //   };
+        //   return student;
+        // });
+        const studentData = jsonData
+          .slice(1)
+          .filter((row) => {
+            // Filtrar filas que tienen al menos un valor no nulo o no vacío
+            return row.some(
+              (cell) => cell !== null && cell !== undefined && cell !== '',
+            );
+          })
+          .map((row) => {
+            // Crear objeto Student solo si todos los campos necesarios tienen valores válidos
+            if (
+              row[headers.indexOf('nombre')] &&
+              row[headers.indexOf('apellido')] &&
+              row[headers.indexOf('cedula')] &&
+              row[headers.indexOf('genero')]
+            ) {
+              const student: Student = {
+                nombre: row[headers.indexOf('nombre')],
+                apellido: row[headers.indexOf('apellido')],
+                cedula: row[headers.indexOf('cedula')],
+                genero: row[headers.indexOf('genero')],
+              };
+              return student;
+            }
+            return null; // Devolver null si la fila no es válida
+          })
+          .filter((student) => student !== null); // Filtrar cualquier entrada nula
 
+
+        console.log(studentData.length);
+        console.log(studentData);
         if (studentData.length < 1) {
           cambiarEstadoGuardadoTemporalmente('error');
           setMensajeError('El listado debe contener estudiantes.');
@@ -337,6 +367,7 @@ const Course = () => {
         }),
       );
 
+      console.log('PROBANDO');
       for (const student of studentsListo) {
         const persona: Persona = {
           per_cedula: student.cedula.toString(),
@@ -346,7 +377,6 @@ const Course = () => {
         };
         await crearPersona(persona);
       }
-
       for (let i = 0; i < usuarios.length; i++) {
         const usuario = usuarios[i];
         const response = await crearUsuario(usuario);
@@ -368,6 +398,7 @@ const Course = () => {
       );
     } catch (err: any) {
       setError(err.message);
+      console.log(err.message);
     } finally {
       setLoading(false);
     }
@@ -792,19 +823,19 @@ const Course = () => {
     fetchEncuestas();
   }, []);
 
-  useEffect(() => {
-    console.log(listaCursos);
-    let mensajeDatosCombinados = datosCursosCombinados.mensaje;
-    let newDatosCursosCombinados: string[] = [];
-    listaCursos.map((curso) => {
-      newDatosCursosCombinados.push(curso.datosCombinados);
-    });
-    let newCursosCombinados = {
-      mensaje: mensajeDatosCombinados,
-      tipos: newDatosCursosCombinados,
-    };
-    setDatosCursosCombinados(newCursosCombinados);
-  }, [listaCursos]);
+  // useEffect(() => {
+  //   console.log(listaCursos);
+  //   let mensajeDatosCombinados = datosCursosCombinados.mensaje;
+  //   let newDatosCursosCombinados: string[] = [];
+  //   listaCursos.map((curso) => {
+  //     newDatosCursosCombinados.push(curso.datosCombinados);
+  //   });
+  //   let newCursosCombinados = {
+  //     mensaje: mensajeDatosCombinados,
+  //     tipos: newDatosCursosCombinados,
+  //   };
+  //   setDatosCursosCombinados(newCursosCombinados);
+  // }, [listaCursos]);
 
   useEffect(() => {
     console.log(semestre);

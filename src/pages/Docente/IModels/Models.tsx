@@ -255,18 +255,18 @@ const Models = () => {
      del test}*/
   const onGuardarTest = async () => {
     if (
-      nombreTest.length == 0 ||
-      autor.length == 0 ||
-      descripcion.length == 0 ||
-      nombreTest.length == 0 ||
-      estilosAprendizaje.length == 0 ||
-      listaPreguntas.length == 0 ||
-      rules.length == 0
+      nombreTest.length === 0 ||
+      autor.length === 0 ||
+      descripcion.length === 0 ||
+      estilosAprendizaje.length === 0 ||
+      listaPreguntas.length === 0 ||
+      rules.length === 0
     ) {
       setErrorCamposGuardar(true);
       cambiarEstadoErrorGuardadoTemporalmente();
       return;
     }
+  
     for (const pregunta of listaPreguntas) {
       if (pregunta.pregunta.length === 0) {
         setMensajeError('Debe llenar todos los campos!');
@@ -274,31 +274,16 @@ const Models = () => {
         return;
       }
       for (const opcion of pregunta.opciones) {
-        if (opcion.estilo.length == 0) {
-          setMensajeError('Debe llenar todos los campos!');
-          cambiarEstadoErrorGuardadoTemporalmente();
-          return;
-        }
-        if (opcion.opcion.length == 0) {
+        if (opcion.estilo.length === 0 || opcion.opcion.length === 0) {
           setMensajeError('Debe llenar todos los campos!');
           cambiarEstadoErrorGuardadoTemporalmente();
           return;
         }
       }
     }
+  
     const fecha = new Date();
-    const test: Test = {
-      titulo: nombreTest,
-      autor: autor,
-      descripcion: descripcion,
-      cuantitativa: encuestaCuantitativa,
-      fechaCreacion: fecha.toISOString(),
-      estilosAprendizaje: estilosAprendizaje,
-      valorPregunta: valorPregunta,
-      preguntas: listaPreguntas,
-      reglaCalculo: rules,
-    };
-
+  
     const encuestaData = {
       enc_autor: autor,
       enc_cuantitativa: encuestaCuantitativa,
@@ -306,107 +291,96 @@ const Models = () => {
       enc_fecha_creacion: fecha.toISOString(),
       enc_titulo: nombreTest,
     };
-
-    //GUARDADO DE TEST
+  
     try {
-      const responseTest = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/encuesta',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${sessionToken}`, // Aquí se incluye el token en el encabezado Authorization
-          },
-          body: JSON.stringify(encuestaData),
+      const responseTest = await fetch('http://127.0.0.1:5000/estilos/api/v1/encuesta', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionToken}`,
         },
-      );
-
-      if (responseTest.status != 201) {
+        body: JSON.stringify(encuestaData),
+      });
+  
+      if (responseTest.status !== 201) {
         setMensajeError('Error al guardar la encuesta en el servidor');
         cambiarEstadoErrorGuardadoTemporalmente();
         return;
       }
+  
       const data = await responseTest.json();
-      console.log(listaPreguntas);
       let testId = data.data.enc_id;
       let arregloEstilosApr: tipoValor[] = [];
-      //GUARDADO DE REGLAS DE CALCULO
+  
       const reglaCalculoData = {
         enc_id: testId,
         reglas_json: rules,
       };
+  
       try {
-        const responseRegla = await fetch(
-          'http://127.0.0.1:5000/estilos/api/v1/reglas',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${sessionToken}`,
-            },
-            body: JSON.stringify(reglaCalculoData),
+        const responseRegla = await fetch('http://127.0.0.1:5000/estilos/api/v1/reglas', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`,
           },
-        );
-
-        if (responseRegla.status != 201) {
+          body: JSON.stringify(reglaCalculoData),
+        });
+  
+        if (responseRegla.status !== 201) {
           const errorData = await responseRegla.json();
-          setMensajeError(`Error al crear la regla de cálculo!`);
+          setMensajeError('Error al crear la regla de cálculo!');
           cambiarEstadoErrorGuardadoTemporalmente();
-          throw new Error(
-            errorData.mensaje || 'Error al crear la regla de cálculo',
-          );
+          throw new Error(errorData.mensaje || 'Error al crear la regla de cálculo');
         }
       } catch (error) {
-        setMensajeError(`Error al crear la regla de cálculo!`);
+        setMensajeError('Error al crear la regla de cálculo!');
         cambiarEstadoErrorGuardadoTemporalmente();
         throw new Error('Error al guardar la regla de cálculo');
       }
-      //GUARDADO DE ESTILOS DE APRENDIZAJE
+  
       try {
         const apiUrl = 'http://127.0.0.1:5000/estilos/api/v1/estilo';
-
         const headers = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${sessionToken}`,
         };
-
+  
         for (let estilo of estilosAprendizaje) {
           let estilos = {
             est_descripcion: estilo.tipo,
             est_nombre: estilo.tipo,
             enc_id: testId,
           };
-
+  
           const responseEstilo = await fetch(apiUrl, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(estilos),
           });
-
-          if (responseEstilo.status != 201) {
+  
+          if (responseEstilo.status !== 201) {
             setMensajeError(`Error al guardar el estilo ${estilo}!`);
             cambiarEstadoErrorGuardadoTemporalmente();
             throw new Error('Error al guardar el estilo');
           }
-          const data = await responseEstilo.json();
+          
+          const dataEstilo = await responseEstilo.json();
           arregloEstilosApr.push({
             tipo: estilo.tipo,
-            valor: data.data.est_id,
+            valor: dataEstilo.data.est_id,
           });
-          console.log('Estilo guardado:', data);
         }
-
-        console.log('Todos los estilos han sido guardados exitosamente.');
+  
       } catch (error) {
         setMensajeError(`Error al guardar los estilos: ${error}`);
         cambiarEstadoErrorGuardadoTemporalmente();
         return;
       }
-
-      //GUARDADO DE PREGUNTAS
+  
       for (let i = 0; i < listaPreguntas.length; i++) {
         const pregunta = listaPreguntas[i];
-
+  
         const preguntaData = {
           enc_id: testId,
           pre_enunciado: pregunta.pregunta,
@@ -416,83 +390,69 @@ const Models = () => {
           pre_tipo_pregunta: pregunta.tipoPregunta,
           pre_valor_total: valorPregunta,
         };
-
+  
         try {
-          const responsePregunta = await fetch(
-            'http://127.0.0.1:5000/estilos/api/v1/pregunta',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${sessionToken}`,
-              },
-              body: JSON.stringify(preguntaData),
+          const responsePregunta = await fetch('http://127.0.0.1:5000/estilos/api/v1/pregunta', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${sessionToken}`,
             },
-          );
-
-          if (responsePregunta.status != 201) {
-            setMensajeError(
-              `Error al guardar la pregunta ${pregunta.pregunta}!`,
-            );
+            body: JSON.stringify(preguntaData),
+          });
+  
+          if (responsePregunta.status !== 201) {
+            setMensajeError(`Error al guardar la pregunta ${pregunta.pregunta}!`);
             cambiarEstadoErrorGuardadoTemporalmente();
-            throw new Error('Error al guardar la opción');
+            throw new Error('Error al guardar la pregunta');
           }
-
-          //GUARDADO DE OPCIONES
+  
+          let dataPregunta = await responsePregunta.json();
+          let preguntaId = dataPregunta.data.pre_id;
+  
           for (const opcion of pregunta.opciones) {
-            let estiloId = arregloEstilosApr.find(
-              (estiloApr) => estiloApr.tipo == opcion.estilo,
-            );
-            let estiloIdNumerico: number;
-            if (estiloId != undefined) {
-              estiloIdNumerico = parseInt(estiloId.valor);
-            } else {
+            let estiloId = arregloEstilosApr.find(estiloApr => estiloApr.tipo === opcion.estilo);
+            
+            if (estiloId === undefined) {
               return;
             }
-
-            let dataPregunta = await responsePregunta.json();
-            let preguntaId = dataPregunta.data.pre_id;
-
+  
+            let estiloIdNumerico = parseInt(estiloId.valor);
+  
             const opcionData = {
-              est_id: estiloIdNumerico, 
+              est_id: estiloIdNumerico,
               opc_texto: opcion.opcion,
-              valor_cualitativo: opcion.estilo, 
-              valor_cuantitativo: valorPregunta, 
+              valor_cualitativo: opcion.estilo,
+              valor_cuantitativo: valorPregunta,
               pre_id: preguntaId,
             };
+  
             try {
-              const responseOpcion = await fetch(
-                'http://127.0.0.1:5000/estilos/api/v1/opcion',
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${sessionToken}`,
-                  },
-                  body: JSON.stringify(opcionData),
+              const responseOpcion = await fetch('http://127.0.0.1:5000/estilos/api/v1/opcion', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${sessionToken}`,
                 },
-              );
-              console.log(responseOpcion)
-              if (responseOpcion.status != 201) {
+                body: JSON.stringify(opcionData),
+              });
+  
+              if (responseOpcion.status !== 201) {
                 setMensajeError(`Error al guardar la opción ${opcion.opcion}!`);
                 cambiarEstadoErrorGuardadoTemporalmente();
                 throw new Error('Error al guardar la opción');
               }
-
-              const data = await responseOpcion.json();
-              console.log('Opción creada:', data);
+  
             } catch (error) {
               console.error('Error al enviar la opción:', error);
             }
           }
+  
         } catch (error) {
-          console.error(
-            `Error al guardar la pregunta ${pregunta.pregunta}:`,
-            error,
-          );
+          console.error(`Error al guardar la pregunta ${pregunta.pregunta}:`, error);
         }
       }
-
+  
       cambiarEstadoGuardadoTemporalmente();
       return;
     } catch (error) {
@@ -501,6 +461,7 @@ const Models = () => {
       return;
     }
   };
+  
 
   const onGuardarNuevoEstiloAprendizaje = (dim: string) => {
     const estilo = nuevoEstiloAprendizaje.toLowerCase();

@@ -10,29 +10,50 @@ import { SessionContext } from '../../Context/SessionContext';
 interface Usuario {
   cedula: string;
   nombres: string;
-  contraseña: string;
   descripcion: string;
+}
+
+interface Persona {
+  per_cedula: string;
+  per_nombres: string;
+  per_apellidos: string;
+  per_genero: string;
+}
+
+interface ApiResponse {
+  data: Persona;
+  mensaje: string;
 }
 
 const ProfileEstudiante = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [password, setPassword] = useState('1234567890');
   const [usuario, setUsuario] = useState<Usuario>();
+  const [persona, setPersona] = useState<Persona>();
+  const [error, setError] = useState('');
   const [actualizando, setActualizando] = useState(false);
-  const {rolContext, userContext,setNewUserContext,passwordContext,setNewUserPassword} = useContext(SessionContext)
+  const {
+    rolContext,
+    userContext,
+    sessionToken,
+    usuCedula,
+    setNewUserContext,
+    passwordContext,
+    setNewUserPassword,
+  } = useContext(SessionContext);
 
   const handleContraseñaVisible = () => {
     setPasswordVisible(!passwordVisible);
   };
 
-  const handleCambiarContraseña = () => {
-    if (password.length < 10) return;
-    let auxUsuario = usuario;
-    if (auxUsuario?.cedula === undefined) return;
-    auxUsuario.contraseña = password;
-    setUsuario(auxUsuario);
-    actualizandoCampo();
-  };
+  // const handleCambiarContraseña = () => {
+  //   if (password.length < 10) return;
+  //   let auxUsuario = usuario;
+  //   if (auxUsuario?.cedula === undefined) return;
+  //   auxUsuario.contraseña = password;
+  //   setUsuario(auxUsuario);
+  //   actualizandoCampo();
+  // };
 
   // useEffect(() => {
   //   let contraseña = '1234567890';
@@ -51,6 +72,71 @@ const ProfileEstudiante = () => {
       setActualizando(false);
     }, 3000);
   };
+
+  const fetchUsuarios = async () => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/usuario/cedula/${usuCedula}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`, // Asegúrate de tener un token de sesión válido
+          },
+        },
+      );
+
+      if (response.status !== 200) {
+        throw new Error('Error en la solicitud: ' + response.statusText);
+      }
+
+      const result = await response.json();
+      setUsuario(result.data);
+      console.log(result);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const fetchPersonaPorCedula = async () => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/persona/${usuCedula}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`, // Asegúrate de tener un token de sesión válido
+          },
+        },
+      );
+
+      if (response.status !== 200) {
+        throw new Error('Error en la solicitud: ' + response.statusText);
+      }
+
+      const resultados: ApiResponse = await response.json();
+      setUsuario({
+        cedula: usuCedula,
+        nombres: resultados.data.per_nombres+' '+resultados.data.per_apellidos,
+        descripcion:
+          rolContext == 'EST'
+            ? 'Un estudiante tiene acceso a los recursos educativos proporcionados por la plataforma, puede participar en encuestas, revisar sus asignaciones, y seguir el progreso de sus cursos.'
+            : 'Un docente tiene la responsabilidad de crear y gestionar los tests de estilos de aprendizaje. Los docentes pueden acceder a las encuestas relacionadas con sus cursos y supervisar los resultados de sus estudiantes.',
+      });
+      const result = await response.json();
+      setPersona(result.data);
+      console.log(result.data);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsuarios();
+    fetchPersonaPorCedula();
+    setPassword(password);
+  }, []);
 
   return (
     <DefaultLayout>
@@ -71,7 +157,7 @@ const ProfileEstudiante = () => {
                 width="120"
                 height="150"
                 viewBox="0 0 450 512"
-                className='dark:fill-white'
+                className="dark:fill-white"
               >
                 <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z" />
               </svg>
@@ -79,17 +165,13 @@ const ProfileEstudiante = () => {
           </div>
           <div className="mt-4 flex flex-col items-center">
             <h3 className="mb-1.5 text-2xl font-semibold text-black dark:text-white">
-              {userContext}
+              {usuario?.nombres}
             </h3>
             <p className="font-medium">{rolContext}</p>
             <div className="mx-auto p-5 mt-4.5 mb-5.5 grid max-w-94 grid-cols-1 rounded-md border border-stroke py-2.5 shadow-1 dark:border-strokedark dark:bg-[#37404F]">
               <span className="text-sm">
                 <div className="font-bold">Descripción: </div>
                 <div>
-                  {/* Lorem ipsum dolor sit amet consectetur adipisicing elit. Quos
-                  libero dolorum dolorem delectus corporis minima ea ratione sit
-                  esse laborum, quidem unde dolores dicta vitae tempora non
-                  rerum repellendus eligendi. */}
                   {usuario?.descripcion}
                 </div>
               </span>
@@ -99,7 +181,7 @@ const ProfileEstudiante = () => {
                 Cedula:
               </label>
               <input
-                value={'1050197118'}
+                value={usuario?.cedula}
                 type="text"
                 id="cedula"
                 disabled={true}
@@ -109,13 +191,13 @@ const ProfileEstudiante = () => {
                 Nombres:
               </label>
               <input
-                value={'Mateo Chancosi'}
+                value={usuario?.nombres}
                 type="text"
                 id="nombre"
                 disabled={true}
                 className={`w-full rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
               />
-              <div className="text-left">
+              {/* <div className="text-left">
                 <label htmlFor="contraseña" className="text-left">
                   Contraseña:
                 </label>
@@ -136,10 +218,13 @@ const ProfileEstudiante = () => {
                   )}
                 </div>
                 {actualizando && (
-                  <div className='animate-fade animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both'>
-                  <AlertSucessfull titulo="Contraseña actualizada" mensaje="" />
+                  <div className="animate-fade animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+                    <AlertSucessfull
+                      titulo="Contraseña actualizada"
+                      mensaje=""
+                    />
                   </div>
-)}
+                )}
                 <div className="flex mt-4 justify-between">
                   <SwitcherThree
                     enabled={passwordVisible}
@@ -152,7 +237,7 @@ const ProfileEstudiante = () => {
                     Guardar
                   </button>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

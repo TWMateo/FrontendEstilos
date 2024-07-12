@@ -180,7 +180,7 @@ function App() {
           }
         />
         <Route
-          path="/test/:id"
+          path="/test/:id/:idAsignacion"
           element={
             <>
               <PageTitle title="Test | Estudiante" />

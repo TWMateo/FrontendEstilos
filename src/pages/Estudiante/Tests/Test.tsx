@@ -32,6 +32,68 @@ interface Respuesta {
   estilo?: string;
 }
 
+interface Asignacion {
+  asi_id: number;
+  enc_id: number;
+  cur_id: number;
+  usu_id: number;
+  asi_descripcion: string;
+  asi_fecha_completado: string;
+  asi_realizado: boolean;
+}
+
+interface Historial {
+  asi_id: number;
+  cur_id: number;
+  est_cedula: string;
+  his_fecha_encuesta: string;
+  his_nota_estudiante: string;
+  his_resultado_encuesta: string;
+}
+
+interface RespuestaEnvio {
+  asi_id: number;
+  opc_id: number;
+  pre_id: number;
+  usu_id: number;
+}
+
+interface TestEstructurado {
+  titulo: string;
+  autor: string;
+  descripcion: string;
+  cuantitativa: boolean;
+  fechaCreacion: string;
+  estilosAprendizaje: string[];
+  valorPregunta: number;
+  preguntas: {
+    id: number;
+    orden: number;
+    pregunta: string;
+    tipoPregunta: string;
+    opciones: {
+      id: number;
+      opcion: string;
+      estilo: string;
+    }[];
+    escalas: string[];
+    min: number;
+    max: number;
+  }[];
+  reglaCalculo: {
+    estilo: string;
+    condiciones: {
+      parametros: {
+        value: string[];
+        operacion: string;
+      }[];
+      condicion: string;
+      valor: number;
+      comparacion: string;
+    }[];
+  }[];
+}
+
 interface ConteoEstilos {
   [key: string]: number;
 }
@@ -61,7 +123,11 @@ interface Condicion {
 }
 
 const Test = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, idAsignacion } = useParams<{
+    id: string;
+    idAsignacion: string;
+  }>();
+  const [asignacion, setAsignacion] = useState<Asignacion>();
   const [loadingTest, setLoadingTest] = useState(true);
   const { login, logout, isLoggedIn, userContext } = useContext(SessionContext);
   const [respuestas, setRespuestas] = useState<Respuesta[]>([]);
@@ -73,6 +139,11 @@ const Test = () => {
   const [errorSave, setErrorSave] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const [errorGuardado, setErrorGuardado] = useState(false);
+  const { sessionToken, usuId, usuCedula, rolContext } =
+    useContext(SessionContext);
+  const [testAsignado, setTestAsignado] = useState<TestEstructurado | null>(
+    null,
+  );
   const listadoTests = [
     { titulo: 'Kolb', descripcion: 'Jan 9, 2014' },
     { titulo: 'Honney y Alonso', descripcion: 'Jan 9, 2014' },
@@ -194,325 +265,7 @@ const Test = () => {
     ],
   };
 
-  // let testAsignado = {
-  //   titulo: 'Kolb',
-  //   autor: 'David Kolb',
-  //   descripcion:
-  //     'A continuación se presenta un inventario compuesto por nueve filas horizontales.',
-  //   cuantitativa: true,
-  //   fechaCreacion: '12/6/2024',
-  //   estilosAprendizaje: [
-  //     'acomodador',
-  //     'divergente',
-  //     'convergente',
-  //     'asimilador',
-  //     'experiencia concreta',
-  //     'observacion reflexiva',
-  //     'conceptualización abstracta',
-  //     'experimentación activa',
-  //   ],
-  //   valorPregunta: 10,
-  //   preguntas: [
-  //     {
-  //       id: 1,
-  //       orden: 1,
-  //       pregunta: 'Cuando aprendo...',
-  //       tipoPregunta: 'Seleccion multiple',
-  //       opciones: [
-  //         {
-  //           id: 1,
-  //           opcion: 'Me gusta vivir sensaciones',
-  //           estilo: 'experiencia concreta',
-  //         },
-  //         {
-  //           id: 2,
-  //           opcion: 'Me gusta pensar sobre ideas',
-  //           estilo: 'observacion reflexiva',
-  //         },
-  //         {
-  //           id: 3,
-  //           opcion: 'Me gusta estar haciendo cosas',
-  //           estilo: 'conceptualización abstracta',
-  //         },
-  //         {
-  //           id: 4,
-  //           opcion: 'Me gusta observar y escuchar',
-  //           estilo: 'experimentación activa',
-  //         },
-  //       ],
-  //       escalas: [],
-  //       min: 4,
-  //       max: 0,
-  //     },
-  //     {
-  //       id: 2,
-  //       orden: 2,
-  //       pregunta: 'Aprendo mejor cuando...',
-  //       tipoPregunta: 'Seleccion multiple',
-  //       opciones: [
-  //         {
-  //           id: 1,
-  //           opcion: 'escucho y observo cuidadosamente',
-  //           estilo: 'experiencia concreta',
-  //         },
-  //         {
-  //           id: 2,
-  //           opcion: 'confio en el pensamiento logico',
-  //           estilo: 'observacion reflexiva',
-  //         },
-  //         {
-  //           id: 3,
-  //           opcion: 'confio en mi intuicion',
-  //           estilo: 'conceptualización abstracta',
-  //         },
-  //         {
-  //           id: 4,
-  //           opcion: 'trabajo duro',
-  //           estilo: 'experimentación activa',
-  //         },
-  //       ],
-  //       escalas: [],
-  //       min: 4,
-  //       max: 0,
-  //     },
-  //     {
-  //       id: 3,
-  //       orden: 3,
-  //       pregunta: 'Cuando estoy aprendiendo',
-  //       tipoPregunta: 'Seleccion multiple',
-  //       opciones: [
-  //         {
-  //           id: 1,
-  //           opcion: 'tiendo a usar el razonamiento',
-  //           estilo: 'experiencia concreta',
-  //         },
-  //         {
-  //           id: 2,
-  //           opcion: 'soy responsable',
-  //           estilo: 'observacion reflexiva',
-  //         },
-  //         {
-  //           id: 3,
-  //           opcion: 'Soy reservado',
-  //           estilo: 'conceptualización abstracta',
-  //         },
-  //         {
-  //           id: 4,
-  //           opcion: 'tengo fuertes reacciones',
-  //           estilo: 'experimentación activa',
-  //         },
-  //       ],
-  //       escalas: [],
-  //       min: 4,
-  //       max: 0,
-  //     },
-  //     {
-  //       id: 4,
-  //       orden: 4,
-  //       pregunta: 'Yo aprendo...',
-  //       tipoPregunta: 'Seleccion multiple',
-  //       opciones: [
-  //         {
-  //           id: 1,
-  //           opcion: 'Sintiendo',
-  //           estilo: 'experiencia concreta',
-  //         },
-  //         {
-  //           id: 2,
-  //           opcion: 'haciendo',
-  //           estilo: 'observacion reflexiva',
-  //         },
-  //         {
-  //           id: 3,
-  //           opcion: 'observando',
-  //           estilo: 'conceptualización abstracta',
-  //         },
-  //         {
-  //           id: 4,
-  //           opcion: 'pensando',
-  //           estilo: 'experimentación activa',
-  //         },
-  //       ],
-  //       escalas: [],
-  //       min: 4,
-  //       max: 0,
-  //     },
-  //     {
-  //       id: 5,
-  //       orden: 5,
-  //       pregunta: 'Cuando aprendo...',
-  //       tipoPregunta: 'Seleccion multiple',
-  //       opciones: [
-  //         {
-  //           id: 1,
-  //           opcion: 'estoy abierto a nuevas experiencias',
-  //           estilo: 'experiencia concreta',
-  //         },
-  //         {
-  //           id: 2,
-  //           opcion: 'observo todos los aspectos',
-  //           estilo: 'observacion reflexiva',
-  //         },
-  //         {
-  //           id: 3,
-  //           opcion: 'me gusta analizar las cosas',
-  //           estilo: 'conceptualización abstracta',
-  //         },
-  //         {
-  //           id: 4,
-  //           opcion: 'me gusta probar las cosas',
-  //           estilo: 'experimentación activa',
-  //         },
-  //       ],
-  //       escalas: [],
-  //       min: 4,
-  //       max: 0,
-  //     },
-  //   ],
-  //   reglaCalculo: [
-  //     {
-  //       estilo: 'asimilador',
-  //       condiciones: [
-  //         {
-  //           parametros: [
-  //             {
-  //               value: ['conceptualización abstracta'],
-  //               operacion: 'resta',
-  //             },
-  //             {
-  //               value: ['experiencia concreta'],
-  //               operacion: 'suma',
-  //             },
-  //           ],
-  //           condicion: 'menor',
-  //           valor: 0,
-  //           comparacion: 'and',
-  //         },
-  //         {
-  //           parametros: [
-  //             {
-  //               value: ['experimentación activa'],
-  //               operacion: 'resta',
-  //             },
-  //             {
-  //               value: ['observacion reflexiva'],
-  //               operacion: 'suma',
-  //             },
-  //           ],
-  //           condicion: 'mayor',
-  //           valor: 0,
-  //           comparacion: 'and',
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       estilo: 'divergente',
-  //       condiciones: [
-  //         {
-  //           parametros: [
-  //             {
-  //               value: ['conceptualización abstracta'],
-  //               operacion: 'resta',
-  //             },
-  //             {
-  //               value: ['experiencia concreta'],
-  //               operacion: 'suma',
-  //             },
-  //           ],
-  //           condicion: 'mayor',
-  //           valor: 0,
-  //           comparacion: 'and',
-  //         },
-  //         {
-  //           parametros: [
-  //             {
-  //               value: ['experimentación activa'],
-  //               operacion: 'resta',
-  //             },
-  //             {
-  //               value: ['observacion reflexiva'],
-  //               operacion: 'suma',
-  //             },
-  //           ],
-  //           condicion: 'mayor',
-  //           valor: 0,
-  //           comparacion: 'and',
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       estilo: 'acomodador',
-  //       condiciones: [
-  //         {
-  //           parametros: [
-  //             {
-  //               value: ['conceptualización abstracta'],
-  //               operacion: 'resta',
-  //             },
-  //             {
-  //               value: ['experiencia concreta'],
-  //               operacion: 'suma',
-  //             },
-  //           ],
-  //           condicion: 'mayor',
-  //           valor: 0,
-  //           comparacion: 'and',
-  //         },
-  //         {
-  //           parametros: [
-  //             {
-  //               value: ['experimentación activa'],
-  //               operacion: 'resta',
-  //             },
-  //             {
-  //               value: ['observacion reflexiva'],
-  //               operacion: 'suma',
-  //             },
-  //           ],
-  //           condicion: 'menor',
-  //           valor: 0,
-  //           comparacion: 'and',
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       estilo: 'convergente',
-  //       condiciones: [
-  //         {
-  //           parametros: [
-  //             {
-  //               value: ['conceptualización abstracta'],
-  //               operacion: 'resta',
-  //             },
-  //             {
-  //               value: ['experiencia concreta'],
-  //               operacion: 'suma',
-  //             },
-  //           ],
-  //           condicion: 'menor',
-  //           valor: 0,
-  //           comparacion: 'and',
-  //         },
-  //         {
-  //           parametros: [
-  //             {
-  //               value: ['experimentación activa'],
-  //               operacion: 'resta',
-  //             },
-  //             {
-  //               value: ['observacion reflexiva'],
-  //               operacion: 'suma',
-  //             },
-  //           ],
-  //           condicion: 'menor',
-  //           valor: 0,
-  //           comparacion: 'and',
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // };
-  let testAsignado = {
+  let testAsignadoZ = {
     titulo: 'Kolb 2',
     autor: 'Kolb 2',
     descripcion: 'Vamos a testear el producto',
@@ -612,11 +365,10 @@ const Test = () => {
     valorOpc?: number,
     estiloI?: string,
   ) => {
-    //Dato quemados
-    console.log('cambiando datos');
-
-    let usuarioId = 1;
-    //-----------------
+    if (!usuId) {
+      return;
+    }
+    let usuarioId = usuId;
     if (!idTest) return;
     let currentResponses = [...respuestas];
     let nuevaRespuesta: Respuesta = {
@@ -635,7 +387,7 @@ const Test = () => {
         respuesta.opcionId === nuevaRespuesta.opcionId,
     );
     if (exists) {
-      if (testAsignado.cuantitativa) {
+      if (testAsignado?.cuantitativa) {
         let index = currentResponses.findIndex(
           (resp) =>
             resp.encuestaId === nuevaRespuesta.encuestaId &&
@@ -667,9 +419,10 @@ const Test = () => {
     valorOpc?: number,
     estiloI?: string,
   ) => {
-    //Dato quemados
-    let usuarioId = 1;
-    //-----------------
+    if (!usuId) {
+      return;
+    }
+    let usuarioId = usuId;
     if (!idTest) return;
     let currentResponses = [...respuestas];
     let nuevaRespuesta: Respuesta = {
@@ -695,17 +448,113 @@ const Test = () => {
     setRespuestas(currentResponses);
   };
 
-  // Controlar el loading para que aparezca hasta que se consulte el test de la db
+  const fetchTest = async (id: number) => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/encuestaDetalles/${id}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        },
+      );
+      const data = await response.json();
+      const dataEstructurada = await transformData(data.data);
+      await console.log(dataEstructurada);
+      setTestAsignado(dataEstructurada);
+    } catch (error) {
+      console.error('Error al obtener las asignaciones:', error);
+    }
+  };
+
+  const transformData = (data: any) => {
+    console.log(data.reglas[0].reglas_json);
+    data.reglas[0].reglas_json.map((reg: any) => {
+      console.log(reg);
+    });
+    return {
+      titulo: data.enc_titulo || '',
+      autor: data.enc_autor || '',
+      descripcion: data.enc_descripcion || '',
+      cuantitativa: data.enc_cuantitativa || false,
+      fechaCreacion: data.enc_fecha_creacion
+        ? new Date(data.enc_fecha_creacion).toLocaleDateString()
+        : '',
+      estilosAprendizaje: data.estilos
+        ? data.estilos.map((estilo: any) => estilo.est_nombre)
+        : [],
+      valorPregunta:
+        data.preguntas && data.preguntas.length > 0
+          ? data.preguntas[0].pre_valor_total
+          : 0,
+      preguntas: data.preguntas
+        ? data.preguntas.map((pregunta: any) => ({
+            id: pregunta.pre_id,
+            orden: pregunta.pre_orden,
+            pregunta: pregunta.pre_enunciado,
+            tipoPregunta:
+              pregunta.pre_tipo_pregunta === 'seleccion'
+                ? 'Seleccion multiple'
+                : 'Likert',
+            opciones: pregunta.opciones
+              ? pregunta.opciones.map((opcion: any) => ({
+                  id: opcion.opc_id,
+                  opcion: opcion.opc_texto,
+                  estilo: opcion.valor_cualitativo,
+                }))
+              : [],
+            escalas:
+              pregunta.pre_tipo_pregunta === 'likert'
+                ? [
+                    'Muy insatisfecho',
+                    'Insatisfecho',
+                    'Neutral',
+                    'Satisfecho',
+                    'Muy satisfecho',
+                  ]
+                : [],
+            min: pregunta.pre_num_respuestas_min,
+            max: pregunta.pre_num_respuestas_max,
+          }))
+        : [],
+      reglaCalculo: data.reglas
+        ? data.reglas[0].reglas_json.map((regla: any) => ({
+            estilo: regla.estilo && regla.estilo.length > 0 ? regla.estilo : '',
+            condiciones:
+              regla.condiciones && regla.condiciones.length > 0
+                ? regla.condiciones.map((condicion: any) => ({
+                    parametros: condicion.parametros.map((parametro: any) => ({
+                      value: parametro.value,
+                      operacion: parametro.operacion,
+                    })),
+                    condicion: condicion.condicion,
+                    valor: condicion.valor,
+                    comparacion: condicion.comparacion,
+                  }))
+                : [],
+          }))
+        : [],
+    };
+  };
+
+  //IMPORTANTE - Controlar el loading para que aparezca hasta que se consulte el test de la db
   useEffect(() => {
-    console.log('ID TEST: ' + id);
-    console.log(userContext);
     if (!id) return;
     let idNewTest = parseInt(id);
     setIdTest(idNewTest);
+    fetchTest(parseInt(id));
+    fetchAsignacion();
     setTimeout(() => {
       setLoadingTest(false);
     }, 1000);
   }, [id]);
+
+  useEffect(() => {
+    if (!idAsignacion) return;
+    console.log(idAsignacion);
+  }, [idAsignacion]);
 
   useEffect(() => {
     console.log('Verificando respuestas');
@@ -743,15 +592,102 @@ const Test = () => {
     }, 4000);
   };
 
+  const fetchAsignacion = async () => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/asignacion/${idAsignacion}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`, // Asegúrate de que sessionToken esté definido
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setAsignacion(data.data);
+    } catch (error) {
+      console.error('Error al obtener datos de asignación:', error);
+      throw error;
+    }
+  };
+
+  const postHistorial = async (historialData: Historial) => {
+    try {
+      const response = await fetch(
+        'http://127.0.0.1:5000/estilos/api/v1/historial',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`,
+          },
+          body: JSON.stringify(historialData),
+        },
+      );
+
+      if (response.status != 201) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || 'Error al guardar el historial');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error al enviar el historial:', error);
+      throw error;
+    }
+  };
+
+  const postRespuesta = async (respuestaData: RespuestaEnvio) => {
+    try {
+      const response = await fetch(
+        'http://127.0.0.1:5000/estilos/api/v1/respuesta',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`,
+          },
+          body: JSON.stringify(respuestaData),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || 'Error al guardar la respuesta');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error al enviar la respuesta:', error);
+      throw error;
+    }
+  };
+
+  function formatDate(date: Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+
   const handleSendTest = () => {
-    console.log(respuestas);
     const res = respuestas;
-    const reglaCalculo = testAsignado.reglaCalculo;
-    // Controlar que todas las preguntas tengan las respuestas especificadas
-    let preguntas = testAsignado.preguntas;
-    let preguntaId;
+    const reglaCalculo = testAsignado?.reglaCalculo;
+    let preguntas = testAsignado?.preguntas;
     let cantidadRespuestas;
-    preguntas.forEach((element) => {
+    preguntas?.forEach((element) => {
       if (element.min != 0) {
         cantidadRespuestas = respuestas.filter(
           (resp) => resp.preguntaId === element.id,
@@ -772,24 +708,35 @@ const Test = () => {
       cambiarEstadoGuardadoTemporalmente();
     });
 
-    //VERSION PRUEBA---------------------------------
-    if (testAsignado.cuantitativa) {
+    if (!testAsignado?.cuantitativa) {
       const conteoEstiloS: ResultadosTest = {};
       const conteoParametros: ConteoEstilos = {};
-      reglaCalculo.forEach((regla) => {
+      reglaCalculo?.forEach((regla) => {
         conteoEstiloS[regla.estilo] = false;
       });
 
       res.forEach((respuesta) => {
+        let resp: RespuestaEnvio = {
+          asi_id: 0,
+          opc_id: 0,
+          pre_id: 0,
+          usu_id: 0,
+        };
         const { estilo, valorOpc } = respuesta;
         if (!estilo) return;
         if (!valorOpc) return;
+        if (!idAsignacion) return;
+        console.log(respuesta);
+        resp.asi_id = parseInt(idAsignacion);
+        resp.opc_id = respuesta.opcionId;
+        resp.pre_id = respuesta.preguntaId;
+        resp.usu_id = respuesta.usuarioId;
+        postRespuesta(resp);
         if (!conteoParametros.hasOwnProperty(estilo)) {
           conteoParametros[estilo] = 0;
         }
       });
-
-      reglaCalculo.forEach((regla) => {
+      reglaCalculo?.forEach((regla) => {
         let sumaCondiciones = 0;
         let operacion: string;
         let operadores: boolean[] = [];
@@ -814,7 +761,6 @@ const Test = () => {
               }
             });
             conteoParametros[parametro.value[0]] = sumaRespuestas;
-            console.log(sumaRespuestas);
             if (primerParametro) {
               sumaParametros = sumaRespuestas;
               primerParametro = false;
@@ -825,7 +771,6 @@ const Test = () => {
                 sumaRespuestas,
                 operacion,
               );
-              console.log(sumaParametros);
               operacion = parametro.operacion;
             }
           });
@@ -848,19 +793,63 @@ const Test = () => {
         conteoEstiloS[regla.estilo] = resultado;
       });
 
-      let estiloPredominante = null;
-
+      let estiloPredominante: string = '';
+      Object.keys(conteoEstiloS).forEach((key) => {
+        const value = conteoEstiloS[key];
+        if (value) {
+          estiloPredominante = key;
+        }
+      });
+      console.log(respuestas);
+      console.log(testAsignado);
       console.log(
         'El estilo de aprendizaje predominante es:',
         estiloPredominante,
       );
       console.log(conteoEstiloS);
-      console.log(conteoParametros);
-      console.log(res);
+      if (!asignacion) {
+        console.log('ERR 1');
+        console.log(asignacion);
+        return;
+      }
+      console.log(asignacion);
+      console.log(estiloPredominante);
+      if (!estiloPredominante) {
+        console.log('ERR 2');
+        return;
+      }
+      console.log(asignacion);
+      console.log(estiloPredominante.substring(0, 5));
+      console.log(asignacion.asi_fecha_completado);
+      let fechaTerminado: Date = new Date();
+      let fechaFormateada = formatDate(fechaTerminado);
+      console.log(fechaFormateada);
+      let historialRespuesta: Historial = {
+        asi_id: asignacion?.asi_id,
+        cur_id: asignacion?.cur_id,
+        his_fecha_encuesta: fechaFormateada,
+        est_cedula: usuCedula,
+        his_nota_estudiante: estiloPredominante.substring(0, 5),
+        his_resultado_encuesta: estiloPredominante,
+      };
+      historialRespuesta.est_cedula = usuCedula;
+      historialRespuesta;
+      console.log('HISTORIAL');
+      postHistorial(historialRespuesta);
+      let asignacionActualizar = {
+        enc_id: asignacion.enc_id,
+        usu_id: asignacion.usu_id,
+        cur_id: asignacion.cur_id,
+        asi_descripcion: asignacion.asi_descripcion,
+        asi_fecha_completado: fechaTerminado.toISOString(),
+        asi_realizado: true,
+      };
+      console.log('ASIGNACION');
+      actualizarAsignacion(asignacion?.asi_id, asignacionActualizar);
     } else {
       const conteoEstilos: ConteoEstilos = {};
 
-      testAsignado.estilosAprendizaje.forEach((regla) => {
+      testAsignado?.estilosAprendizaje.forEach((regla) => {
         conteoEstilos[regla] = 0;
       });
 
@@ -870,7 +859,7 @@ const Test = () => {
         if (!estilo) return;
         if (!valorOpc) return;
 
-        testAsignado.estilosAprendizaje.forEach((est) => {
+        testAsignado?.estilosAprendizaje.forEach((est) => {
           if (est.includes(estilo)) {
             conteoEstilos[est] += valorOpc;
           }
@@ -895,6 +884,34 @@ const Test = () => {
       console.log(respuestas);
     }
   };
+
+  async function actualizarAsignacion(asi_id: number, asignacionData: any) {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/asignacion/${asi_id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`,
+          },
+          body: JSON.stringify(asignacionData),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al actualizar la asignación');
+      }
+
+      const data = await response.json();
+      console.log('Asignación actualizada:', data);
+      return data;
+    } catch (error: any) {
+      console.error('Error al actualizar la asignación:', error.message);
+      throw error;
+    }
+  }
 
   const evaluateConditions = (conditions: boolean[], operators: string[]) => {
     let result = conditions[0];
@@ -985,20 +1002,20 @@ const Test = () => {
       )}
       <div className="flex flex-col justify-center items-center w-[100%] gap-8 bg-stroke dark:bg-transparent">
         <h3 className="text-xl font-semibold text-black dark:text-white">
-          Test de {testAsignado.titulo}
+          Test de {testAsignado?.titulo}
         </h3>
-        <div>{testAsignado.autor}</div>
+        <div>{testAsignado?.autor}</div>
         <div className="p-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
           <h4 className="text-base font-semibold p-3 text-black dark:text-white">
             Descripción:
           </h4>
-          <div className="pl-3 pb-3">{testAsignado.descripcion}</div>
+          <div className="pl-3 pb-3">{testAsignado?.descripcion}</div>
         </div>
         <h3 className="text-lg w-[80%] font-semibold text-black dark:text-white">
           Preguntas:
         </h3>
         <div className="flex flex-col p-5 gap-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
-          {testAsignado.preguntas.map((preg, index) =>
+          {testAsignado?.preguntas.map((preg, index) =>
             preg.tipoPregunta == 'Seleccion multiple' ? (
               testAsignado.cuantitativa ? (
                 <MultiChoiceCuantitativaResponse
