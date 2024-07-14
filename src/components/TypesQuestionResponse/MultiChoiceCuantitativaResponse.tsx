@@ -11,6 +11,8 @@ interface Pregunta {
   orden: number;
   pregunta: string;
   opciones: Opcion[];
+  min?: number;
+  max?: number;
 }
 
 interface MultiChoiceCuantitativaResponseProps {
@@ -36,39 +38,45 @@ const MultiChoiceCuantitativaResponse: React.FC<
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const newValue = parseInt(event.target.value);
-    console.log('NEW VALUE')
-    console.log(newValue)
     if (!isNaN(newValue) && newValue >= 0) {
       const nuevasRespuestas = {
         ...respuestas,
         [opcionId]: newValue,
       };
-      console.log('NEW VAL 2')
-      console.log(newValue)
+      const cantidadRespuestas = Object.values(nuevasRespuestas).filter(value => value > 0).length;
       const sumaRespuestas = Object.values(nuevasRespuestas).reduce(
         (total, value) => total + value,
         0,
       );
 
-      if (sumaRespuestas <= valor) {
-        const valorRespuesta = respuestas[opcionId] || 0;
-        console.log(valorRespuesta)
-        console.log(respuestas)
-        console.log('VAL 3')
-        console.log(newValue)
-        setRespuestas(nuevasRespuestas);
-        onAddResponse(pregunta.id, opcionId, newValue, estilo);
-        setError(null);
-      } else {
+      if (sumaRespuestas > valor) {
         setError(`La suma de los valores no puede exceder ${valor}`);
+        return;
       }
+
+      if (sumaRespuestas < valor) {
+        setError(`La suma de los valores debe ser igual a ${valor}`);
+      }
+
+      if (pregunta.min && cantidadRespuestas > pregunta.min) {
+        setError(`Debe seleccionar mínimo ${pregunta.min} respuestas`);
+        return;
+      }
+
+      if (pregunta.max && cantidadRespuestas > pregunta.max) {
+        setError(`Puede seleccionar maximo ${pregunta.max} respuestas`);
+        return;
+      }
+
+      const valorRespuesta = respuestas[opcionId] || 0;
+      setRespuestas(nuevasRespuestas);
+      onAddResponse(pregunta.id, opcionId, newValue, estilo);
+      setError(null);
     }
   };
 
   const handleBlur = (opcionId: number) => {
     const valorRespuesta = respuestas[opcionId] || 0;
-    console.log('handleBlur');
-    // onAddResponse(pregunta.id, opcionId, valorRespuesta, '');
   };
 
   return (
@@ -94,7 +102,7 @@ const MultiChoiceCuantitativaResponse: React.FC<
               <input
                 type="number"
                 value={respuestas[opc.id] || ''}
-                onChange={(e) => handleChange(opc.id,opc.estilo, e)}
+                onChange={(e) => handleChange(opc.id, opc.estilo, e)}
                 // onBlur={() => handleBlur(opc.id)}
                 className="border-strokedark w-20 border rounded-lg bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               />

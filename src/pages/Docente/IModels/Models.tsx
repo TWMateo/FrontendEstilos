@@ -266,7 +266,7 @@ const Models = () => {
       cambiarEstadoErrorGuardadoTemporalmente();
       return;
     }
-  
+
     for (const pregunta of listaPreguntas) {
       if (pregunta.pregunta.length === 0) {
         setMensajeError('Debe llenar todos los campos!');
@@ -281,9 +281,9 @@ const Models = () => {
         }
       }
     }
-  
+
     const fecha = new Date();
-  
+
     const encuestaData = {
       enc_autor: autor,
       enc_cuantitativa: encuestaCuantitativa,
@@ -291,96 +291,103 @@ const Models = () => {
       enc_fecha_creacion: fecha.toISOString(),
       enc_titulo: nombreTest,
     };
-  
+
     try {
-      const responseTest = await fetch('http://127.0.0.1:5000/estilos/api/v1/encuesta', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${sessionToken}`,
-        },
-        body: JSON.stringify(encuestaData),
-      });
-  
-      if (responseTest.status !== 201) {
-        setMensajeError('Error al guardar la encuesta en el servidor');
-        cambiarEstadoErrorGuardadoTemporalmente();
-        return;
-      }
-  
-      const data = await responseTest.json();
-      let testId = data.data.enc_id;
-      let arregloEstilosApr: tipoValor[] = [];
-  
-      const reglaCalculoData = {
-        enc_id: testId,
-        reglas_json: rules,
-      };
-  
-      try {
-        const responseRegla = await fetch('http://127.0.0.1:5000/estilos/api/v1/reglas', {
+      const responseTest = await fetch(
+        'http://127.0.0.1:5000/estilos/api/v1/encuesta',
+        {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${sessionToken}`,
           },
-          body: JSON.stringify(reglaCalculoData),
-        });
-  
+          body: JSON.stringify(encuestaData),
+        },
+      );
+
+      if (responseTest.status !== 201) {
+        setMensajeError('Error al guardar la encuesta en el servidor');
+        cambiarEstadoErrorGuardadoTemporalmente();
+        return;
+      }
+
+      const data = await responseTest.json();
+      let testId = data.data.enc_id;
+      let arregloEstilosApr: tipoValor[] = [];
+
+      const reglaCalculoData = {
+        enc_id: testId,
+        reglas_json: rules,
+      };
+
+      try {
+        const responseRegla = await fetch(
+          'http://127.0.0.1:5000/estilos/api/v1/reglas',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${sessionToken}`,
+            },
+            body: JSON.stringify(reglaCalculoData),
+          },
+        );
+
         if (responseRegla.status !== 201) {
           const errorData = await responseRegla.json();
           setMensajeError('Error al crear la regla de cálculo!');
           cambiarEstadoErrorGuardadoTemporalmente();
-          throw new Error(errorData.mensaje || 'Error al crear la regla de cálculo');
+          throw new Error(
+            errorData.mensaje || 'Error al crear la regla de cálculo',
+          );
         }
       } catch (error) {
         setMensajeError('Error al crear la regla de cálculo!');
         cambiarEstadoErrorGuardadoTemporalmente();
         throw new Error('Error al guardar la regla de cálculo');
       }
-  
+
       try {
         const apiUrl = 'http://127.0.0.1:5000/estilos/api/v1/estilo';
         const headers = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${sessionToken}`,
         };
-  
+
         for (let estilo of estilosAprendizaje) {
           let estilos = {
             est_descripcion: estilo.tipo,
             est_nombre: estilo.tipo,
             enc_id: testId,
           };
-  
+
           const responseEstilo = await fetch(apiUrl, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(estilos),
           });
-  
+
           if (responseEstilo.status !== 201) {
             setMensajeError(`Error al guardar el estilo ${estilo}!`);
             cambiarEstadoErrorGuardadoTemporalmente();
             throw new Error('Error al guardar el estilo');
           }
-          
+
           const dataEstilo = await responseEstilo.json();
           arregloEstilosApr.push({
             tipo: estilo.tipo,
             valor: dataEstilo.data.est_id,
           });
         }
-  
       } catch (error) {
         setMensajeError(`Error al guardar los estilos: ${error}`);
         cambiarEstadoErrorGuardadoTemporalmente();
         return;
       }
-  
+
       for (let i = 0; i < listaPreguntas.length; i++) {
         const pregunta = listaPreguntas[i];
-  
+
         const preguntaData = {
           enc_id: testId,
           pre_enunciado: pregunta.pregunta,
@@ -390,35 +397,42 @@ const Models = () => {
           pre_tipo_pregunta: pregunta.tipoPregunta,
           pre_valor_total: valorPregunta,
         };
-  
+
         try {
-          const responsePregunta = await fetch('http://127.0.0.1:5000/estilos/api/v1/pregunta', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${sessionToken}`,
+          const responsePregunta = await fetch(
+            'http://127.0.0.1:5000/estilos/api/v1/pregunta',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${sessionToken}`,
+              },
+              body: JSON.stringify(preguntaData),
             },
-            body: JSON.stringify(preguntaData),
-          });
-  
+          );
+
           if (responsePregunta.status !== 201) {
-            setMensajeError(`Error al guardar la pregunta ${pregunta.pregunta}!`);
+            setMensajeError(
+              `Error al guardar la pregunta ${pregunta.pregunta}!`,
+            );
             cambiarEstadoErrorGuardadoTemporalmente();
             throw new Error('Error al guardar la pregunta');
           }
-  
+
           let dataPregunta = await responsePregunta.json();
           let preguntaId = dataPregunta.data.pre_id;
-  
+
           for (const opcion of pregunta.opciones) {
-            let estiloId = arregloEstilosApr.find(estiloApr => estiloApr.tipo === opcion.estilo);
-            
+            let estiloId = arregloEstilosApr.find(
+              (estiloApr) => estiloApr.tipo === opcion.estilo,
+            );
+
             if (estiloId === undefined) {
               return;
             }
-  
+
             let estiloIdNumerico = parseInt(estiloId.valor);
-  
+
             const opcionData = {
               est_id: estiloIdNumerico,
               opc_texto: opcion.opcion,
@@ -426,33 +440,37 @@ const Models = () => {
               valor_cuantitativo: valorPregunta,
               pre_id: preguntaId,
             };
-  
+
             try {
-              const responseOpcion = await fetch('http://127.0.0.1:5000/estilos/api/v1/opcion', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${sessionToken}`,
+              const responseOpcion = await fetch(
+                'http://127.0.0.1:5000/estilos/api/v1/opcion',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${sessionToken}`,
+                  },
+                  body: JSON.stringify(opcionData),
                 },
-                body: JSON.stringify(opcionData),
-              });
-  
+              );
+
               if (responseOpcion.status !== 201) {
                 setMensajeError(`Error al guardar la opción ${opcion.opcion}!`);
                 cambiarEstadoErrorGuardadoTemporalmente();
                 throw new Error('Error al guardar la opción');
               }
-  
             } catch (error) {
               console.error('Error al enviar la opción:', error);
             }
           }
-  
         } catch (error) {
-          console.error(`Error al guardar la pregunta ${pregunta.pregunta}:`, error);
+          console.error(
+            `Error al guardar la pregunta ${pregunta.pregunta}:`,
+            error,
+          );
         }
       }
-  
+
       cambiarEstadoGuardadoTemporalmente();
       return;
     } catch (error) {
@@ -461,7 +479,6 @@ const Models = () => {
       return;
     }
   };
-  
 
   const onGuardarNuevoEstiloAprendizaje = (dim: string) => {
     const estilo = nuevoEstiloAprendizaje.toLowerCase();
@@ -678,6 +695,7 @@ const Models = () => {
   };
 
   const cambiarTipoPregunta = (valor: string) => {
+    console.log(valor);
     setTipoPregunta(valor);
     setOpcionesPregunta([]);
     setNuevaOpcion('');
@@ -685,9 +703,6 @@ const Models = () => {
   };
 
   const handleClickAddPregunta = () => {
-    // Añadir mas campos para evitar la adición de preguntas si
-    // no se llenan
-    // if (nombreTest.length == 0) return;
     if (estilosAprendizaje[0].tipo == '') return;
     let IdUltimaPregunta;
     if (listaPreguntas.length == 0) {
@@ -723,6 +738,10 @@ const Models = () => {
     setListaPreguntas(nuevaLista);
     ResetCamposPregunta();
   };
+
+  useEffect(() => {
+    console.log(tipoPregunta);
+  }, [tipoPregunta]);
 
   const ResetCamposPregunta = () => {
     setNuevaPregunta('');
@@ -795,7 +814,7 @@ const Models = () => {
         tipos: [{ tipo: 'Selección múltiple', valor: 'seleccion' }],
       });
       setListaPreguntas([]);
-      setTipoPregunta('Selección múltiple');
+      setTipoPregunta('seleccion');
     } else {
       setTiposPreguntas({
         mensaje: 'Selecciona el tipo de pregunta',
@@ -834,33 +853,6 @@ const Models = () => {
       setErrorGuardado(false);
     }, 4000);
   };
-
-  // Pruebas de estados
-  useEffect(() => {
-    console.log('Listado pregunta');
-    console.log(listaPreguntas);
-  }, [listaPreguntas]);
-
-  useEffect(() => {
-    console.log('Estilos aprendizaje');
-    console.log(estilosAprendizaje);
-    console.log('Auxiliar');
-    console.log(estilosAprendizajeAux);
-    console.log('Parametros');
-    console.log(parametrosAprendizaje);
-  }, [estilosAprendizaje]);
-
-  useEffect(() => {
-    console.log(valorPregunta);
-    console.log('');
-  }, [valorPregunta]);
-
-  useEffect(() => {
-    console.log(reglaCalculo);
-    console.log('tamaño regla');
-    console.log(rules);
-    console.log(rules.length);
-  }, [rules]);
 
   useEffect(() => {
     if (parametrosAprendizaje.length > 0) {
@@ -1196,16 +1188,18 @@ const Models = () => {
             listaPreguntas.map((pre) => (
               <div className="gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
                 {pre.tipoPregunta === 'seleccion' && (
-                  <MultiChoiceQuestion
-                    pregunta={pre}
-                    tiposEstilosAprendizaje={tiposEstilosAprendizaje}
-                    onUpdatePregunta={handleChangePregunta}
-                    onUpdateOpcion={handleChangeOpcion}
-                    onDeleteOpcion={handleClickDeleteOpcion}
-                    onDeletePregunta={handleClickDeletePregunta}
-                    onAddOpcion={handleClickAddOpcion}
-                    onUpdateLimiteRespuesta={handleChangeLimiteRespuesta}
-                  />
+                  <>
+                    <MultiChoiceQuestion
+                      pregunta={pre}
+                      tiposEstilosAprendizaje={tiposEstilosAprendizaje}
+                      onUpdatePregunta={handleChangePregunta}
+                      onUpdateOpcion={handleChangeOpcion}
+                      onDeleteOpcion={handleClickDeleteOpcion}
+                      onDeletePregunta={handleClickDeletePregunta}
+                      onAddOpcion={handleClickAddOpcion}
+                      onUpdateLimiteRespuesta={handleChangeLimiteRespuesta}
+                    />
+                  </>
                 )}
                 {pre.tipoPregunta === 'likert' && (
                   <Likert

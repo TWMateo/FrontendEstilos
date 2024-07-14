@@ -141,6 +141,7 @@ const Test = () => {
   const [errorGuardado, setErrorGuardado] = useState(false);
   const { sessionToken, usuId, usuCedula, rolContext } =
     useContext(SessionContext);
+  const [errorGuardadoCuantitativa, setErrorGuardadoCuantitativa] = useState(false);
   const [testAsignado, setTestAsignado] = useState<TestEstructurado | null>(
     null,
   );
@@ -359,6 +360,10 @@ const Test = () => {
     ],
   };
 
+  const limpiarRespuestas = (respuestas: Respuesta[]): Respuesta[] => {
+    return respuestas.filter((respuesta) => respuesta.valorOpc !== 0);
+  };
+
   const handleAddRespuesta = (
     preguntaId: number,
     opcionId: number,
@@ -370,7 +375,10 @@ const Test = () => {
     }
     let usuarioId = usuId;
     if (!idTest) return;
-    let currentResponses = [...respuestas];
+    let currentR = [...respuestas];
+    const respuestasLimpias = limpiarRespuestas(currentR);
+    let currentResponses = respuestasLimpias;
+
     let nuevaRespuesta: Respuesta = {
       encuestaId: idTest,
       usuarioId: usuarioId,
@@ -379,6 +387,7 @@ const Test = () => {
       valorOpc: valorOpc ? valorOpc : 0,
       estilo: estiloI,
     };
+
     let exists = currentResponses.some(
       (respuesta) =>
         respuesta.encuestaId === nuevaRespuesta.encuestaId &&
@@ -410,6 +419,8 @@ const Test = () => {
     } else {
       currentResponses.push(nuevaRespuesta);
     }
+    console.log('RESPUESTAS');
+    console.log(currentResponses);
     setRespuestas(currentResponses);
   };
 
@@ -582,7 +593,14 @@ const Test = () => {
     setErrorGuardado(true);
     setTimeout(() => {
       setErrorGuardado(false);
-    }, 4000);
+    }, 7000);
+  };
+
+  const cambiarEstadoErrorGuardadoCuantitativa = () => {
+    setErrorGuardadoCuantitativa(true);
+    setTimeout(() => {
+      setErrorGuardadoCuantitativa(false);
+    }, 7000);
   };
 
   const cambiarEstadoGuardadoTemporalmente = () => {
@@ -682,16 +700,30 @@ const Test = () => {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }
 
+  function getRandomKey(obj: { [key: string]: boolean | number }): string {
+    const keys = Object.keys(obj);
+    const randomIndex = Math.floor(Math.random() * keys.length);
+    return keys[randomIndex];
+  }
+
   const handleSendTest = () => {
     const res = respuestas;
     const reglaCalculo = testAsignado?.reglaCalculo;
     let preguntas = testAsignado?.preguntas;
     let cantidadRespuestas;
-    preguntas?.forEach((element) => {
+    if (!preguntas) {
+      cambiarEstadoErrorGuardadoTemporalmente();
+      return;
+    }
+    for (let i = 0; i < preguntas.length; i++) {
+      const element = preguntas[i];
+      let cantidadRespuestas;
+
       if (element.min != 0) {
         cantidadRespuestas = respuestas.filter(
           (resp) => resp.preguntaId === element.id,
         );
+
         if (cantidadRespuestas.length != element.min) {
           cambiarEstadoErrorGuardadoTemporalmente();
           return;
@@ -700,13 +732,15 @@ const Test = () => {
         cantidadRespuestas = respuestas.filter(
           (resp) => resp.preguntaId === element.id,
         );
+
         if (cantidadRespuestas.length == 0) {
           cambiarEstadoErrorGuardadoTemporalmente();
           return;
         }
       }
+
       cambiarEstadoGuardadoTemporalmente();
-    });
+    }
 
     if (!testAsignado?.cuantitativa) {
       const conteoEstiloS: ResultadosTest = {};
@@ -749,7 +783,6 @@ const Test = () => {
           let contadorParam = 0;
           condicion.parametros.forEach((parametro) => {
             let sumaRespuestas = 0;
-            console.log(parametro);
             contadorParam++;
             operadoresParciales += parametro.value + ' ' + operacion + ' ';
             res.forEach((respuesta) => {
@@ -800,30 +833,17 @@ const Test = () => {
           estiloPredominante = key;
         }
       });
-      console.log(respuestas);
-      console.log(testAsignado);
-      console.log(
-        'El estilo de aprendizaje predominante es:',
-        estiloPredominante,
-      );
-      console.log(conteoEstiloS);
       if (!asignacion) {
-        console.log('ERR 1');
         console.log(asignacion);
         return;
       }
-      console.log(asignacion);
-      console.log(estiloPredominante);
+
       if (!estiloPredominante) {
-        console.log('ERR 2');
-        return;
+        estiloPredominante = getRandomKey(conteoEstiloS);
       }
-      console.log(asignacion);
-      console.log(estiloPredominante.substring(0, 5));
-      console.log(asignacion.asi_fecha_completado);
+      //CALCULOS
       let fechaTerminado: Date = new Date();
       let fechaFormateada = formatDate(fechaTerminado);
-      console.log(fechaFormateada);
       let historialRespuesta: Historial = {
         asi_id: asignacion?.asi_id,
         cur_id: asignacion?.cur_id,
@@ -834,7 +854,6 @@ const Test = () => {
       };
       historialRespuesta.est_cedula = usuCedula;
       historialRespuesta;
-      console.log('HISTORIAL');
       postHistorial(historialRespuesta);
       let asignacionActualizar = {
         enc_id: asignacion.enc_id,
@@ -844,11 +863,27 @@ const Test = () => {
         asi_fecha_completado: fechaTerminado.toISOString(),
         asi_realizado: true,
       };
-      console.log('ASIGNACION');
       actualizarAsignacion(asignacion?.asi_id, asignacionActualizar);
     } else {
-      const conteoEstilos: ConteoEstilos = {};
+      if (testAsignado?.cuantitativa) {
+        for (const pregunta of preguntas) {
+          if (pregunta.min !== undefined || pregunta.max !== undefined) {
+            const respuestasPregunta = res.filter(
+              (resp) => resp.preguntaId === pregunta.id,
+            );
+            const sumaRespuestasPregunta = respuestasPregunta.reduce(
+              (total, resp) => total + (resp.valorOpc || 0),
+              0,
+            );
 
+            if (sumaRespuestasPregunta !== testAsignado.valorPregunta) {
+              cambiarEstadoErrorGuardadoCuantitativa();
+              return;
+            }
+          }
+        }
+      }
+      const conteoEstilos: ConteoEstilos = {};
       testAsignado?.estilosAprendizaje.forEach((regla) => {
         conteoEstilos[regla] = 0;
       });
@@ -876,12 +911,54 @@ const Test = () => {
         }
       }
 
-      console.log(
-        'El estilo de aprendizaje predominante es:',
-        estiloPredominante,
-      );
-      console.log(conteoEstilos);
-      console.log(respuestas);
+      res.forEach((respuesta) => {
+        let resp: RespuestaEnvio = {
+          asi_id: 0,
+          opc_id: 0,
+          pre_id: 0,
+          usu_id: 0,
+        };
+        const { estilo, valorOpc } = respuesta;
+        if (!estilo) return;
+        if (!valorOpc) return;
+        if (!idAsignacion) return;
+        resp.asi_id = parseInt(idAsignacion);
+        resp.opc_id = respuesta.opcionId;
+        resp.pre_id = respuesta.preguntaId;
+        resp.usu_id = respuesta.usuarioId;
+        postRespuesta(resp);
+      });
+
+      if (!asignacion) {
+        console.log(asignacion);
+        return;
+      }
+
+      if (!estiloPredominante) {
+        estiloPredominante = getRandomKey(conteoEstilos);
+      }
+      let fechaTerminado: Date = new Date();
+      let fechaFormateada = formatDate(fechaTerminado);
+      let historialRespuesta: Historial = {
+        asi_id: asignacion?.asi_id,
+        cur_id: asignacion?.cur_id,
+        his_fecha_encuesta: fechaFormateada,
+        est_cedula: usuCedula,
+        his_nota_estudiante: estiloPredominante.substring(0, 5),
+        his_resultado_encuesta: estiloPredominante,
+      };
+      historialRespuesta.est_cedula = usuCedula;
+      historialRespuesta;
+      postHistorial(historialRespuesta);
+      let asignacionActualizar = {
+        enc_id: asignacion.enc_id,
+        usu_id: asignacion.usu_id,
+        cur_id: asignacion.cur_id,
+        asi_descripcion: asignacion.asi_descripcion,
+        asi_fecha_completado: fechaTerminado.toISOString(),
+        asi_realizado: true,
+      };
+      actualizarAsignacion(asignacion?.asi_id, asignacionActualizar);
     }
   };
 
@@ -997,6 +1074,14 @@ const Test = () => {
           <AlertError
             titulo="Test no guardado"
             mensaje="Todos las preguntas deben ser respondidas"
+          />
+        </div>
+      )}
+      {errorGuardadoCuantitativa && (
+        <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
+          <AlertError
+            titulo="Test no guardado"
+            mensaje="La sumatoria de las respuestas debe cumplir el valor maximo indicado en las preguntas."
           />
         </div>
       )}

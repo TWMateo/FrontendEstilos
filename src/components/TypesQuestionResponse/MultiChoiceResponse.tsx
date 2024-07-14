@@ -71,7 +71,6 @@ const MultiChoiceResponse: React.FC<Props> = ({ pregunta, onAddResponse }) => {
         return;
       }
     }
-    console.log('SALIO');
     setIdOptions(updatedIdOptions);
     setSelectedOptions(updatedOptions);
     onAddResponse(pregunta.id, idOpcion, 1, estiloOpcion);

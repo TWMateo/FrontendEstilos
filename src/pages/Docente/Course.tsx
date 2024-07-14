@@ -367,7 +367,6 @@ const Course = () => {
         }),
       );
 
-      console.log('PROBANDO');
       for (const student of studentsListo) {
         const persona: Persona = {
           per_cedula: student.cedula.toString(),
