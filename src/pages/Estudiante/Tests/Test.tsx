@@ -141,7 +141,8 @@ const Test = () => {
   const [errorGuardado, setErrorGuardado] = useState(false);
   const { sessionToken, usuId, usuCedula, rolContext } =
     useContext(SessionContext);
-  const [errorGuardadoCuantitativa, setErrorGuardadoCuantitativa] = useState(false);
+  const [errorGuardadoCuantitativa, setErrorGuardadoCuantitativa] =
+    useState(false);
   const [testAsignado, setTestAsignado] = useState<TestEstructurado | null>(
     null,
   );
@@ -1060,93 +1061,97 @@ const Test = () => {
     },
   });
 
-  return loadingTest ? (
-    <Loader />
-  ) : (
+  return (
     <DefaultLayout>
-      {guardado && (
-        <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
-          <AlertSucessfull titulo="Test Guardado" mensaje="" />
-        </div>
-      )}
-      {errorGuardado && (
-        <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
-          <AlertError
-            titulo="Test no guardado"
-            mensaje="Todos las preguntas deben ser respondidas"
-          />
-        </div>
-      )}
-      {errorGuardadoCuantitativa && (
-        <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
-          <AlertError
-            titulo="Test no guardado"
-            mensaje="La sumatoria de las respuestas debe cumplir el valor maximo indicado en las preguntas."
-          />
-        </div>
-      )}
-      <div className="flex flex-col justify-center items-center w-[100%] gap-8 bg-stroke dark:bg-transparent">
-        <h3 className="text-xl font-semibold text-black dark:text-white">
-          Test de {testAsignado?.titulo}
-        </h3>
-        <div>{testAsignado?.autor}</div>
-        <div className="p-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
-          <h4 className="text-base font-semibold p-3 text-black dark:text-white">
-            Descripción:
-          </h4>
-          <div className="pl-3 pb-3">{testAsignado?.descripcion}</div>
-        </div>
-        <h3 className="text-lg w-[80%] font-semibold text-black dark:text-white">
-          Preguntas:
-        </h3>
-        <div className="flex flex-col p-5 gap-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
-          {testAsignado?.preguntas.map((preg, index) =>
-            preg.tipoPregunta == 'Seleccion multiple' ? (
-              testAsignado.cuantitativa ? (
-                <MultiChoiceCuantitativaResponse
-                  pregunta={preg}
-                  // indice={index}
-                  valor={testAsignado.valorPregunta}
-                  onAddResponse={handleAddRespuesta}
-                  key={index}
-                />
-              ) : (
-                <MultiChoiceResponse
-                  pregunta={preg}
-                  indice={index}
-                  onAddResponse={handleAddRespuesta}
-                  key={index}
-                />
-              )
-            ) : (
-              preg.tipoPregunta == 'Likert' && (
-                <LikertResponse
-                  pregunta={preg}
-                  key={index}
-                  selectedOptions={selectedOptions}
-                  setSelectedOptions={setSelectedOptions}
-                  onAddResponse={handleAddRespuestaLikert}
-                />
-              )
-            ),
+      {loadingTest ? (
+        <Loader />
+      ) : (
+        <>
+          {guardado && (
+            <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+              <AlertSucessfull titulo="Test Guardado" mensaje="" />
+            </div>
           )}
-          <div className="flex justify-between cursor-auto">
-            <div className="cursor-none"></div>
-            <button
-              className="flex w-[40%] justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-              onClick={handleOpenModal}
-            >
-              Enviar
-            </button>
-            <Modal
-              isOpen={isModalOpen}
-              mensaje="¿Estás seguro de guardar el test?"
-              onClose={handleCloseModal}
-              onConfirm={handleConfirm}
-            />
+          {errorGuardado && (
+            <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
+              <AlertError
+                titulo="Test no guardado"
+                mensaje="Todos las preguntas deben ser respondidas"
+              />
+            </div>
+          )}
+          {errorGuardadoCuantitativa && (
+            <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
+              <AlertError
+                titulo="Test no guardado"
+                mensaje="La sumatoria de las respuestas debe cumplir el valor maximo indicado en las preguntas."
+              />
+            </div>
+          )}
+          <div className="flex flex-col justify-center items-center w-[100%] gap-8 bg-stroke dark:bg-transparent">
+            <h3 className="text-xl font-semibold text-black dark:text-white">
+              Test de {testAsignado?.titulo}
+            </h3>
+            <div>{testAsignado?.autor}</div>
+            <div className="p-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
+              <h4 className="text-base font-semibold p-3 text-black dark:text-white">
+                Descripción:
+              </h4>
+              <div className="pl-3 pb-3">{testAsignado?.descripcion}</div>
+            </div>
+            <h3 className="text-lg w-[80%] font-semibold text-black dark:text-white">
+              Preguntas:
+            </h3>
+            <div className="flex flex-col p-5 gap-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
+              {testAsignado?.preguntas.map((preg, index) =>
+                preg.tipoPregunta == 'Seleccion multiple' ? (
+                  testAsignado.cuantitativa ? (
+                    <MultiChoiceCuantitativaResponse
+                      pregunta={preg}
+                      // indice={index}
+                      valor={testAsignado.valorPregunta}
+                      onAddResponse={handleAddRespuesta}
+                      key={index}
+                    />
+                  ) : (
+                    <MultiChoiceResponse
+                      pregunta={preg}
+                      indice={index}
+                      onAddResponse={handleAddRespuesta}
+                      key={index}
+                    />
+                  )
+                ) : (
+                  preg.tipoPregunta == 'Likert' && (
+                    <LikertResponse
+                      pregunta={preg}
+                      key={index}
+                      selectedOptions={selectedOptions}
+                      setSelectedOptions={setSelectedOptions}
+                      onAddResponse={handleAddRespuestaLikert}
+                    />
+                  )
+                ),
+              )}
+              <div className="flex justify-between cursor-auto">
+                <div className="cursor-none"></div>
+                <button
+                  className="flex w-[40%] justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  onClick={handleOpenModal}
+                >
+                  Enviar
+                </button>
+                <Modal
+                  isOpen={isModalOpen}
+                  mensaje="¿Estás seguro de guardar el test?"
+                  onClose={handleCloseModal}
+                  onConfirm={handleConfirm}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </DefaultLayout>
   );
 };

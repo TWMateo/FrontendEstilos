@@ -1,6 +1,7 @@
 import { ApexOptions } from 'apexcharts';
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
+import { SessionContext } from '../../Context/SessionContext';
 
 const options: ApexOptions = {
   legend: {
@@ -123,6 +124,7 @@ interface ChartOneState {
 }
 
 const ChartOne: React.FC = () => {
+  const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<ChartOneState>({
     series: [
       {
@@ -143,6 +145,26 @@ const ChartOne: React.FC = () => {
     }));
   };
   handleReset;
+
+  // useEffect(() => {
+  //   const filtered = cursos.filter((curso) =>
+  //     curso.cur_carrera.toLowerCase().includes(searchTerm.toLowerCase()),
+  //   );
+  //   setFilteredCursos(filtered);
+  // }, [searchTerm, cursos]);
+
+  // const handleSelectCurso = (cur_id: number) => {
+  //   setSelectedCursoId(cur_id);
+  // };
+
+  // useEffect(() => {
+  //   const filtered = cursos.filter(curso =>
+  //     curso.cur_carrera.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     curso.cur_nivel.toString().includes(searchTerm)
+  //   );
+  //   setFilteredCursos(filtered);
+  // }, [searchTerm, cursos]);
+
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">

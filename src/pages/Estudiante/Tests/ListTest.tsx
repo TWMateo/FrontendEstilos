@@ -13,19 +13,19 @@ import {
 import PsychologySharpIcon from '@mui/icons-material/PsychologySharp';
 import { SessionContext } from '../../../Context/SessionContext';
 import { useContext, useEffect, useState } from 'react';
+import Loader from '../../../common/Loader';
 
 interface Asignacion {
   id: number;
-  idAsignacion:number;
+  idAsignacion: number;
   titulo: string;
   descripcion: string;
 }
 
 const ListTest = () => {
   const navigate = useNavigate();
-
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
-
+  const [loadingTest, setLoadingTest] = useState(true);
   const { sessionToken, usuId, usuCedula, rolContext } =
     useContext(SessionContext);
 
@@ -45,6 +45,7 @@ const ListTest = () => {
         throw new Error('Error al obtener las asignaciones');
       }
       const data = await response.json();
+      let fechaActual = new Date();
       const asignacionesData = [];
       const titulosData = [];
 
@@ -88,8 +89,12 @@ const ListTest = () => {
         const idAsignacion = asignacion.asi_id;
         const titulo = `${encuestaData.data.enc_id}. ${encuestaData.data.enc_titulo} - ${cursoData.data.cur_carrera} ${cursoData.data.cur_nivel}`;
         const descripcion = fecha.toLocaleDateString('es-ES', opcionesFecha);
-        if (!asignacion.asi_realizado) {
-          asignacionesData.push({ id, idAsignacion, titulo, descripcion });
+        let date1 = new Date(asignacion.asi_fecha_completado);
+        let date2 = new Date(fechaActual);
+        if (date2 <= date1) {
+          if (!asignacion.asi_realizado) {
+            asignacionesData.push({ id, idAsignacion, titulo, descripcion });
+          }
         }
       }
       setAsignaciones(asignacionesData);
@@ -104,11 +109,14 @@ const ListTest = () => {
 
   useEffect(() => {
     fetchAsignaciones();
+    setTimeout(() => {
+      setLoadingTest(false);
+    }, 1000);
   }, []);
 
-  const handleSelectTest = (idTest: number,idAsignacion:number) => {
+  const handleSelectTest = (idTest: number, idAsignacion: number) => {
     console.log('ID TEST:' + idTest);
-    navigate('/test/' + idTest+'/'+idAsignacion);
+    navigate('/test/' + idTest + '/' + idAsignacion);
     return true;
   };
 
@@ -129,52 +137,59 @@ const ListTest = () => {
   });
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Tests" />
-      <div className="flex flex-col gap-8">
-        <h3 className="text-xl font-semibold text-black dark:text-white">
-          Tests asignados
-        </h3>
-        <ThemeProvider theme={theme}>
-          <List
-            sx={{ width: '100%', bgcolor: 'background.paper' }}
-            className="grid grid-cols-1 lg:grid-cols-2 cursor-pointer rounded-lg bg-stroke dark:bg-boxdark"
-          >
-            {asignaciones.map((test) => (
-              <ListItem
-                className="flex gap-8 hover:bg-black m-5 rounded-lg text-black dark:text-slate-400 hover:text-white dark:hover:text-white"
-                sx={{ width: '93%', minWidth: 280 }}
-                onClick={() => handleSelectTest(test.id, test.idAsignacion)}
+      {loadingTest ? (
+        <Loader />
+      ) : (
+        <>
+          <Breadcrumb pageName="Tests" />
+          <div className="flex flex-col gap-8">
+            <h3 className="text-xl font-semibold text-black dark:text-white">
+              Tests asignados
+            </h3>
+            <ThemeProvider theme={theme}>
+              <List
+                sx={{ width: '100%', bgcolor: 'background.paper' }}
+                className="grid grid-cols-1 lg:grid-cols-2 cursor-pointer rounded-lg bg-stroke dark:bg-boxdark"
               >
-                <ListItemAvatar className="">
-                  <Avatar style={{ width: '75px', height: '75px' }}>
-                    {/* {icono == 'test' && ( */}
-                    <PsychologySharpIcon
-                      style={{ width: '70px', height: '70px' }}
-                      className="text-black"
-                    />
-                    {/* )} */}
-                    {/* {icono == 'curso' && (
-                    <SchoolRoundedIcon
-                      style={{ width: '65px', height: '65px' }}
-                      className="text-black"
-                    />
-                  )} */}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  style={{
-                    width: '100px',
-                    whiteSpace: 'wrap',
-                    textAlign: 'center',
-                  }}
-                  primary={test.titulo}
-                  secondary={test.descripcion}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </ThemeProvider>
-      </div>
+                {asignaciones.length > 0 ? (
+                  asignaciones.map((test) => (
+                    <ListItem
+                      className="flex gap-8 hover:bg-black m-5 rounded-lg text-black dark:text-slate-400 hover:text-white dark:hover:text-white"
+                      sx={{ width: '93%', minWidth: 280 }}
+                      onClick={() =>
+                        handleSelectTest(test.id, test.idAsignacion)
+                      }
+                    >
+                      <ListItemAvatar className="">
+                        <Avatar style={{ width: '75px', height: '75px' }}>
+                          {/* {icono == 'test' && ( */}
+                          <PsychologySharpIcon
+                            style={{ width: '70px', height: '70px' }}
+                            className="text-black"
+                          />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        style={{
+                          width: '100px',
+                          whiteSpace: 'wrap',
+                          textAlign: 'center',
+                        }}
+                        primary={test.titulo}
+                        secondary={test.descripcion}
+                      />
+                    </ListItem>
+                  ))
+                ) : (
+                  <div className="font-bold text-xl p-10">
+                    ¡Todos tus tests estan completados🥳!
+                  </div>
+                )}
+              </List>
+            </ThemeProvider>
+          </div>
+        </>
+      )}
     </DefaultLayout>
   );
 };

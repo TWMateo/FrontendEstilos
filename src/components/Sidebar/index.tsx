@@ -255,12 +255,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Análisis --> */}
               <li>
                 <NavLink
-                  to="/chart"
+                  to="/graficos"
                   className={`group relative hover:text-white flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium dark:text-bodydark1 duration-300 ease-in-out text-black hover:bg-graydark dark:hover:bg-meta-4 ${
-                    pathname.includes('chart') &&
+                    pathname.includes('graficos') &&
                     'bg-graydark text-white dark:bg-meta-4'
                   }`}
-                  onClick={(e) => handleNavLinkClick('/chart', e)}
+                  onClick={(e) => handleNavLinkClick('/graficos', e)}
                 >
                   <svg
                     className="fill-current"

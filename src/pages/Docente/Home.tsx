@@ -3,6 +3,7 @@ import DefaultLayout from '../../layout/DefaultLayout';
 import { TableGeneral } from '../../components/Tables/TableGeneral';
 import { useContext, useEffect, useState } from 'react';
 import { SessionContext } from '../../Context/SessionContext';
+import Loader from '../../common/Loader';
 
 interface Encuesta {
   enc_id: number;
@@ -20,6 +21,7 @@ interface Test {
 
 const Home = () => {
   const [encuestas, setEncuestas] = useState<Test[]>([]);
+  const [loadingTest, setLoadingTest] = useState(true);
   const [asignaciones, setAsignaciones] = useState<
     {
       titulo: string;
@@ -110,7 +112,7 @@ const Home = () => {
             },
           },
         );
-        if (encuestaResponse.status!=200) {
+        if (encuestaResponse.status != 200) {
           throw new Error('Error al obtener los datos de la encuesta');
         }
         const encuestaData = await encuestaResponse.json();
@@ -134,6 +136,9 @@ const Home = () => {
   useEffect(() => {
     fetchEncuestas();
     fetchAsignaciones();
+    setTimeout(() => {
+      setLoadingTest(false);
+    }, 2000);
   }, []);
 
   useEffect(() => {
@@ -141,22 +146,27 @@ const Home = () => {
   }, [encuestas]);
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Inicio" />
-
-      <div className="flex flex-col gap-8">
-        <TableGeneral
-          listado={encuestas}
-          titulo="Tests Creados"
-          icono="test"
-          path="/modelos/nuevo/test"
-        />
-        <TableGeneral
-          listado={asignaciones}
-          titulo="Asignaciones"
-          icono="curso"
-          path="/perfil"
-        />
-      </div>
+      {loadingTest ? (
+        <Loader />
+      ) : (
+        <>
+          <Breadcrumb pageName="Inicio" />
+          <div className="flex flex-col gap-8">
+            <TableGeneral
+              listado={encuestas}
+              titulo="Tests Creados"
+              icono="test"
+              path="/modelos/nuevo/test"
+            />
+            <TableGeneral
+              listado={asignaciones}
+              titulo="Asignaciones"
+              icono="curso"
+              path="/perfil"
+            />
+          </div>
+        </>
+      )}
     </DefaultLayout>
   );
 };
