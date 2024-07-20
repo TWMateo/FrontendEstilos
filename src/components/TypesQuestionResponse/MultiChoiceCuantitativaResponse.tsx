@@ -81,7 +81,6 @@ const MultiChoiceCuantitativaResponse: React.FC<
 
   return (
     <div className="flex flex-col rounded-lg p-3">
-      <div>CUANTITATIVAS</div>
       <div className="flex flex-col">
         <div className="flex w-full items-start pb-3">
           <h3 className="w-[95%] text- font-semibold text-black dark:text-white">

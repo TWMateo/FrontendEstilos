@@ -537,11 +537,14 @@ const Models = () => {
   };
 
   const handleClickDeleteEstiloAprendizaje = (estilo: string) => {
-    const index = estilosAprendizaje.indexOf({ tipo: estilo, valor: estilo });
+    const index = estilosAprendizaje.findIndex((itemEst) => itemEst.tipo === estilo && itemEst.valor === estilo);
+    console.log(index)
+    console.log(estilosAprendizaje)
     const indexAux = estilosAprendizajeAux.indexOf({
       tipo: estilo,
       valor: estilo,
     });
+    console.log('BORRANDO EST')
     let currentEstilosAprendizaje = [...estilosAprendizaje];
     let currentEstilosAux = [...estilosAprendizajeAux];
     let nuevasReglas;
@@ -577,12 +580,13 @@ const Models = () => {
       setRules(updatedRules);
       setEstilosAprendizaje(currentEstilosAprendizaje);
       setEstilosAprendizajeAux(currentEstilosAux);
+      console.log(currentEstilosAux)
       setReglaCalculo(nuevasReglas);
     }
   };
 
   const handleClickDeleteParametroAprendizaje = (estilo: string) => {
-    const index = estilosAprendizaje.indexOf({ tipo: estilo, valor: estilo });
+    const index = estilosAprendizaje.findIndex((itemEst) => itemEst.tipo === estilo && itemEst.valor === estilo);
     const indexAux = parametrosAprendizaje.indexOf({
       tipo: estilo,
       valor: estilo,

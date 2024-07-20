@@ -162,7 +162,7 @@ const Home = () => {
               listado={asignaciones}
               titulo="Asignaciones"
               icono="curso"
-              path="/perfil"
+              path="/curso"
             />
           </div>
         </>

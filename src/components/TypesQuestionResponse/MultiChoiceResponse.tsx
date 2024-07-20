@@ -48,13 +48,6 @@ const MultiChoiceResponse: React.FC<Props> = ({ pregunta, onAddResponse }) => {
       updatedOptions = selectedOptions.filter((item) => item !== opcion);
       updatedIdOptions = idOptions.filter((item) => item !== idOpcion);
     } else {
-      console.log('ENTRO');
-      console.log(pregunta.max);
-      console.log(selectedOptions.length);
-      console.log(pregunta.min);
-      console.log(opcion);
-      console.log(idOpcion);
-      console.log(estiloOpcion);
       if (pregunta.max == 0 && pregunta.min == 0) {
         updatedOptions = [...selectedOptions, opcion];
         updatedIdOptions = [...idOptions, idOpcion];

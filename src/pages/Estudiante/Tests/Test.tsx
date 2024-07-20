@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import PsychologySharpIcon from '@mui/icons-material/PsychologySharp';
 import { Props } from 'react-apexcharts';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import MultiChoiceResponse from '../../../components/TypesQuestionResponse/MultiChoiceResponse';
 import LikertResponse from '../../../components/TypesQuestionResponse/LikertResponse';
 import MultiChoiceCuantitativaResponse from '../../../components/TypesQuestionResponse/MultiChoiceCuantitativaResponse';
@@ -123,13 +123,15 @@ interface Condicion {
 }
 
 const Test = () => {
+  const navigate = useNavigate();
   const { id, idAsignacion } = useParams<{
     id: string;
     idAsignacion: string;
   }>();
   const [asignacion, setAsignacion] = useState<Asignacion>();
   const [loadingTest, setLoadingTest] = useState(true);
-  const { login, logout, isLoggedIn, userContext } = useContext(SessionContext);
+  const [pantallaResultado, setPantallaResultado] = useState(false);
+  const [resultadoPantalla, setResultadoPantalla] = useState('');
   const [respuestas, setRespuestas] = useState<Respuesta[]>([]);
   const [idTest, setIdTest] = useState<number>();
   const [selectedOptions, setSelectedOptions] = useState<
@@ -865,6 +867,8 @@ const Test = () => {
         asi_realizado: true,
       };
       actualizarAsignacion(asignacion?.asi_id, asignacionActualizar);
+      setPantallaResultado(true);
+      setResultadoPantalla(estiloPredominante);
     } else {
       if (testAsignado?.cuantitativa) {
         for (const pregunta of preguntas) {
@@ -960,8 +964,18 @@ const Test = () => {
         asi_realizado: true,
       };
       actualizarAsignacion(asignacion?.asi_id, asignacionActualizar);
+      setPantallaResultado(true);
+      setResultadoPantalla(estiloPredominante);
     }
   };
+
+  useEffect(() => {
+    if (pantallaResultado) {
+      setTimeout(() => {
+        navigate('/');
+      }, 15000);
+    }
+  }, [pantallaResultado]);
 
   async function actualizarAsignacion(asi_id: number, asignacionData: any) {
     try {
@@ -1063,7 +1077,17 @@ const Test = () => {
 
   return (
     <DefaultLayout>
-      {loadingTest ? (
+      {pantallaResultado ? (
+        <div className="h-screen bg-white rounded-lg dark:bg-black flex flex-col justify-center items-center">
+          <h1 className="font-bold text-4xl">Gracias por participar 🥳🎉!!</h1>
+          <h1 className="font-bold text-4xl">
+            Tu estilo de aprendizaje es: {resultadoPantalla} 😎
+          </h1>
+          <h1 className="font-bold text-4xl">
+            Revisa la sección de inicio en busca de nuevos test 👌
+          </h1>
+        </div>
+      ) : loadingTest ? (
         <Loader />
       ) : (
         <>

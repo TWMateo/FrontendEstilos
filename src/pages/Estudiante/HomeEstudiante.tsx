@@ -37,7 +37,6 @@ const HomeEstudiante = () => {
     useContext(SessionContext);
 
   const fetchAsignaciones = async () => {
-    console.log('ENTRANDO')
     try {
       const response = await fetch(
         `http://127.0.0.1:5000/estilos/api/v1/asignacion/usuario/${usuId}`,
@@ -55,7 +54,6 @@ const HomeEstudiante = () => {
       const data = await response.json();
       const asignacionesData = [];
       const titulosData = [];
-      console.log(data)
       for (const asignacion of data.data) {
         const cursoResponse = await fetch(
           `http://127.0.0.1:5000/estilos/api/v1/curso/${asignacion.cur_id}`,
@@ -72,8 +70,6 @@ const HomeEstudiante = () => {
         }
         const cursoData = await cursoResponse.json();
         let fechaActual = new Date();
-        console.log(asignacion.asi_fecha_completado);
-        console.log(fechaActual);
         let date1 = new Date(asignacion.asi_fecha_completado);
         let date2 = new Date(fechaActual);
 
