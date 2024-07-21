@@ -465,7 +465,7 @@ const Test = () => {
   const fetchTest = async (id: number) => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/encuestaDetalles/${id}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/encuestaDetalles/${id}`,
         {
           method: 'GET',
           headers: {
@@ -553,7 +553,6 @@ const Test = () => {
     };
   };
 
-  //IMPORTANTE - Controlar el loading para que aparezca hasta que se consulte el test de la db
   useEffect(() => {
     if (!id) return;
     let idNewTest = parseInt(id);
@@ -616,7 +615,7 @@ const Test = () => {
   const fetchAsignacion = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/asignacion/${idAsignacion}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/asignacion/${idAsignacion}`,
         {
           method: 'GET',
           headers: {
@@ -641,7 +640,7 @@ const Test = () => {
   const postHistorial = async (historialData: Historial) => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/historial',
+        'https://backendestilos.onrender.com/estilos/api/v1/historial',
         {
           method: 'POST',
           headers: {
@@ -668,7 +667,7 @@ const Test = () => {
   const postRespuesta = async (respuestaData: RespuestaEnvio) => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/respuesta',
+        'https://backendestilos.onrender.com/estilos/api/v1/respuesta',
         {
           method: 'POST',
           headers: {
@@ -980,7 +979,7 @@ const Test = () => {
   async function actualizarAsignacion(asi_id: number, asignacionData: any) {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/asignacion/${asi_id}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/asignacion/${asi_id}`,
         {
           method: 'PUT',
           headers: {

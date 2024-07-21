@@ -51,7 +51,7 @@ const Profile = () => {
   const fetchUsuarios = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/usuario/cedula/${usuCedula}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/usuario/cedula/${usuCedula}`,
         {
           method: 'GET',
           headers: {
@@ -76,7 +76,7 @@ const Profile = () => {
   const fetchPersonaPorCedula = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/persona/${usuCedula}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/persona/${usuCedula}`,
         {
           method: 'GET',
           headers: {
