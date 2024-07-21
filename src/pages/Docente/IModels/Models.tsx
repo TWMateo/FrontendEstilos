@@ -492,6 +492,7 @@ const Models = () => {
   };
 
   const onGuardarNuevoEstiloAprendizaje = (dim: string) => {
+    console.log('AGREGANDO')
     const estilo = nuevoEstiloAprendizaje.toLowerCase();
     const nuevoParam = nuevoParametro.toLowerCase();
     if (estilosAprendizaje[0].tipo.length == 0) {
@@ -528,6 +529,7 @@ const Models = () => {
         dim == 'dimension' &&
         !estilosAprendizaje.find((estiloA) => estiloA.tipo === nuevoParam)
       ) {
+        console.log('viendo')
         setEstilosAprendizaje((prevState) => [
           ...prevState,
           { tipo: nuevoParam, valor: nuevoParam },
@@ -653,15 +655,14 @@ const Models = () => {
   const onActualizarEstiloAprendizaje = (dim: string) => {
     let posicion;
     if (dim == 'dimension') {
-      posicion = estilosAprendizaje.indexOf({
-        tipo: parametroBuscado,
-        valor: parametroBuscado,
-      });
+      posicion = estilosAprendizaje.findIndex(
+        (item) =>
+          item.tipo == parametroBuscado && item.valor == parametroBuscado,
+      );
     } else {
-      posicion = estilosAprendizaje.indexOf({
-        tipo: estiloBuscado,
-        valor: estiloBuscado,
-      });
+      posicion = estilosAprendizaje.findIndex(
+        (item) => item.tipo == estiloBuscado && item.valor == estiloBuscado,
+      );
     }
     const auxEstilosAprendizaje = [...estilosAprendizaje];
     auxEstilosAprendizaje[posicion] = {
@@ -670,10 +671,10 @@ const Models = () => {
     };
     setEstilosAprendizaje(auxEstilosAprendizaje);
     if (dim == 'dimension') {
-      const posicionAux = parametrosAprendizaje.indexOf({
-        tipo: parametroBuscado,
-        valor: parametroBuscado,
-      });
+      const posicionAux = parametrosAprendizaje.findIndex(
+        (item) =>
+          item.tipo == parametroBuscado && item.valor == parametroBuscado,
+      );
       const parametrosAux = [...parametrosAprendizaje];
       parametrosAux[posicionAux] = {
         tipo: nuevoParametro,
@@ -682,17 +683,19 @@ const Models = () => {
       setParametrosAprendizaje(parametrosAux);
       setActualizandoParametro(false);
     } else {
-      const posicionAux = estilosAprendizajeAux.indexOf({
-        tipo: estiloBuscado,
-        valor: estiloBuscado,
-      });
-      console.log(posicionAux);
-      const estilosAprendizajeAuxDos = [...estilosAprendizajeAux];
-      estilosAprendizajeAuxDos[posicionAux] = {
-        tipo: nuevoEstiloAprendizaje,
-        valor: nuevoEstiloAprendizaje,
-      };
-      setEstilosAprendizajeAux(estilosAprendizajeAuxDos);
+      const posicionAux = estilosAprendizajeAux.findIndex(
+        (item) => item.tipo == estiloBuscado && item.valor == estiloBuscado,
+      );
+      if (posicionAux != -1) {
+        const estilosAprendizajeAuxDos = [...estilosAprendizajeAux];
+        estilosAprendizajeAuxDos[posicionAux] = {
+          tipo: nuevoEstiloAprendizaje,
+          valor: nuevoEstiloAprendizaje,
+        };
+        setEstilosAprendizajeAux(estilosAprendizajeAuxDos);
+      }
+      console.log('actual')
+      setActualizandoParametro(false);
       setActualizandoEstilo(false);
     }
   };
@@ -1105,7 +1108,7 @@ const Models = () => {
                 <div className="flex flex-row">
                   <input
                     type="text"
-                    placeholder="Agregar nuevo estilo"
+                    placeholder="Agregar nueva dimensión"
                     value={nuevoParametro}
                     onChange={(e) => setNuevoParametro(e.target.value)}
                     className={`w-[50%] ${
@@ -1114,7 +1117,7 @@ const Models = () => {
                         : 'rounded-l-lg'
                     } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
                   />
-                  {actualizandoEstilo === true ? (
+                  {actualizandoParametro === true ? (
                     <button
                       className={`flex w-[50%] justify-center bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
                       onClick={() => onActualizarEstiloAprendizaje('dimension')}
