@@ -4,6 +4,8 @@ import AppLogoUTN from '../../images/UTN/App-Utn.png';
 import { AlertError } from '../../components/Alerts/AlertError';
 // import { Props } from 'react-apexcharts';
 import { SessionContext } from '../../Context/SessionContext';
+import Campus from '../../images/UTN/1-CAMPUS-EL-OLIVO.png';
+import { AlertLoading } from '../../components/Alerts/AlertLoading';
 
 interface Props {
   handleLogin: () => void;
@@ -14,7 +16,7 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
   const [password, setPassword] = useState('');
   const [errorStatus, setErrorStatus] = useState(false);
   const [succesfullStatus, setSuccesfullStatus] = useState();
-
+  const [loadingGuardando, setLoadingGuardando] = useState(false);
   const {
     isLoggedIn,
     setNewUserContext,
@@ -24,11 +26,12 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
     setNewSessionToken,
     setNewUsuCedula,
     setNewUsuId,
-    setNewCurId
+    setNewCurId,
   } = useContext(SessionContext);
 
   // Función para iniciar sesión
   const authenticateUser = async () => {
+    setLoadingGuardando(true);
     try {
       const response = await fetch(
         'https://backendestilos.onrender.com/estilos/api/v1/auth/login',
@@ -61,11 +64,14 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
         login(data.usu_estado);
         setNewCurId(data.cur_id);
         handleLogin();
+        setLoadingGuardando(false);
       } else {
+        setLoadingGuardando(false);
         cambiarStatusError();
       }
     } catch (error) {
       console.error('Error en la autenticación:', error);
+      setLoadingGuardando(false);
       cambiarStatusError();
     }
   };
@@ -85,6 +91,7 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
   }, [user]);
 
   const cambiarStatusError = () => {
+    setLoadingGuardando(false);
     setErrorStatus(true);
     setTimeout(() => {
       setErrorStatus(false);
@@ -92,8 +99,12 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
   };
 
   return (
-    <div className="flex justify-center items-center bg-boxdark h-screen">
+    <div
+      className="flex justify-center items-center bg-boxdark h-screen"
+      style={{ backgroundImage: `url(${Campus})` }}
+    >
       {/* <Breadcrumb pageName="Inicio de Sesión" /> */}
+      {/* <img src={Campus} alt="Logo" /> */}
       <div className="rounded-sm border border-stroke bg-white shadow-default">
         <div className="flex flex-wrap items-center">
           <div className="hidden w-full xl:block xl:w-1/2">
@@ -121,6 +132,11 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
               {errorStatus && (
                 <div className="flex items-center z-50 w-full animate-fade-down min-h-14 max-h-14 animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
                   <AlertError mensaje="Credenciales incorrectas" />
+                </div>
+              )}
+              {loadingGuardando && (
+                <div className="sticky top-20 bg-[#cec043] z-50 rounded-b-lg animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+                  <AlertLoading titulo="Iniciando..." mensaje="" />
                 </div>
               )}
               <form>
