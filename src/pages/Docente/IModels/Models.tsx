@@ -12,6 +12,7 @@ import RuleComponent from './ReglaCalculo/RuleComponent';
 import { Hidden } from '@mui/material';
 import { SessionContext } from '../../../Context/SessionContext';
 import Loader from '../../../common/Loader';
+import { AlertLoading } from '../../../components/Alerts/AlertLoading';
 
 interface Opcion {
   id: number;
@@ -80,6 +81,7 @@ interface Props {
 
 const Models = () => {
   const [nombreTest, setNombreTest] = useState('');
+  const [savingState, setSavingState] = useState(false);
   const [loadingGuardando, setLoadingGuardando] = useState(false);
   const [nuevaPregunta, setNuevaPregunta] = useState('');
   const [tipoPregunta, setTipoPregunta] = useState('');
@@ -287,14 +289,15 @@ const Models = () => {
     const fecha = new Date();
 
     const encuestaData = {
-      enc_autor: autor,
+      enc_autor: autor.toString(),
       enc_cuantitativa: encuestaCuantitativa,
-      enc_descripcion: descripcion,
+      enc_descripcion: descripcion.toString(),
       enc_fecha_creacion: fecha.toISOString(),
-      enc_titulo: nombreTest,
+      enc_titulo: nombreTest.toString(),
     };
-
+    console.log(encuestaData);
     try {
+      console.log('UNOOO');
       setLoadingGuardando(true);
       const responseTest = await fetch(
         'https://backendestilos.onrender.com/estilos/api/v1/encuesta',
@@ -307,7 +310,7 @@ const Models = () => {
           body: JSON.stringify(encuestaData),
         },
       );
-
+      console.log('DOSS');
       if (responseTest.status !== 201) {
         setLoadingGuardando(false);
         setMensajeError('Error al guardar la encuesta en el servidor');
@@ -323,6 +326,8 @@ const Models = () => {
         enc_id: testId,
         reglas_json: rules,
       };
+
+      console.log(reglaCalculoData);
 
       try {
         const responseRegla = await fetch(
@@ -368,6 +373,7 @@ const Models = () => {
             enc_id: testId,
           };
 
+          console.log(estilos);
           const responseEstilo = await fetch(apiUrl, {
             method: 'POST',
             headers: headers,
@@ -408,6 +414,7 @@ const Models = () => {
         };
 
         try {
+          console.log(preguntaData);
           const responsePregunta = await fetch(
             'https://backendestilos.onrender.com/estilos/api/v1/pregunta',
             {
@@ -452,6 +459,7 @@ const Models = () => {
             };
 
             try {
+              console.log(opcionData);
               const responseOpcion = await fetch(
                 'https://backendestilos.onrender.com/estilos/api/v1/opcion',
                 {
@@ -463,7 +471,7 @@ const Models = () => {
                   body: JSON.stringify(opcionData),
                 },
               );
-
+              console.log('pasando primer');
               if (responseOpcion.status !== 201) {
                 setLoadingGuardando(false);
                 setMensajeError(`Error al guardar la opción ${opcion.opcion}!`);
@@ -487,12 +495,13 @@ const Models = () => {
     } catch (error) {
       setMensajeError('Error al guardar la encuesta');
       cambiarEstadoErrorGuardadoTemporalmente();
+      console.log(error);
       return;
     }
   };
 
   const onGuardarNuevoEstiloAprendizaje = (dim: string) => {
-    console.log('AGREGANDO')
+    console.log('AGREGANDO');
     const estilo = nuevoEstiloAprendizaje.toLowerCase();
     const nuevoParam = nuevoParametro.toLowerCase();
     if (estilosAprendizaje[0].tipo.length == 0) {
@@ -529,7 +538,7 @@ const Models = () => {
         dim == 'dimension' &&
         !estilosAprendizaje.find((estiloA) => estiloA.tipo === nuevoParam)
       ) {
-        console.log('viendo')
+        console.log('viendo');
         setEstilosAprendizaje((prevState) => [
           ...prevState,
           { tipo: nuevoParam, valor: nuevoParam },
@@ -694,7 +703,7 @@ const Models = () => {
         };
         setEstilosAprendizajeAux(estilosAprendizajeAuxDos);
       }
-      console.log('actual')
+      console.log('actual');
       setActualizandoParametro(false);
       setActualizandoEstilo(false);
     }
@@ -893,398 +902,399 @@ const Models = () => {
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Modelos" />
-      {loadingGuardando ? (
+      {/* {loadingGuardando ? (
         <Loader />
-      ) : (
-        <>
-          {guardado && (
-            <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
-              <AlertSucessfull titulo="Test Guardado" mensaje="" />
-            </div>
-          )}
-          {errorRegla && (
-            <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
-              <AlertError
-                titulo="Agregue al menos un estilo de aprendizaje"
-                mensaje=""
-              />
-            </div>
-          )}
-          {errorGuardado && mensajeError && (
-            <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
-              <AlertError titulo="Test no guardado" mensaje={mensajeError} />
-            </div>
-          )}
-          <div className="flex flex-col gap-3">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="">
-                <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
-                  Título:
-                </h3>
-                <input
-                  type="text"
-                  placeholder="Nombre del modelo"
-                  maxLength={75}
-                  value={nombreTest.length > 0 ? nombreTest : ''}
-                  onChange={(e) => setNombreTest(e.target.value)}
-                  className={`w-full ${
-                    errorCamposGuardar && nombreTest.length == 0
-                      ? 'rounded-t-lg'
-                      : 'rounded-lg'
-                  } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
-                />
-                {errorCamposGuardar && nombreTest.length == 0 && (
-                  <AlertError mensaje="El campo no debe estar vacío" />
-                )}
-              </div>
-              <div className="">
-                <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
-                  Autor:
-                </h3>
-                <input
-                  type="text"
-                  placeholder="Nombre del autor"
-                  value={autor}
-                  maxLength={100}
-                  onChange={(e) => setAutor(e.target.value)}
-                  className={`w-full ${
-                    errorCamposGuardar && autor.length == 0
-                      ? 'rounded-t-lg'
-                      : 'rounded-lg'
-                  } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
-                />
-                {errorCamposGuardar && autor.length == 0 && (
-                  <AlertError mensaje="El campo no debe estar vacío" />
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-                  Tipo de test:
-                </h3>
-                <div className="gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
-                  <label className="flex items-center gap-3 pt-2 pb-2">
-                    <div className="w-full pl-4 font-semibold">Cualitativo</div>
-                    <div>
-                      <input
-                        title="Cualitativo"
-                        type="radio"
-                        name="tipoTest"
-                        onClick={() => setEncuestaCuantitativa(false)}
-                        className="sr-only"
-                      />
-                      <div
-                        className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border ${
-                          !encuestaCuantitativa && 'border-primary'
-                        }`}
-                      >
-                        <span
-                          className={`h-2.5 w-2.5 rounded-full bg-transparent ${
-                            !encuestaCuantitativa && '!bg-primary'
-                          }`}
-                        >
-                          {' '}
-                        </span>
-                      </div>
-                    </div>
-                  </label>
-                  <label className="flex items-center gap-3 pt-2 pb-2">
-                    <div className="w-full pl-4 font-semibold">
-                      Cuantitativo
-                    </div>
-                    <div className="relative">
-                      <input
-                        title="Cuantitativo"
-                        type="radio"
-                        name="tipoTest"
-                        onClick={() => setEncuestaCuantitativa(true)}
-                        className="sr-only"
-                      />
-                      <div
-                        className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border ${
-                          encuestaCuantitativa && 'border-primary'
-                        }`}
-                      >
-                        <span
-                          className={`h-2.5 w-2.5 rounded-full bg-transparent ${
-                            encuestaCuantitativa && '!bg-primary'
-                          }`}
-                        >
-                          {' '}
-                        </span>
-                      </div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
-                  Descripción:
-                </h3>
-                <textarea
-                  placeholder="Descripción del test"
-                  value={descripcion}
-                  onChange={(e) => setDescripcion(e.target.value)}
-                  maxLength={100}
-                  className={`w-full h-[83%] ${
-                    errorCamposGuardar && descripcion.length == 0
-                      ? 'rounded-t-lg'
-                      : 'rounded-lg'
-                  } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
-                />
-                {errorCamposGuardar && descripcion.length == 0 && (
-                  <AlertError mensaje="El campo no debe estar vacío" />
-                )}
-              </div>
-            </div>
-            <div className={`gap-4 ${!encuestaCuantitativa && 'hidden'}`}>
-              <h3 className="text-title-xsm pt-2 pb-4 font-semibold text-black dark:text-white">
-                Valor de preguntas:
+      ) : ( */}
+      <>
+        {guardado && (
+          <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+            <AlertSucessfull titulo="Test Guardado" mensaje="" />
+          </div>
+        )}
+        {loadingGuardando && (
+          <div className="sticky top-20 bg-[#cec043] z-50 rounded-b-lg animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+            <AlertLoading titulo="Guardando..." mensaje="" />
+          </div>
+        )}
+        {errorRegla && (
+          <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+            <AlertError
+              titulo="Agregue al menos un estilo de aprendizaje"
+              mensaje=""
+            />
+          </div>
+        )}
+        {errorGuardado && mensajeError && (
+          <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
+            <AlertError titulo="Test no guardado" mensaje={mensajeError} />
+          </div>
+        )}
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="">
+              <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
+                Título:
               </h3>
               <input
-                type="number"
-                placeholder="Valor cuantitativo"
-                value={valorPregunta}
-                onChange={handleChangeValorPregunta}
-                className="rounded-lg w-full h-13 border-[1.5px] border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                type="text"
+                placeholder="Nombre del modelo"
+                maxLength={75}
+                value={nombreTest.length > 0 ? nombreTest : ''}
+                onChange={(e) => setNombreTest(e.target.value)}
+                className={`w-full ${
+                  errorCamposGuardar && nombreTest.length == 0
+                    ? 'rounded-t-lg'
+                    : 'rounded-lg'
+                } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
               />
+              {errorCamposGuardar && nombreTest.length == 0 && (
+                <AlertError mensaje="El campo no debe estar vacío" />
+              )}
             </div>
-            <div className="flex flex-col gap-5 ">
-              <div className="flex flex-col">
-                <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
-                  Estilos de aprendizaje:
-                </h3>
-                <div className="flex flex-row">
-                  <input
-                    type="text"
-                    placeholder="Agregar nuevo estilo"
-                    value={nuevoEstiloAprendizaje}
-                    onChange={(e) => setNuevoEstiloAprendizaje(e.target.value)}
-                    className={`w-[50%] ${
-                      errorCamposGuardar && estilosAprendizaje[0].tipo == ''
-                        ? 'rounded-tl-lg'
-                        : 'rounded-l-lg'
-                    } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
-                  />
-                  {actualizandoEstilo === true ? (
-                    <button
-                      className={`flex w-[50%] justify-center bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
-                      onClick={() => onActualizarEstiloAprendizaje('')}
+            <div className="">
+              <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
+                Autor:
+              </h3>
+              <input
+                type="text"
+                placeholder="Nombre del autor"
+                value={autor}
+                maxLength={100}
+                onChange={(e) => setAutor(e.target.value)}
+                className={`w-full ${
+                  errorCamposGuardar && autor.length == 0
+                    ? 'rounded-t-lg'
+                    : 'rounded-lg'
+                } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+              />
+              {errorCamposGuardar && autor.length == 0 && (
+                <AlertError mensaje="El campo no debe estar vacío" />
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-3">
+              <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+                Tipo de test:
+              </h3>
+              <div className="gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
+                <label className="flex items-center gap-3 pt-2 pb-2">
+                  <div className="w-full pl-4 font-semibold">Cualitativo</div>
+                  <div>
+                    <input
+                      title="Cualitativo"
+                      type="radio"
+                      name="tipoTest"
+                      onClick={() => setEncuestaCuantitativa(false)}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border ${
+                        !encuestaCuantitativa && 'border-primary'
+                      }`}
                     >
-                      Actualizar Estilo de Aprendizaje
-                    </button>
-                  ) : (
-                    <button
-                      className={`flex w-[50%] justify-center rounded-r-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
-                      onClick={() => onGuardarNuevoEstiloAprendizaje('')}
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full bg-transparent ${
+                          !encuestaCuantitativa && '!bg-primary'
+                        }`}
+                      >
+                        {' '}
+                      </span>
+                    </div>
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 pt-2 pb-2">
+                  <div className="w-full pl-4 font-semibold">Cuantitativo</div>
+                  <div className="relative">
+                    <input
+                      title="Cuantitativo"
+                      type="radio"
+                      name="tipoTest"
+                      onClick={() => setEncuestaCuantitativa(true)}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border ${
+                        encuestaCuantitativa && 'border-primary'
+                      }`}
                     >
-                      Agregar Estilo de Aprendizaje
-                    </button>
-                  )}
-                </div>
-                {estilosAprendizajeAux.length > 0 &&
-                  errorCamposGuardar &&
-                  estilosAprendizajeAux[0].tipo == '' && (
-                    <AlertError mensaje="La lista no debe estar vacía" />
-                  )}
-                <ul className="grid grid-cols-3 gap-4 pt-3">
-                  {estilosAprendizajeAux.length > 0 &&
-                    estilosAprendizajeAux[0].tipo.length > 0 &&
-                    estilosAprendizajeAux.map((estilo) => (
-                      <CardList
-                        actualizar={prepararActualizacionEstilo}
-                        eliminar={handleClickDeleteEstiloAprendizaje}
-                        valor={estilo.tipo}
-                        limite={20}
-                      />
-                    ))}
-                </ul>
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full bg-transparent ${
+                          encuestaCuantitativa && '!bg-primary'
+                        }`}
+                      >
+                        {' '}
+                      </span>
+                    </div>
+                  </div>
+                </label>
               </div>
-              <div className="flex flex-col">
-                <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
-                  Dimensiones de aprendizaje:
-                </h3>
-                <div className="flex flex-row">
-                  <input
-                    type="text"
-                    placeholder="Agregar nueva dimensión"
-                    value={nuevoParametro}
-                    onChange={(e) => setNuevoParametro(e.target.value)}
-                    className={`w-[50%] ${
-                      errorCamposGuardar && estilosAprendizaje[0].tipo == ''
-                        ? 'rounded-tl-lg'
-                        : 'rounded-l-lg'
-                    } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
-                  />
-                  {actualizandoParametro === true ? (
-                    <button
-                      className={`flex w-[50%] justify-center bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
-                      onClick={() => onActualizarEstiloAprendizaje('dimension')}
-                    >
-                      Actualizar Dimensión de aprendizaje
-                    </button>
-                  ) : (
-                    <button
-                      className="flex w-[50%] justify-center rounded-r-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-                      onClick={() =>
-                        onGuardarNuevoEstiloAprendizaje('dimension')
-                      }
-                    >
-                      Agregar Dimensión de Aprendizaje
-                    </button>
-                  )}
-                </div>
-                {/* {parametrosAprendizaje.length > 0 &&
+            </div>
+            <div className="flex flex-col">
+              <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
+                Descripción:
+              </h3>
+              <textarea
+                placeholder="Descripción del test"
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                maxLength={100}
+                className={`w-full h-[83%] ${
+                  errorCamposGuardar && descripcion.length == 0
+                    ? 'rounded-t-lg'
+                    : 'rounded-lg'
+                } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+              />
+              {errorCamposGuardar && descripcion.length == 0 && (
+                <AlertError mensaje="El campo no debe estar vacío" />
+              )}
+            </div>
+          </div>
+          <div className={`gap-4 ${!encuestaCuantitativa && 'hidden'}`}>
+            <h3 className="text-title-xsm pt-2 pb-4 font-semibold text-black dark:text-white">
+              Valor de preguntas:
+            </h3>
+            <input
+              type="number"
+              placeholder="Valor cuantitativo"
+              value={valorPregunta}
+              onChange={handleChangeValorPregunta}
+              className="rounded-lg w-full h-13 border-[1.5px] border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            />
+          </div>
+          <div className="flex flex-col gap-5 ">
+            <div className="flex flex-col">
+              <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
+                Estilos de aprendizaje:
+              </h3>
+              <div className="flex flex-row">
+                <input
+                  type="text"
+                  placeholder="Agregar nuevo estilo"
+                  value={nuevoEstiloAprendizaje}
+                  onChange={(e) => setNuevoEstiloAprendizaje(e.target.value)}
+                  className={`w-[50%] ${
+                    errorCamposGuardar && estilosAprendizaje[0].tipo == ''
+                      ? 'rounded-tl-lg'
+                      : 'rounded-l-lg'
+                  } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+                />
+                {actualizandoEstilo === true ? (
+                  <button
+                    className={`flex w-[50%] justify-center bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
+                    onClick={() => onActualizarEstiloAprendizaje('')}
+                  >
+                    Actualizar Estilo de Aprendizaje
+                  </button>
+                ) : (
+                  <button
+                    className={`flex w-[50%] justify-center rounded-r-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
+                    onClick={() => onGuardarNuevoEstiloAprendizaje('')}
+                  >
+                    Agregar Estilo de Aprendizaje
+                  </button>
+                )}
+              </div>
+              {estilosAprendizajeAux.length > 0 &&
+                errorCamposGuardar &&
+                estilosAprendizajeAux[0].tipo == '' && (
+                  <AlertError mensaje="La lista no debe estar vacía" />
+                )}
+              <ul className="grid grid-cols-3 gap-4 pt-3">
+                {estilosAprendizajeAux.length > 0 &&
+                  estilosAprendizajeAux[0].tipo.length > 0 &&
+                  estilosAprendizajeAux.map((estilo) => (
+                    <CardList
+                      actualizar={prepararActualizacionEstilo}
+                      eliminar={handleClickDeleteEstiloAprendizaje}
+                      valor={estilo.tipo}
+                      limite={20}
+                    />
+                  ))}
+              </ul>
+            </div>
+            <div className="flex flex-col">
+              <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
+                Dimensiones de aprendizaje:
+              </h3>
+              <div className="flex flex-row">
+                <input
+                  type="text"
+                  placeholder="Agregar nueva dimensión"
+                  value={nuevoParametro}
+                  onChange={(e) => setNuevoParametro(e.target.value)}
+                  className={`w-[50%] ${
+                    errorCamposGuardar && estilosAprendizaje[0].tipo == ''
+                      ? 'rounded-tl-lg'
+                      : 'rounded-l-lg'
+                  } border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+                />
+                {actualizandoParametro === true ? (
+                  <button
+                    className={`flex w-[50%] justify-center bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
+                    onClick={() => onActualizarEstiloAprendizaje('dimension')}
+                  >
+                    Actualizar Dimensión de aprendizaje
+                  </button>
+                ) : (
+                  <button
+                    className="flex w-[50%] justify-center rounded-r-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                    onClick={() => onGuardarNuevoEstiloAprendizaje('dimension')}
+                  >
+                    Agregar Dimensión de Aprendizaje
+                  </button>
+                )}
+              </div>
+              {/* {parametrosAprendizaje.length > 0 &&
               errorCamposGuardar &&
               parametrosAprendizaje[0] == '' && (
                 <AlertError mensaje="La lista no debe estar vacía" />
               )} */}
-                <ul className="grid grid-cols-3 gap-4 pt-3">
-                  {parametrosAprendizaje.length > 0 &&
-                    parametrosAprendizaje[0].tipo.length > 0 &&
-                    parametrosAprendizaje.map((estilo) => (
-                      <CardList
-                        actualizar={prepararActualizacionParametro}
-                        eliminar={handleClickDeleteParametroAprendizaje}
-                        valor={estilo.tipo}
-                        limite={11}
-                      />
-                    ))}
-                </ul>
-              </div>
-              {/* Sección de reglas de cálculo */}
-              <div>
-                <h3 className="text-title-xsm pt-3 pb-3 font-semibold text-black dark:text-white">
-                  Regla de cálculo:
-                </h3>
-                <div className="flex flex-col bg-whiten dark:bg-form-input gap-5 rounded-t-lg border-[1.5px] border-black py-8 px-5 dark:text-white outline-none transition dark:border-form-strokedark">
-                  {/* INGRESO DE REGLA ESPECIAL */}
-                  <div className="App flex flex-col gap-10">
-                    {rules.map((rule, index) => (
-                      <div>
-                        <div className="font-bold text-black dark:text-white text-lg mb-5">
-                          Regla {index + 1} :
-                        </div>
-                        <RuleComponent
-                          key={index}
-                          rule={rule}
-                          onChange={(updatedRule) =>
-                            handleRuleChange(index, updatedRule)
-                          }
-                          onDelete={() => deleteRule(index)}
-                          estilosAprendizaje={estilosAprendizajeAux}
-                          parametrosAprendizaje={
-                            parametrosAprendizaje.every(
-                              (param) => param.tipo === '',
-                            )
-                              ? estilosAprendizajeAux
-                              : parametrosAprendizaje
-                          }
-                        />
-                      </div>
-                    ))}
-                    <button
-                      className={`flex justify-center lg:justify-between items-center w-[40%] lg:w-[20%] gap-3 ${`rounded-lg`} bg-primary p-2 font-medium text-gray hover:bg-opacity-90`}
-                      onClick={addRule}
-                      disabled={
-                        estilosAprendizajeAux.length == 0 ||
-                        estilosAprendizajeAux[0].tipo.length == 0
-                          ? true
-                          : false
-                      }
-                    >
-                      <div className="lg:w-[12%] flex items-center h-1">
-                        <svg
-                          className="fill-white dark:fill-bodydark1 w-5"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 512 612"
-                        >
-                          <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z" />
-                        </svg>
-                      </div>
-                      <div className={`flex w-[100%]`}>Crear Regla</div>
-                    </button>
-                  </div>
-                </div>
-                {errorCamposGuardar && rules.length == 0 && (
-                  <AlertError mensaje="Debe determinar una regla de calculo" />
-                )}
-
-                {reglaCalculo.length == 0 && (
-                  <AlertError mensaje="La regla de calculo debe definirse" />
-                )}
-              </div>
+              <ul className="grid grid-cols-3 gap-4 pt-3">
+                {parametrosAprendizaje.length > 0 &&
+                  parametrosAprendizaje[0].tipo.length > 0 &&
+                  parametrosAprendizaje.map((estilo) => (
+                    <CardList
+                      actualizar={prepararActualizacionParametro}
+                      eliminar={handleClickDeleteParametroAprendizaje}
+                      valor={estilo.tipo}
+                      limite={11}
+                    />
+                  ))}
+              </ul>
             </div>
-            {/* Sección de previsualizacion del test */}
-            <div className="flex flex-col gap-6">
-              <h3 className="text-title-xsm pt-4 placeholder:b-4 font-semibold text-black dark:text-white">
-                Test:
+            {/* Sección de reglas de cálculo */}
+            <div>
+              <h3 className="text-title-xsm pt-3 pb-3 font-semibold text-black dark:text-white">
+                Regla de cálculo:
               </h3>
-              {listaPreguntas &&
-                listaPreguntas.map((pre) => (
-                  <div className="gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
-                    {pre.tipoPregunta === 'seleccion' && (
-                      <>
-                        <MultiChoiceQuestion
-                          pregunta={pre}
-                          tiposEstilosAprendizaje={tiposEstilosAprendizaje}
-                          onUpdatePregunta={handleChangePregunta}
-                          onUpdateOpcion={handleChangeOpcion}
-                          onDeleteOpcion={handleClickDeleteOpcion}
-                          onDeletePregunta={handleClickDeletePregunta}
-                          onAddOpcion={handleClickAddOpcion}
-                          onUpdateLimiteRespuesta={handleChangeLimiteRespuesta}
-                        />
-                      </>
-                    )}
-                    {pre.tipoPregunta === 'likert' && (
-                      <Likert
+              <div className="flex flex-col bg-whiten dark:bg-form-input gap-5 rounded-t-lg border-[1.5px] border-black py-8 px-5 dark:text-white outline-none transition dark:border-form-strokedark">
+                {/* INGRESO DE REGLA ESPECIAL */}
+                <div className="App flex flex-col gap-10">
+                  {rules.map((rule, index) => (
+                    <div>
+                      <div className="font-bold text-black dark:text-white text-lg mb-5">
+                        Regla {index + 1} :
+                      </div>
+                      <RuleComponent
+                        key={index}
+                        rule={rule}
+                        onChange={(updatedRule) =>
+                          handleRuleChange(index, updatedRule)
+                        }
+                        onDelete={() => deleteRule(index)}
+                        estilosAprendizaje={estilosAprendizajeAux}
+                        parametrosAprendizaje={
+                          parametrosAprendizaje.every(
+                            (param) => param.tipo === '',
+                          )
+                            ? estilosAprendizajeAux
+                            : parametrosAprendizaje
+                        }
+                      />
+                    </div>
+                  ))}
+                  <button
+                    className={`flex justify-center lg:justify-between items-center w-[40%] lg:w-[20%] gap-3 ${`rounded-lg`} bg-primary p-2 font-medium text-gray hover:bg-opacity-90`}
+                    onClick={addRule}
+                    disabled={
+                      estilosAprendizajeAux.length == 0 ||
+                      estilosAprendizajeAux[0].tipo.length == 0
+                        ? true
+                        : false
+                    }
+                  >
+                    <div className="lg:w-[12%] flex items-center h-1">
+                      <svg
+                        className="fill-white dark:fill-bodydark1 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 512 612"
+                      >
+                        <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344V280H168c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H280v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z" />
+                      </svg>
+                    </div>
+                    <div className={`flex w-[100%]`}>Crear Regla</div>
+                  </button>
+                </div>
+              </div>
+              {errorCamposGuardar && rules.length == 0 && (
+                <AlertError mensaje="Debe determinar una regla de calculo" />
+              )}
+
+              {reglaCalculo.length == 0 && (
+                <AlertError mensaje="La regla de calculo debe definirse" />
+              )}
+            </div>
+          </div>
+          {/* Sección de previsualizacion del test */}
+          <div className="flex flex-col gap-6">
+            <h3 className="text-title-xsm pt-4 placeholder:b-4 font-semibold text-black dark:text-white">
+              Test:
+            </h3>
+            {listaPreguntas &&
+              listaPreguntas.map((pre) => (
+                <div className="gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
+                  {pre.tipoPregunta === 'seleccion' && (
+                    <>
+                      <MultiChoiceQuestion
                         pregunta={pre}
                         tiposEstilosAprendizaje={tiposEstilosAprendizaje}
                         onUpdatePregunta={handleChangePregunta}
-                        onAddOpcion={handleClickAddOpcion}
+                        onUpdateOpcion={handleChangeOpcion}
                         onDeleteOpcion={handleClickDeleteOpcion}
                         onDeletePregunta={handleClickDeletePregunta}
-                        onUpdateOpcion={handleChangeOpcion}
+                        onAddOpcion={handleClickAddOpcion}
+                        onUpdateLimiteRespuesta={handleChangeLimiteRespuesta}
                       />
-                    )}
-                  </div>
-                ))}
-            </div>
-            <div className="flex flex-col gap-2">
-              <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-                Tipo de pregunta:
-              </h3>
-              <SelectGroupOne
-                onChange={cambiarTipoPregunta}
-                opciones={tiposPreguntas}
-                opcionPorDefecto={tipoPregunta}
-              />
-            </div>
-            <div className="flex gap-4">
-              <button
-                className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-                onClick={handleClickAddPregunta}
-              >
-                Agregar Pregunta
-              </button>
-              <button
-                className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-                onClick={handleOpenModal}
-              >
-                Guardar Test
-              </button>
-              <Modal
-                isOpen={isModalOpen}
-                mensaje="¿Estás seguro de guardar el test?"
-                onClose={handleCloseModal}
-                onConfirm={handleConfirm}
-              />
-            </div>
+                    </>
+                  )}
+                  {pre.tipoPregunta === 'likert' && (
+                    <Likert
+                      pregunta={pre}
+                      tiposEstilosAprendizaje={tiposEstilosAprendizaje}
+                      onUpdatePregunta={handleChangePregunta}
+                      onAddOpcion={handleClickAddOpcion}
+                      onDeleteOpcion={handleClickDeleteOpcion}
+                      onDeletePregunta={handleClickDeletePregunta}
+                      onUpdateOpcion={handleChangeOpcion}
+                    />
+                  )}
+                </div>
+              ))}
           </div>
-        </>
-      )}
+          <div className="flex flex-col gap-2">
+            <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+              Tipo de pregunta:
+            </h3>
+            <SelectGroupOne
+              onChange={cambiarTipoPregunta}
+              opciones={tiposPreguntas}
+              opcionPorDefecto={tipoPregunta}
+            />
+          </div>
+          <div className="flex gap-4">
+            <button
+              className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+              onClick={handleClickAddPregunta}
+            >
+              Agregar Pregunta
+            </button>
+            <button
+              className="flex w-full justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+              onClick={handleOpenModal}
+            >
+              Guardar Test
+            </button>
+            <Modal
+              isOpen={isModalOpen}
+              mensaje="¿Estás seguro de guardar el test?"
+              onClose={handleCloseModal}
+              onConfirm={handleConfirm}
+            />
+          </div>
+        </div>
+      </>
+      {/* )} */}
     </DefaultLayout>
   );
 };
