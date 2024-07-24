@@ -112,7 +112,6 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
               <Link className="mb-5.5 inline-block" to="/">
                 <img className="" src={AppLogoUTN} alt="Logo" />
               </Link>
-
               <p className="2xl:px-20 font-bold">
                 Aplicación para el análisis de estilos de aprendizaje.
               </p>

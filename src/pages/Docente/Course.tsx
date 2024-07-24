@@ -7,6 +7,7 @@ import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
 import { AlertError } from '../../components/Alerts/AlertError';
 import * as XLSX from 'xlsx';
 import { SessionContext } from '../../Context/SessionContext';
+import { AlertLoading } from '../../components/Alerts/AlertLoading';
 
 interface Asignacion {
   fecha: string;
@@ -94,6 +95,9 @@ interface tipoValor {
 const Course = () => {
   const [actualizandoCurso, setActualizandoCurso] = useState(false);
   const [carrera, setCarrera] = useState('');
+  const [okGuardado, setOkGuardado] = useState(false);
+  const [errorGuardado, setErrorGuardado] = useState(false);
+  const [guardando, setGuardando] = useState(false);
   const [semestre, setSemestre] = useState('');
   const [asignatura, setAsignatura] = useState('');
   const [test, setTest] = useState('');
@@ -140,6 +144,10 @@ const Course = () => {
       {
         tipo: 'Ingeniería de Software',
         valor: 'Ingeniería de Software',
+      },
+      {
+        tipo: 'Ingeniería en mantenimiento eléctrico',
+        valor: 'Ingeniería en Mantenimiento Eléctrico',
       },
     ],
   };
@@ -315,7 +323,6 @@ const Course = () => {
           })
           .filter((student) => student !== null); // Filtrar cualquier entrada nula
 
-
         console.log(studentData.length);
         console.log(studentData);
         if (studentData.length < 1) {
@@ -338,14 +345,8 @@ const Course = () => {
   };
 
   const handleSubmitAsignaciones = async () => {
-    // if (!file) {
-    //   setError('No se ha seleccionado ningún archivo');
-    //   return;
-    // }
     setLoading(true);
-    // setError(null);
-    // setMensaje(null);
-
+    setGuardando(true);
     try {
       const usuarios: Usuario[] = studentsListo.map((student) => ({
         cur_id: 1,
@@ -389,6 +390,7 @@ const Course = () => {
         cur_id: parseInt(cursoSeleccionado),
         enc_id: parseInt(test),
         usu_id: usuId ? usuId : 0,
+        mat_id: asignatura,
       };
       registrarAsignacion(asignacionCreador);
       cambiarEstadoGuardadoTemporalmente('ok');
@@ -397,8 +399,14 @@ const Course = () => {
       );
     } catch (err: any) {
       setError(err.message);
+      setMensajeError('Revisa los datos antes de enviar.');
+      setErrorGuardado(true);
+      setTimeout(() => {
+        setErrorGuardado(false);
+      }, 5000);
       console.log(err.message);
     } finally {
+      setGuardando(false);
       setLoading(false);
     }
   };
@@ -454,6 +462,7 @@ const Course = () => {
 
   const handleAgregarActualizarCurso = () => {
     if (carrera == '' || semestre == '') {
+      setGuardando(true);
       cambiarEstadoGuardadoTemporalmente('error');
       setMensajeError('Todos los datos del curso deben ser llenados');
       return;
@@ -475,6 +484,9 @@ const Course = () => {
     }
     const semesteNumber = parseInt(semestre);
     fetchCreateCursos(carrera, semesteNumber);
+    setTimeout(() => {
+      setGuardando(false);
+    }, 5000);
     cambiarEstadoGuardadoTemporalmente('ok');
   };
 
@@ -522,7 +534,7 @@ const Course = () => {
       (cur) => cur.datosCombinados == cursoSeleccionado,
     );
     let indexDatosCombinados = datosCursosCombinados.tipos.findIndex(
-      (dat) => dat == cursoSeleccionado,
+      (dat) => dat.tipo == cursoSeleccionado,
     );
     if (index == -1 && indexDatosCombinados != -1) return;
     let listaCursosActual = [...listaCursos];
@@ -806,6 +818,42 @@ const Course = () => {
     }
   };
 
+  const fetchMaterias = async () => {
+    try {
+      const response = await fetch(
+        'https://backendestilos.onrender.com/estilos/api/v1/materia',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      if (response.status != 200) {
+        throw new Error('Error fetching data');
+      }
+
+      const data = await response.json();
+      const tipos = data.data.map((item: any) => ({
+        tipo: item.mat_nombre,
+        valor: item.mat_id,
+      }));
+
+      setDatosAsignaturas({
+        mensaje: 'Asignatura',
+        tipos,
+      });
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
+  useEffect(() => {
+    console.log(asignatura);
+  }, [asignatura]);
+
   useEffect(() => {
     console.log(cursoSeleccionado);
   }, [cursoSeleccionado]);
@@ -820,29 +868,8 @@ const Course = () => {
   useEffect(() => {
     fetchCursos();
     fetchEncuestas();
+    fetchMaterias();
   }, []);
-
-  // useEffect(() => {
-  //   console.log(listaCursos);
-  //   let mensajeDatosCombinados = datosCursosCombinados.mensaje;
-  //   let newDatosCursosCombinados: string[] = [];
-  //   listaCursos.map((curso) => {
-  //     newDatosCursosCombinados.push(curso.datosCombinados);
-  //   });
-  //   let newCursosCombinados = {
-  //     mensaje: mensajeDatosCombinados,
-  //     tipos: newDatosCursosCombinados,
-  //   };
-  //   setDatosCursosCombinados(newCursosCombinados);
-  // }, [listaCursos]);
-
-  useEffect(() => {
-    console.log(semestre);
-  }, [semestre]);
-
-  useEffect(() => {
-    console.log(cursoSeleccionado);
-  }, [cursoSeleccionado]);
 
   useEffect(() => {
     if (listaCursos.length == 0) return;
@@ -859,16 +886,21 @@ const Course = () => {
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Cursos" />
+      {guardando && (
+        <div className="sticky top-20 bg-[#cec043] z-50 rounded-b-lg animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+          <AlertLoading titulo="Guardando..." mensaje="" />
+        </div>
+      )}
+      {errorGuardado && mensajeError && (
+        <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[5000ms] animate-ease-in-out animate-reverse animate-fill-both">
+          <AlertError titulo="Test no guardado" mensaje={mensajeError} />
+        </div>
+      )}
       <div className="flex flex-row justify-between gap-80 sticky top-20 z-50">
         <div className="w-100">
           {succesfull && (
             <div className="z-50 animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
               <AlertSucessfull titulo="Curso agregado" mensaje="" />
-            </div>
-          )}
-          {error && (
-            <div className="z-50 animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
-              <AlertError titulo={mensajeError} mensaje="" />
             </div>
           )}
         </div>
@@ -989,18 +1021,18 @@ const Course = () => {
           <h3 className="text-title-xsm font-semibold text-black dark:text-white">
             Nueva fecha:
           </h3>
-          <div className="grid grid-cols-5 gap-7">
+          <div className="flex justify-between gap-7">
             <div className="flex flex-row col-span-2 rounded-lg">
               <DatePickerOne setFechaActual={setFechaAsignacion} />
             </div>
-            <div className="col-span-2">
+            {/* <div className="col-span-2">
               <SelectGroupOne
                 opciones={datosParciales}
                 onChange={setPeriodo}
                 opcionPorDefecto={periodo}
                 advertencia="n"
               />
-            </div>
+            </div> */}
             <button
               className="rounded-b-lg col-span-1 h-13 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
               onClick={handleSubmitAsignaciones}
