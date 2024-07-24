@@ -365,6 +365,7 @@ const Course = () => {
           cur_id: parseInt(cursoSeleccionado),
           enc_id: parseInt(test),
           usu_id: 0,
+          mat_id:asignatura
         }),
       );
 
