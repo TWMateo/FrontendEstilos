@@ -149,6 +149,10 @@ const Course = () => {
         tipo: 'Ingeniería en mantenimiento eléctrico',
         valor: 'Ingeniería en Mantenimiento Eléctrico',
       },
+      {
+        tipo: 'Ingeniería automotriz',
+        valor: 'Ingeniería automotriz',
+      },
     ],
   };
   const datosParciales = {

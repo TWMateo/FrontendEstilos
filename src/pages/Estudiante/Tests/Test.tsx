@@ -37,6 +37,7 @@ interface Asignacion {
   enc_id: number;
   cur_id: number;
   usu_id: number;
+  mat_id: number;
   asi_descripcion: string;
   asi_fecha_completado: string;
   asi_realizado: boolean;
@@ -620,7 +621,7 @@ const Test = () => {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${sessionToken}`, // Asegúrate de que sessionToken esté definido
+            Authorization: `Bearer ${sessionToken}`,
           },
         },
       );
@@ -861,6 +862,7 @@ const Test = () => {
         enc_id: asignacion.enc_id,
         usu_id: asignacion.usu_id,
         cur_id: asignacion.cur_id,
+        mat_id:asignacion.mat_id,
         asi_descripcion: asignacion.asi_descripcion,
         asi_fecha_completado: fechaTerminado.toISOString(),
         asi_realizado: true,
@@ -958,6 +960,7 @@ const Test = () => {
         enc_id: asignacion.enc_id,
         usu_id: asignacion.usu_id,
         cur_id: asignacion.cur_id,
+        mat_id: asignacion.mat_id,
         asi_descripcion: asignacion.asi_descripcion,
         asi_fecha_completado: fechaTerminado.toISOString(),
         asi_realizado: true,
