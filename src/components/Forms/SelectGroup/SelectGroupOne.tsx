@@ -51,6 +51,7 @@ const SelectGroupOne: React.FC<Props> = ({
     changeTextColor();
   };
   useEffect(() => {
+    console.log(opciones)
     if (opcionPorDefecto != '') setSelectedOption(opcionPorDefecto);
   }, []);
 

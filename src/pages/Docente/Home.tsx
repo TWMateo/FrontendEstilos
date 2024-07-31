@@ -4,6 +4,7 @@ import { TableGeneral } from '../../components/Tables/TableGeneral';
 import { useContext, useEffect, useState } from 'react';
 import { SessionContext } from '../../Context/SessionContext';
 import Loader from '../../common/Loader';
+import EscudoUtn from '../../images/UTN/escudo-utn.svg';
 
 interface Encuesta {
   enc_id: number;
@@ -151,7 +152,17 @@ const Home = () => {
       ) : (
         <>
           <Breadcrumb pageName="Inicio" />
-          <div className="flex flex-col gap-8">
+          <div
+            className="flex flex-col gap-8"
+            style={{
+              backgroundImage: `url(${EscudoUtn})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
+              height: '70vh',
+            }}
+          >
             <TableGeneral
               listado={encuestas}
               titulo="Tests Creados"

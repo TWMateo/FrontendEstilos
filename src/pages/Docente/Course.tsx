@@ -8,6 +8,7 @@ import { AlertError } from '../../components/Alerts/AlertError';
 import * as XLSX from 'xlsx';
 import { SessionContext } from '../../Context/SessionContext';
 import { AlertLoading } from '../../components/Alerts/AlertLoading';
+import EscudoUtn from '../../images/UTN/escudo-utn.svg';
 
 interface Asignacion {
   fecha: string;
@@ -369,7 +370,7 @@ const Course = () => {
           cur_id: parseInt(cursoSeleccionado),
           enc_id: parseInt(test),
           usu_id: 0,
-          mat_id:asignatura
+          mat_id: asignatura,
         }),
       );
 
@@ -920,7 +921,16 @@ const Course = () => {
           {actualizandoCurso ? 'Actualizar Curso' : 'Agregar curso'}
         </button>
       </div>
-      <div className="flex flex-col gap-4">
+      <div
+        className="flex flex-col gap-4"
+        style={{
+          backgroundImage: `url(${EscudoUtn})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: '400px 500px',
+          backgroundPosition: 'center',
+          width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
+        }}
+      >
         <h3 className="text-title-xsm font-semibold text-black dark:text-white">
           Carrera:
         </h3>
@@ -941,7 +951,7 @@ const Course = () => {
         <h2 className="text-title-xsm font-semibold text-black dark:text-white">
           Aginaciones:
         </h2>
-        <div className="flex flex-col gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
+        <div className="flex opacity-85 flex-col gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
           <h3 className="text-title-xsm font-semibold text-black dark:text-white">
             Cursos creados:
           </h3>
@@ -970,7 +980,7 @@ const Course = () => {
           <div className="flex gap-5">
             <div className="w-[50%]">
               <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-                Asignatura:
+                Asignaturas:
               </h3>
               <SelectGroupOne
                 opciones={datosAsignaturas}

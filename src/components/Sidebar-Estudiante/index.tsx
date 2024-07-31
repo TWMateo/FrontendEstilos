@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import EscudoUtn from '../../images/UTN/escudo-utn.png';
 import ClassIcon from '@mui/icons-material/Class';
+import BluePrint from '../../images/backgroundHeader/backGround-v2.gif';
 import {
   Button,
   Dialog,
@@ -73,8 +74,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
   ) => {
     const shouldShowConfirmation =
-      location.pathname === '/test' &&
-      path !== '/test';
+      location.pathname === '/test' && path !== '/test';
     if (shouldShowConfirmation) {
       setIsModalOpen(true);
       setRedirectTo(path);
@@ -102,7 +102,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       }`}
     >
       {/* <!-- SIDEBAR HEADER --> */}
-      <div className="flex items-center bg-black justify-between gap-2 px-6 py-5.5 lg:py-6.5">
+      <div
+        className="flex items-center bg-black justify-between gap-2 px-6 py-5.5 lg:py-6.5"
+        style={{
+          backgroundImage: `url(${BluePrint})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
         <NavLink className={''} to="/">
           <img src={EscudoUtn} alt="Logo" />
         </NavLink>
@@ -224,7 +232,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 'group relative flex items-center gap-2.5 rounded-md px-4 font-medium dark:text-bodydark2 duration-300 ease-in-out text-slate-500 hover:text-black dark:hover:text-white ' +
                                 (isActive && 'text-black dark:!text-white')
                               }
-                              onClick={(e) => handleNavLinkClick('/testsAsignados', e)}
+                              onClick={(e) =>
+                                handleNavLinkClick('/testsAsignados', e)
+                              }
                             >
                               Test Asignados
                             </NavLink>
@@ -236,7 +246,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 'group relative flex items-center gap-2.5 rounded-md px-4 font-medium dark:text-bodydark2 duration-300 ease-in-out text-slate-500 hover:text-black dark:hover:text-white ' +
                                 (isActive && 'text-black dark:!text-white')
                               }
-                              onClick={(e) => handleNavLinkClick('/resultados', e)}
+                              onClick={(e) =>
+                                handleNavLinkClick('/resultados', e)
+                              }
                             >
                               Resultados
                             </NavLink>

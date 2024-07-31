@@ -38,16 +38,16 @@ interface Props {
   icono: string;
   crear?: boolean;
   path?: string;
-  mensaje?:string;
+  mensaje?: string;
 }
 
 export const TableGeneral: React.FC<Props> = ({
   listado,
   titulo,
   icono,
-  crear='true',
+  crear = 'true',
   path,
-  mensaje
+  mensaje,
 }) => {
   const navigate = useNavigate();
 
@@ -58,7 +58,7 @@ export const TableGeneral: React.FC<Props> = ({
   };
 
   return (
-    <div className="rounded-xl border border-stroke bg-white px-5 pt-5 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+    <div className="rounded-xl opacity-85 border border-stroke bg-white px-5 pt-5 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="flex justify-between mb-2">
         <h4 className="text-xl font-semibold text-black dark:text-white">
           {titulo}
@@ -82,38 +82,42 @@ export const TableGeneral: React.FC<Props> = ({
           sx={{ width: '100%', bgcolor: 'background.paper' }}
           className="flex overflow-auto cursor-pointer bg-stroke dark:bg-boxdark"
         >
-          {listado.length > 0 ? listado.map((test) => (
-            <ListItem
-              className="flex gap-3 hover:bg-black rounded-lg text-black dark:text-slate-400 hover:text-white dark:hover:text-white"
-              sx={{ width: '100%', minWidth: 280 }}
-            >
-              <ListItemAvatar className="">
-                <Avatar style={{ width: '75px', height: '75px' }}>
-                  {icono == 'test' && (
-                    <PsychologySharpIcon
-                      style={{ width: '70px', height: '70px' }}
-                      className="text-black"
-                    />
-                  )}
-                  {icono == 'curso' && (
-                    <SchoolRoundedIcon
-                      style={{ width: '65px', height: '65px' }}
-                      className="text-black"
-                    />
-                  )}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                style={{
-                  width: '100px',
-                  whiteSpace: 'wrap',
-                  textAlign: 'center',
-                }}
-                primary={test.titulo}
-                secondary={test.descripcion}
-              />
-            </ListItem>
-          )):<div className='font-bold text-xl'>{mensaje}</div>}
+          {listado.length > 0 ? (
+            listado.map((test) => (
+              <ListItem
+                className="flex gap-3 hover:bg-black rounded-lg text-black dark:text-slate-400 hover:text-white dark:hover:text-white"
+                sx={{ width: '100%', minWidth: 280 }}
+              >
+                <ListItemAvatar className="">
+                  <Avatar style={{ width: '75px', height: '75px' }}>
+                    {icono == 'test' && (
+                      <PsychologySharpIcon
+                        style={{ width: '70px', height: '70px' }}
+                        className="text-black"
+                      />
+                    )}
+                    {icono == 'curso' && (
+                      <SchoolRoundedIcon
+                        style={{ width: '65px', height: '65px' }}
+                        className="text-black"
+                      />
+                    )}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  style={{
+                    width: '100px',
+                    whiteSpace: 'wrap',
+                    textAlign: 'center',
+                  }}
+                  primary={test.titulo}
+                  secondary={test.descripcion}
+                />
+              </ListItem>
+            ))
+          ) : (
+            <div className="font-bold text-xl">{mensaje}</div>
+          )}
         </List>
       </ThemeProvider>
     </div>

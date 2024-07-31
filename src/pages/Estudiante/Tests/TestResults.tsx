@@ -5,6 +5,7 @@ import { SessionContext } from '../../../Context/SessionContext';
 import { useContext, useEffect, useState } from 'react';
 import Loader from '../../../common/Loader';
 import { Chart as GoogleChart } from 'react-google-charts';
+import EscudoUtn from '../../../images/UTN/escudo-utn.svg';
 
 interface Encuesta {
   enc_id: number;
@@ -358,7 +359,7 @@ const HomeEstudiante = () => {
       }
 
       const result = await response.json();
-      console.log(result)
+      console.log(result);
       setCursos(result.data);
     } catch (error: any) {
       setError(error.message);
@@ -366,7 +367,7 @@ const HomeEstudiante = () => {
   };
 
   useEffect(() => {
-    console.log(cursos)
+    console.log(cursos);
     const filtered = cursos.filter((cur) => {
       const cursoString =
         `${cur.cur_carrera} (Nivel: ${cur.cur_nivel})`.toLowerCase();
@@ -585,7 +586,17 @@ const HomeEstudiante = () => {
       ) : (
         <>
           <Breadcrumb pageName="Resultados" />
-          <div className="flex flex-col gap-8">
+          <div
+            className="flex flex-col gap-8"
+            style={{
+              backgroundImage: `url(${EscudoUtn})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
+              height: '70vh',
+            }}
+          >
             <TableGeneral
               listado={asignaciones}
               titulo="Asignaciones"
@@ -601,7 +612,8 @@ const HomeEstudiante = () => {
               crear={false}
             />
           </div>
-          <div className="col-span-12 mt-8 mb-8 w-full rounded-lg border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
+          <div className="col-span-12 mt-8 mb-8 w-full rounded-lg border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8"
+          >
             <div className="grid grid-cols-3 gap-4 min-w-47.5">
               <div className="flex flex-col gap-4">
                 <h1 className="font-bold">Lista de Cursos</h1>
@@ -627,7 +639,6 @@ const HomeEstudiante = () => {
                     </option>
                   ))}
                 </select>
-                
               </div>
               <div className="flex flex-col gap-4">
                 <h1 className="font-bold">Asignaciones</h1>

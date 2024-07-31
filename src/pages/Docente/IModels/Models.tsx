@@ -13,6 +13,7 @@ import { Hidden } from '@mui/material';
 import { SessionContext } from '../../../Context/SessionContext';
 import Loader from '../../../common/Loader';
 import { AlertLoading } from '../../../components/Alerts/AlertLoading';
+import EscudoUtn from '../../../images/UTN/escudo-utn.svg';
 
 interface Opcion {
   id: number;
@@ -359,8 +360,7 @@ const Models = () => {
       }
 
       try {
-        const apiUrl =
-          'https://backendestilos.onrender.com/estilos/api/v1/estilo';
+        const apiUrl = 'https://backendestilos.onrender.com/estilos/api/v1/estilo';
         const headers = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${sessionToken}`,
@@ -929,8 +929,17 @@ const Models = () => {
             <AlertError titulo="Test no guardado" mensaje={mensajeError} />
           </div>
         )}
-        <div className="flex flex-col gap-3">
-          <div className="grid grid-cols-2 gap-4">
+        <div
+          className="flex flex-col gap-3 opacity-85"
+          style={{
+            backgroundImage: `url(${EscudoUtn})`,
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '400px 350px',
+            backgroundPosition: 'center',
+            width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
+          }}
+        >
+          <div className="grid grid-cols-2 gap-4 opacity-95">
             <div className="">
               <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
                 Título:
@@ -972,7 +981,7 @@ const Models = () => {
               )}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 opacity-95">
             <div className="flex flex-col gap-3">
               <h3 className="text-title-xsm font-semibold text-black dark:text-white">
                 Tipo de test:
@@ -1062,7 +1071,7 @@ const Models = () => {
               className="rounded-lg w-full h-13 border-[1.5px] border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             />
           </div>
-          <div className="flex flex-col gap-5 ">
+          <div className="flex flex-col gap-5 opacity-95">
             <div className="flex flex-col">
               <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
                 Estilos de aprendizaje:
@@ -1227,7 +1236,7 @@ const Models = () => {
             </div>
           </div>
           {/* Sección de previsualizacion del test */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 opacity-95">
             <h3 className="text-title-xsm pt-4 placeholder:b-4 font-semibold text-black dark:text-white">
               Test:
             </h3>

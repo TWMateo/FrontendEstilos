@@ -4,13 +4,22 @@ import DropdownNotification from './DropdownNotification';
 import DropdownUser from './DropdownUser';
 import LogoIcon from '../../images/UTN/logo-utn.png';
 import DarkModeSwitcher from './DarkModeSwitcher';
+import BackGround from '../../images/backgroundHeader/backGround-v2.gif';
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
   setSidebarOpen: (arg0: boolean) => void;
 }) => {
   return (
-    <header className="sticky top-0 z-999 flex w-full drop-shadow-1 bg-black dark:drop-shadow-none">
+    <header
+      className="sticky top-0 z-999 flex w-full drop-shadow-1 bg-black dark:drop-shadow-none"
+      style={{
+        backgroundImage: `url(${BackGround})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
       <div className="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
           {/* <!-- Hamburger Toggle BTN --> */}
@@ -55,13 +64,17 @@ const Header = (props: {
             </span>
           </button>
           {/* <!-- Hamburger Toggle BTN --> */}
-
           <Link className="block flex-shrink-0 w-[50%] lg:hidden" to="/">
             <img src={LogoIcon} alt="Logo" />
           </Link>
         </div>
 
         <div className="hidden sm:block">
+          <div className='hidden lg:flex h-8'>
+            <Link className="block flex-shrink-0 w-[25%]" to="/">
+              <img src={LogoIcon} alt="Logo" />
+            </Link>
+          </div>
           <form action="https://formbold.com/s/unique_form_id" method="POST">
             <div className="relative">
               {/* <button className="absolute left-0 top-1/2 -translate-y-1/2">

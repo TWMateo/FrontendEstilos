@@ -14,6 +14,7 @@ import PsychologySharpIcon from '@mui/icons-material/PsychologySharp';
 import { SessionContext } from '../../../Context/SessionContext';
 import { useContext, useEffect, useState } from 'react';
 import Loader from '../../../common/Loader';
+import EscudoUtn from '../../../images/UTN/escudo-utn.svg';
 
 interface Asignacion {
   id: number;
@@ -93,6 +94,7 @@ const ListTest = () => {
         let date2 = new Date(fechaActual);
         if (date2 <= date1) {
           if (!asignacion.asi_realizado) {
+            console.log(asignacion);
             asignacionesData.push({ id, idAsignacion, titulo, descripcion });
           }
         }
@@ -142,14 +144,24 @@ const ListTest = () => {
       ) : (
         <>
           <Breadcrumb pageName="Tests" />
-          <div className="flex flex-col gap-8">
+          <div
+            className="flex flex-col gap-8"
+            style={{
+              backgroundImage: `url(${EscudoUtn})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
+              height: '70vh',
+            }}
+          >
             <h3 className="text-xl font-semibold text-black dark:text-white">
               Tests asignados
             </h3>
             <ThemeProvider theme={theme}>
               <List
                 sx={{ width: '100%', bgcolor: 'background.paper' }}
-                className="grid grid-cols-1 lg:grid-cols-2 cursor-pointer rounded-lg bg-stroke dark:bg-boxdark"
+                className="grid opacity-90 grid-cols-1 lg:grid-cols-2 cursor-pointer rounded-lg bg-stroke dark:bg-boxdark"
               >
                 {asignaciones.length > 0 ? (
                   asignaciones.map((test) => (

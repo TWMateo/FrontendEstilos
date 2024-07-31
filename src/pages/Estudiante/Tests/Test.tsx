@@ -862,7 +862,7 @@ const Test = () => {
         enc_id: asignacion.enc_id,
         usu_id: asignacion.usu_id,
         cur_id: asignacion.cur_id,
-        mat_id:asignacion.mat_id,
+        mat_id: asignacion.mat_id,
         asi_descripcion: asignacion.asi_descripcion,
         asi_fecha_completado: fechaTerminado.toISOString(),
         asi_realizado: true,
@@ -973,9 +973,16 @@ const Test = () => {
 
   useEffect(() => {
     if (pantallaResultado) {
-      setTimeout(() => {
-        navigate('/');
-      }, 15000);
+      const timer = setTimeout(() => {
+        navigate('/resultado', {
+          state: {
+            resultado: resultadoPantalla,
+            titulo: testAsignado?.titulo,
+            autor: testAsignado?.autor,
+          },
+        });
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [pantallaResultado]);
 
@@ -1079,105 +1086,108 @@ const Test = () => {
 
   return (
     <DefaultLayout>
-      {pantallaResultado ? (
-        <div className="h-screen bg-white rounded-lg dark:bg-black flex flex-col justify-center items-center">
-          <h1 className="font-bold text-4xl">Gracias por participar 🥳🎉!!</h1>
-          <h1 className="font-bold text-4xl">
-            Tu estilo de aprendizaje es: {resultadoPantalla} 😎
-          </h1>
-          <h1 className="font-bold text-4xl">
-            Revisa la sección de inicio en busca de nuevos test 👌
-          </h1>
-        </div>
-      ) : loadingTest ? (
-        <Loader />
-      ) : (
-        <>
-          {guardado && (
-            <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
-              <AlertSucessfull titulo="Test Guardado" mensaje="" />
-            </div>
-          )}
-          {errorGuardado && (
-            <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
-              <AlertError
-                titulo="Test no guardado"
-                mensaje="Todos las preguntas deben ser respondidas"
-              />
-            </div>
-          )}
-          {errorGuardadoCuantitativa && (
-            <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
-              <AlertError
-                titulo="Test no guardado"
-                mensaje="La sumatoria de las respuestas debe cumplir el valor maximo indicado en las preguntas."
-              />
-            </div>
-          )}
-          <div className="flex flex-col justify-center items-center w-[100%] gap-8 bg-stroke dark:bg-transparent">
-            <h3 className="text-xl font-semibold text-black dark:text-white">
-              Test de {testAsignado?.titulo}
-            </h3>
-            <div>{testAsignado?.autor}</div>
-            <div className="p-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
-              <h4 className="text-base font-semibold p-3 text-black dark:text-white">
-                Descripción:
-              </h4>
-              <div className="pl-3 pb-3">{testAsignado?.descripcion}</div>
-            </div>
-            <h3 className="text-lg w-[80%] font-semibold text-black dark:text-white">
-              Preguntas:
-            </h3>
-            <div className="flex flex-col p-5 gap-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
-              {testAsignado?.preguntas.map((preg, index) =>
-                preg.tipoPregunta == 'Seleccion multiple' ? (
-                  testAsignado.cuantitativa ? (
-                    <MultiChoiceCuantitativaResponse
-                      pregunta={preg}
-                      // indice={index}
-                      valor={testAsignado.valorPregunta}
-                      onAddResponse={handleAddRespuesta}
-                      key={index}
-                    />
-                  ) : (
-                    <MultiChoiceResponse
-                      pregunta={preg}
-                      indice={index}
-                      onAddResponse={handleAddRespuesta}
-                      key={index}
-                    />
-                  )
-                ) : (
-                  preg.tipoPregunta == 'Likert' && (
-                    <LikertResponse
-                      pregunta={preg}
-                      key={index}
-                      selectedOptions={selectedOptions}
-                      setSelectedOptions={setSelectedOptions}
-                      onAddResponse={handleAddRespuestaLikert}
-                    />
-                  )
-                ),
-              )}
-              <div className="flex justify-between cursor-auto">
-                <div className="cursor-none"></div>
-                <button
-                  className="flex w-[40%] justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-                  onClick={handleOpenModal}
-                >
-                  Enviar
-                </button>
-                <Modal
-                  isOpen={isModalOpen}
-                  mensaje="¿Estás seguro de guardar el test?"
-                  onClose={handleCloseModal}
-                  onConfirm={handleConfirm}
+      {
+        // pantallaResultado ? (
+        //   <div className="h-screen bg-white rounded-lg dark:bg-black flex flex-col justify-center items-center">
+        //     <h1 className="font-bold text-4xl">Gracias por participar 🥳🎉!!</h1>
+        //     <h1 className="font-bold text-4xl">
+        //       Tu estilo de aprendizaje es: {resultadoPantalla} 😎
+        //     </h1>
+        //     <h1 className="font-bold text-4xl">
+        //       Revisa la sección de inicio en busca de nuevos test 👌
+        //     </h1>
+        //   </div>
+        // ) :
+        loadingTest ? (
+          <Loader />
+        ) : (
+          <>
+            {guardado && (
+              <div className="sticky top-20 bg-[#93e6c7] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
+                <AlertSucessfull titulo="Test Guardado" mensaje="" />
+              </div>
+            )}
+            {errorGuardado && (
+              <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
+                <AlertError
+                  titulo="Test no guardado"
+                  mensaje="Todos las preguntas deben ser respondidas"
                 />
               </div>
+            )}
+            {errorGuardadoCuantitativa && (
+              <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[4000ms] animate-ease-in-out animate-reverse animate-fill-both">
+                <AlertError
+                  titulo="Test no guardado"
+                  mensaje="La sumatoria de las respuestas debe cumplir el valor maximo indicado en las preguntas."
+                />
+              </div>
+            )}
+            <div className="flex flex-col justify-center items-center w-[100%] gap-8 bg-stroke dark:bg-transparent">
+              <h3 className="text-xl font-semibold text-black dark:text-white">
+                Test de {testAsignado?.titulo}
+              </h3>
+              <div>{testAsignado?.autor}</div>
+              <div className="p-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
+                <h4 className="text-base font-semibold p-3 text-black dark:text-white">
+                  Descripción:
+                </h4>
+                <div className="pl-3 pb-3">{testAsignado?.descripcion}</div>
+              </div>
+              <h3 className="text-lg w-[80%] font-semibold text-black dark:text-white">
+                Preguntas:
+              </h3>
+              <div className="flex flex-col p-5 gap-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
+                {testAsignado?.preguntas.map((preg, index) =>
+                  preg.tipoPregunta == 'Seleccion multiple' ? (
+                    testAsignado.cuantitativa ? (
+                      <MultiChoiceCuantitativaResponse
+                        pregunta={preg}
+                        // indice={index}
+                        valor={testAsignado.valorPregunta}
+                        onAddResponse={handleAddRespuesta}
+                        key={index}
+                      />
+                    ) : (
+                      <MultiChoiceResponse
+                        pregunta={preg}
+                        indice={index}
+                        onAddResponse={handleAddRespuesta}
+                        key={index}
+                      />
+                    )
+                  ) : (
+                    preg.tipoPregunta == 'Likert' && (
+                      <LikertResponse
+                        pregunta={preg}
+                        key={index}
+                        selectedOptions={selectedOptions}
+                        setSelectedOptions={setSelectedOptions}
+                        onAddResponse={handleAddRespuestaLikert}
+                      />
+                    )
+                  ),
+                )}
+                <div className="flex justify-between cursor-auto">
+                  <div className="cursor-none"></div>
+                  <button
+                    className="flex w-[40%] justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                    onClick={handleOpenModal}
+                  >
+                    Enviar
+                  </button>
+                  <Modal
+                    isOpen={isModalOpen}
+                    mensaje="¿Estás seguro de guardar el test?"
+                    onClose={handleCloseModal}
+                    onConfirm={handleConfirm}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )
+      }
     </DefaultLayout>
   );
 };

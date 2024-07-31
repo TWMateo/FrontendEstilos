@@ -5,6 +5,7 @@ import { TableGeneral } from '../../components/Tables/TableGeneral';
 import { SessionContext } from '../../Context/SessionContext';
 import { Chart as GoogleChart } from 'react-google-charts';
 import Loader from '../../common/Loader';
+import EscudoUtn from '../../images/UTN/escudo-utn.svg';
 
 interface Encuesta {
   enc_id: number;
@@ -342,7 +343,7 @@ const Chart: React.FC = () => {
       }
 
       const result = await response.json();
-      console.log(result.data)
+      console.log(result.data);
       setCursos(result.data);
     } catch (error: any) {
       setError(error.message);
@@ -350,7 +351,7 @@ const Chart: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log(cursos)
+    console.log(cursos);
     const filtered = cursos.filter((curso) => {
       const cursoString =
         `${curso.cur_carrera} (Nivel: ${curso.cur_nivel})`.toLowerCase();
@@ -567,7 +568,15 @@ const Chart: React.FC = () => {
       {loadingTest ? (
         <Loader />
       ) : (
-        <>
+        <div
+          style={{
+            backgroundImage: `url(${EscudoUtn})`,
+            backgroundRepeat: 'repeat-y',
+            backgroundSize: '400px 495px',
+            backgroundPosition: 'center',
+            width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
+          }}
+        >
           <Breadcrumb pageName="Chart" />
           <div className="flex flex-col gap-8">
             <TableGeneral
@@ -583,10 +592,10 @@ const Chart: React.FC = () => {
               path="/curso"
             />
           </div>
-          <div className="col-span-12 mt-8 mb-8 w-full rounded-lg border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
+          <div className="col-span-12 opacity-85 text-black dark:text-white mt-8 mb-8 w-full rounded-lg border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
             <div className="grid grid-cols-3 gap-4 min-w-47.5">
-              <div className="flex flex-col gap-4">
-                <h1 className="font-bold">Lista de Cursos</h1>
+              <div className="flex flex-col gap-4 text-black">
+                <h1 className="font-bold dark:text-white">Lista de Cursos</h1>
                 <input
                   type="text"
                   placeholder="Buscar curso"
@@ -616,8 +625,8 @@ const Chart: React.FC = () => {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col gap-4">
-                <h1 className="font-bold">Asignaciones</h1>
+              <div className="flex flex-col gap-4 text-black">
+                <h1 className="font-bold dark:text-white">Asignaciones</h1>
                 <input
                   type="text"
                   placeholder="Buscar asignación"
@@ -646,8 +655,8 @@ const Chart: React.FC = () => {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col gap-4">
-                <h1 className="font-bold">Lista de Tests</h1>
+              <div className="flex flex-col gap-4 text-black">
+                <h1 className="font-bold dark:text-white">Lista de Tests</h1>
                 <input
                   type="text"
                   placeholder="Buscar asignación"
@@ -709,7 +718,7 @@ const Chart: React.FC = () => {
               )}
             </div>
           </div>
-        </>
+        </div>
       )}
     </DefaultLayout>
   );
