@@ -569,7 +569,7 @@ const Chart: React.FC = () => {
 
         const result = await response.json();
         setAsignacionTest(result.data);
-
+        console.log(result.data)
         const preguntas = result.data.preguntas;
         const estiloReglas = result.data.encuesta.estilos_aprendizaje.map(
           (estilo: any) => estilo.est_nombre,
@@ -599,6 +599,7 @@ const Chart: React.FC = () => {
 
           formattedData.push([pregunta.pre_enunciado, ...counts]);
         });
+        console.log(formattedData)
         setAsignacionTest(formattedData);
       } catch (error: any) {
         setError(error.message);

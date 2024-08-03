@@ -669,7 +669,7 @@ const Test = () => {
     } else if (estiloPredominante.length === 1) {
       mensajeRespuesta = `${estiloPredominante[0]}.`;
     } else {
-      mensajeRespuesta = `Posees rasgos relacionados a los estilos ${estiloPredominante.join(
+      mensajeRespuesta = `${estiloPredominante.join(
         ', ',
       )}.`;
     }
