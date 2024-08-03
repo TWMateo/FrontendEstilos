@@ -301,7 +301,7 @@ const Models = () => {
       console.log('UNOOO');
       setLoadingGuardando(true);
       const responseTest = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/encuesta',
+        'https://backendestilos.onrender.com/estilos/api/v1/encuesta',
         {
           method: 'POST',
           headers: {
@@ -332,7 +332,7 @@ const Models = () => {
 
       try {
         const responseRegla = await fetch(
-          'http://127.0.0.1:5000/estilos/api/v1/reglas',
+          'https://backendestilos.onrender.com/estilos/api/v1/reglas',
           {
             method: 'POST',
             headers: {
@@ -360,7 +360,7 @@ const Models = () => {
       }
 
       try {
-        const apiUrl = 'http://127.0.0.1:5000/estilos/api/v1/estilo';
+        const apiUrl = 'https://backendestilos.onrender.com/estilos/api/v1/estilo';
         const headers = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${sessionToken}`,
@@ -416,7 +416,7 @@ const Models = () => {
         try {
           console.log(preguntaData);
           const responsePregunta = await fetch(
-            'http://127.0.0.1:5000/estilos/api/v1/pregunta',
+            'https://backendestilos.onrender.com/estilos/api/v1/pregunta',
             {
               method: 'POST',
               headers: {
@@ -461,7 +461,7 @@ const Models = () => {
             try {
               console.log(opcionData);
               const responseOpcion = await fetch(
-                'http://127.0.0.1:5000/estilos/api/v1/opcion',
+                'https://backendestilos.onrender.com/estilos/api/v1/opcion',
                 {
                   method: 'POST',
                   headers: {
