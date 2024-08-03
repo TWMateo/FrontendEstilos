@@ -36,7 +36,7 @@ const Home = () => {
   const fetchEncuestas = async () => {
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/encuesta',
+        'http://127.0.0.1:5000/estilos/api/v1/encuesta',
         {
           method: 'GET',
           headers: {
@@ -69,70 +69,123 @@ const Home = () => {
     }
   };
 
+  // const fetchAsignaciones = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       `http://127.0.0.1:5000/estilos/api/v1/asignacion/usuario/${usuId}`,
+  //       {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Authorization: `Bearer ${sessionToken}`,
+  //         },
+  //       },
+  //     );
+  //     if (!response.ok) {
+  //       throw new Error('Error al obtener las asignaciones');
+  //     }
+  //     const data = await response.json();
+  //     const asignacionesData = [];
+
+  //     for (const asignacion of data.data) {
+  //       const cursoResponse = await fetch(
+  //         `http://127.0.0.1:5000/estilos/api/v1/curso/${asignacion.cur_id}`,
+  //         {
+  //           method: 'GET',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             Authorization: `Bearer ${sessionToken}`,
+  //           },
+  //         },
+  //       );
+  //       if (!cursoResponse.ok) {
+  //         throw new Error('Error al obtener los datos del curso');
+  //       }
+  //       const cursoData = await cursoResponse.json();
+
+  //       const encuestaResponse = await fetch(
+  //         `http://127.0.0.1:5000/estilos/api/v1/encuesta/${asignacion.enc_id}`,
+  //         {
+  //           method: 'GET',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             Authorization: `Bearer ${sessionToken}`,
+  //           },
+  //         },
+  //       );
+  //       if (encuestaResponse.status != 200) {
+  //         throw new Error('Error al obtener los datos de la encuesta');
+  //       }
+  //       const encuestaData = await encuestaResponse.json();
+  //       const fecha = new Date(asignacion.asi_fecha_completado);
+  //       const opcionesFecha: Intl.DateTimeFormatOptions = {
+  //         month: 'short',
+  //         day: 'numeric',
+  //         year: 'numeric',
+  //       };
+  //       const titulo = `${encuestaData.data.enc_id}. ${encuestaData.data.enc_titulo} - ${cursoData.data.cur_carrera} ${cursoData.data.cur_nivel}`;
+  //       const descripcion = fecha.toLocaleDateString('es-ES', opcionesFecha);
+  //       asignacionesData.push({ titulo, descripcion });
+  //     }
+
+  //     setAsignaciones(asignacionesData);
+  //   } catch (error) {
+  //     console.error('Error:', error);
+  //   }
+  // };
+
   const fetchAsignaciones = async () => {
-    try {
-      const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/asignacion/usuario/${usuId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${sessionToken}`,
-          },
+    const fetchData = async (url:any) => {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionToken}`,
         },
-      );
+      });
+  
       if (!response.ok) {
-        throw new Error('Error al obtener las asignaciones');
+        throw new Error(`Error al obtener datos de ${url}`);
       }
-      const data = await response.json();
-      const asignacionesData = [];
-
-      for (const asignacion of data.data) {
-        const cursoResponse = await fetch(
-          `https://backendestilos.onrender.com/estilos/api/v1/curso/${asignacion.cur_id}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${sessionToken}`,
-            },
-          },
+      return response.json();
+    };
+  
+    try {
+      const asignacionesResponse = await fetchData(
+        `http://127.0.0.1:5000/estilos/api/v1/asignacion/usuario/${usuId}`
+      );
+      const asignaciones = asignacionesResponse.data;
+  
+      const asignacionesDataPromises = asignaciones.map(async (asignacion:any) => {
+        const cursoPromise = fetchData(
+          `http://127.0.0.1:5000/estilos/api/v1/curso/${asignacion.cur_id}`
         );
-        if (!cursoResponse.ok) {
-          throw new Error('Error al obtener los datos del curso');
-        }
-        const cursoData = await cursoResponse.json();
-
-        const encuestaResponse = await fetch(
-          `https://backendestilos.onrender.com/estilos/api/v1/encuesta/${asignacion.enc_id}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${sessionToken}`,
-            },
-          },
+        const encuestaPromise = fetchData(
+          `http://127.0.0.1:5000/estilos/api/v1/encuesta/${asignacion.enc_id}`
         );
-        if (encuestaResponse.status != 200) {
-          throw new Error('Error al obtener los datos de la encuesta');
-        }
-        const encuestaData = await encuestaResponse.json();
+  
+        const [cursoData, encuestaData] = await Promise.all([cursoPromise, encuestaPromise]);
+  
         const fecha = new Date(asignacion.asi_fecha_completado);
         const opcionesFecha: Intl.DateTimeFormatOptions = {
           month: 'short',
           day: 'numeric',
           year: 'numeric',
         };
+  
         const titulo = `${encuestaData.data.enc_id}. ${encuestaData.data.enc_titulo} - ${cursoData.data.cur_carrera} ${cursoData.data.cur_nivel}`;
         const descripcion = fecha.toLocaleDateString('es-ES', opcionesFecha);
-        asignacionesData.push({ titulo, descripcion });
-      }
-
+  
+        return { titulo, descripcion };
+      });
+  
+      const asignacionesData = await Promise.all(asignacionesDataPromises);
       setAsignaciones(asignacionesData);
     } catch (error) {
       console.error('Error:', error);
     }
   };
+  
 
   useEffect(() => {
     fetchEncuestas();

@@ -143,7 +143,7 @@ const Chart: React.FC = () => {
   const fetchEncuestas = async () => {
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/encuesta',
+        'http://127.0.0.1:5000/estilos/api/v1/encuesta',
         {
           method: 'GET',
           headers: {
@@ -179,7 +179,7 @@ const Chart: React.FC = () => {
   const fetchAsignacionesByCursoId = async () => {
     try {
       const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/asignacion/curso/${selectedCursoId}`,
+        `http://127.0.0.1:5000/estilos/api/v1/asignacion/curso/${selectedCursoId}`,
         {
           method: 'GET',
           headers: {
@@ -260,65 +260,126 @@ const Chart: React.FC = () => {
     console.log(titulosEncuesta);
   }, [titulosEncuesta]);
 
+  // const fetchAsignaciones = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       `http://127.0.0.1:5000/estilos/api/v1/asignacion/usuario/${usuId}`,
+  //       {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Authorization: `Bearer ${sessionToken}`,
+  //         },
+  //       },
+  //     );
+  //     if (response.status != 200) {
+  //       throw new Error('Error al obtener las asignaciones');
+  //     }
+  //     const data = await response.json();
+  //     const asignacionesData = [];
+
+  //     for (const asignacion of data.data) {
+  //       const cursoResponse = await fetch(
+  //         `http://127.0.0.1:5000/estilos/api/v1/curso/${asignacion.cur_id}`,
+  //         {
+  //           method: 'GET',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             Authorization: `Bearer ${sessionToken}`,
+  //           },
+  //         },
+  //       );
+  //       if (!cursoResponse.ok) {
+  //         throw new Error('Error al obtener los datos del curso');
+  //       }
+  //       const cursoData = await cursoResponse.json();
+
+  //       const encuestaResponse = await fetch(
+  //         `http://127.0.0.1:5000/estilos/api/v1/encuesta/${asignacion.enc_id}`,
+  //         {
+  //           method: 'GET',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             Authorization: `Bearer ${sessionToken}`,
+  //           },
+  //         },
+  //       );
+  //       if (encuestaResponse.status != 200) {
+  //         throw new Error('Error al obtener los datos de la encuesta');
+  //       }
+  //       const encuestaData = await encuestaResponse.json();
+  //       const fecha = new Date(asignacion.asi_fecha_completado);
+  //       const opcionesFecha: Intl.DateTimeFormatOptions = {
+  //         month: 'short',
+  //         day: 'numeric',
+  //         year: 'numeric',
+  //       };
+  //       const titulo = `${encuestaData.data.enc_id}. ${encuestaData.data.enc_titulo} - ${cursoData.data.cur_carrera} ${cursoData.data.cur_nivel}`;
+  //       const descripcion = fecha.toLocaleDateString('es-ES', opcionesFecha);
+  //       asignacionesData.push({ titulo, descripcion });
+  //     }
+
+  //     setAsignaciones(asignacionesData);
+  //   } catch (error) {
+  //     console.error('Error:', error);
+  //   }
+  // };
+
   const fetchAsignaciones = async () => {
-    try {
-      const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/asignacion/usuario/${usuId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${sessionToken}`,
-          },
+    const fetchData = async (url:any) => {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionToken}`,
         },
-      );
-      if (response.status != 200) {
-        throw new Error('Error al obtener las asignaciones');
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al obtener datos de ${url}`);
       }
-      const data = await response.json();
-      const asignacionesData = [];
+      return response.json();
+    };
 
-      for (const asignacion of data.data) {
-        const cursoResponse = await fetch(
-          `https://backendestilos.onrender.com/estilos/api/v1/curso/${asignacion.cur_id}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${sessionToken}`,
-            },
-          },
-        );
-        if (!cursoResponse.ok) {
-          throw new Error('Error al obtener los datos del curso');
-        }
-        const cursoData = await cursoResponse.json();
+    try {
+      const response = await fetchData(
+        `http://127.0.0.1:5000/estilos/api/v1/asignacion/usuario/${usuId}`,
+      );
 
-        const encuestaResponse = await fetch(
-          `https://backendestilos.onrender.com/estilos/api/v1/encuesta/${asignacion.enc_id}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${sessionToken}`,
-            },
-          },
+      const asignaciones = response.data;
+      const fechaActual = new Date();
+      const asignacionesData:any = [];
+
+      const fetchDetailsPromises = asignaciones.map(async (asignacion:any) => {
+        const cursoPromise = fetchData(
+          `http://127.0.0.1:5000/estilos/api/v1/curso/${asignacion.cur_id}`,
         );
-        if (encuestaResponse.status != 200) {
-          throw new Error('Error al obtener los datos de la encuesta');
-        }
-        const encuestaData = await encuestaResponse.json();
+        const encuestaPromise = fetchData(
+          `http://127.0.0.1:5000/estilos/api/v1/encuesta/${asignacion.enc_id}`,
+        );
+
+        const [cursoData, encuestaData] = await Promise.all([
+          cursoPromise,
+          encuestaPromise,
+        ]);
+
         const fecha = new Date(asignacion.asi_fecha_completado);
         const opcionesFecha: Intl.DateTimeFormatOptions = {
           month: 'short',
           day: 'numeric',
           year: 'numeric',
         };
+        const id = asignacion.enc_id;
+        const idAsignacion = asignacion.asi_id;
         const titulo = `${encuestaData.data.enc_id}. ${encuestaData.data.enc_titulo} - ${cursoData.data.cur_carrera} ${cursoData.data.cur_nivel}`;
         const descripcion = fecha.toLocaleDateString('es-ES', opcionesFecha);
-        asignacionesData.push({ titulo, descripcion });
-      }
 
+        if (fechaActual <= fecha && !asignacion.asi_realizado) {
+          asignacionesData.push({ id, idAsignacion, titulo, descripcion });
+        }
+      });
+
+      await Promise.all(fetchDetailsPromises);
       setAsignaciones(asignacionesData);
     } catch (error) {
       console.error('Error:', error);
@@ -328,7 +389,7 @@ const Chart: React.FC = () => {
   const fetchCursos = async () => {
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/curso',
+        'http://127.0.0.1:5000/estilos/api/v1/curso',
         {
           method: 'GET',
           headers: {
@@ -445,7 +506,7 @@ const Chart: React.FC = () => {
     console.log(idsAsignacion);
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/historial/asignacion',
+        'http://127.0.0.1:5000/estilos/api/v1/historial/asignacion',
         {
           method: 'POST',
           headers: {
@@ -492,7 +553,7 @@ const Chart: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://backendestilos.onrender.com/estilos/api/v1/asignacion/test/${selectedAsignacionId}`,
+          `http://127.0.0.1:5000/estilos/api/v1/asignacion/test/${selectedAsignacionId}`,
           {
             method: 'GET',
             headers: {

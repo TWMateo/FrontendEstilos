@@ -40,7 +40,7 @@ const HomeEstudiante = () => {
   const fetchAsignaciones = async () => {
     try {
       const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/asignacion/usuario/${usuId}`,
+        `http://127.0.0.1:5000/estilos/api/v1/asignacion/usuario/${usuId}`,
         {
           method: 'GET',
           headers: {
@@ -57,7 +57,7 @@ const HomeEstudiante = () => {
       const titulosData = [];
       for (const asignacion of data.data) {
         const cursoResponse = await fetch(
-          `https://backendestilos.onrender.com/estilos/api/v1/curso/${asignacion.cur_id}`,
+          `http://127.0.0.1:5000/estilos/api/v1/curso/${asignacion.cur_id}`,
           {
             method: 'GET',
             headers: {
@@ -76,7 +76,7 @@ const HomeEstudiante = () => {
 
         if (date2 <= date1) {
           const encuestaResponse = await fetch(
-            `https://backendestilos.onrender.com/estilos/api/v1/encuesta/${asignacion.enc_id}`,
+            `http://127.0.0.1:5000/estilos/api/v1/encuesta/${asignacion.enc_id}`,
             {
               method: 'GET',
               headers: {

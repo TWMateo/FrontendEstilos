@@ -34,7 +34,7 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
     setLoadingGuardando(true);
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/auth/login',
+        'http://127.0.0.1:5000/estilos/api/v1/auth/login',
         {
           method: 'POST',
           headers: {
@@ -101,11 +101,16 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
   return (
     <div
       className="flex justify-center items-center bg-boxdark h-screen"
-      style={{ backgroundImage: `url(${Campus})` }}
+      style={{
+        backgroundImage: `url(${Campus})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
     >
       {/* <Breadcrumb pageName="Inicio de Sesión" /> */}
       {/* <img src={Campus} alt="Logo" /> */}
-      <div className="rounded-sm border border-stroke bg-white shadow-default">
+      <div className="rounded-sm border opacity-90 border-stroke bg-white shadow-default">
         <div className="flex flex-wrap items-center">
           <div className="hidden w-full xl:block xl:w-1/2">
             <div className="py-17.5 px-26 text-center">
@@ -225,8 +230,7 @@ const SignIn: React.FC<Props> = ({ handleLogin }) => {
                     </span>
                   </div>
                 </div>
-
-                <div className="mb-5">
+                <div className="mb-5 opacity-100">
                   <input
                     type="button"
                     value="Entrar"
