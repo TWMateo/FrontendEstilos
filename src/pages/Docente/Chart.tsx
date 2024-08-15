@@ -92,6 +92,7 @@ const Chart: React.FC = () => {
   const [filteredCursos, setFilteredCursos] = useState<Curso[]>([]);
   const [selectedCursoId, setSelectedCursoId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [respuestaHistorial, setRespuestasHistorial] = useState('');
   const [searchTermAsignacion, setSearchTermAsignacion] = useState<string>('');
   const [tituloAsignacionSeleccionada, setTituloAsignacionSeleccionada] =
     useState<Asignacion>();
@@ -109,13 +110,15 @@ const Chart: React.FC = () => {
   const optionsAsignacion = {
     chart: {
       title: `Resultados de Asignación ${tituloAsignacionSeleccionada?.asi_id} de ${tituloAsignacionSeleccionada?.usuario.usu_usuario}`,
-      subtitle: `Test de ${tituloAsignacionSeleccionada?.encuesta.enc_titulo}`,
+      subtitle: `Test de ${tituloAsignacionSeleccionada?.encuesta.enc_titulo} Estilo(s) predominante: ${respuestaHistorial}`,
+      bar: { groupWidth: '60px' },
     },
-    bars: 'horizontal', // En lugar de 'vertical'
+    bars: 'horizontal',
+    backgroundColor: 'transparent',
     series: {
-      0: { color: '#1f77b4' }, // Color para Visual
-      1: { color: '#ff7f0e' }, // Color para Kinestésico
-      2: { color: '#2ca02c' }, // Color para Auditivo
+      0: { color: '#1f77b4' },
+      1: { color: '#ff7f0e' },
+      2: { color: '#2ca02c' },
     },
     axes: {
       x: {
@@ -131,12 +134,29 @@ const Chart: React.FC = () => {
     title: 'Tests por Curso',
     pieHole: 0.4,
     is3D: true,
+    colors: ['#3357FF', '#FF5733', '#33FF57'],
+    backgroundColor: 'transparent',
+    animation: {
+      startup: true, // Activar animación al cargar
+      duration: 50000, // Duración de la animación en milisegundos
+      easing: 'out', // Tipo de suavizado para la animación (opciones: 'in', 'out', 'inAndOut')
+    },
   };
 
   const optionsTest = {
     chart: {
       title: `Resultado del curso ${datosCursoSeleccionado?.cur_nivel} - ${datosCursoSeleccionado?.cur_carrera}`,
       subtitle: `En el test ${encuestaSeleccionada?.enc_titulo}`,
+    },
+    bar: {groupWidth: "15%"},
+    animation: {
+      startup: true, // Activa la animación al cargar
+      duration: 1000, // Duración de la animación en milisegundos
+      easing: 'out', // Tipo de animación
+    },
+    series: {
+      0: { color: '#1f77b4' }, // Color de la primera serie de datos
+      1: { color: '#ff7f0e' }, // Color de la segunda serie de datos (si hay más series)
     },
   };
 
@@ -260,73 +280,8 @@ const Chart: React.FC = () => {
     console.log(titulosEncuesta);
   }, [titulosEncuesta]);
 
-  // const fetchAsignaciones = async () => {
-  //   try {
-  //     const response = await fetch(
-  //       `https://backendestilos.onrender.com/estilos/api/v1/asignacion/usuario/${usuId}`,
-  //       {
-  //         method: 'GET',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           Authorization: `Bearer ${sessionToken}`,
-  //         },
-  //       },
-  //     );
-  //     if (response.status != 200) {
-  //       throw new Error('Error al obtener las asignaciones');
-  //     }
-  //     const data = await response.json();
-  //     const asignacionesData = [];
-
-  //     for (const asignacion of data.data) {
-  //       const cursoResponse = await fetch(
-  //         `https://backendestilos.onrender.com/estilos/api/v1/curso/${asignacion.cur_id}`,
-  //         {
-  //           method: 'GET',
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //             Authorization: `Bearer ${sessionToken}`,
-  //           },
-  //         },
-  //       );
-  //       if (!cursoResponse.ok) {
-  //         throw new Error('Error al obtener los datos del curso');
-  //       }
-  //       const cursoData = await cursoResponse.json();
-
-  //       const encuestaResponse = await fetch(
-  //         `https://backendestilos.onrender.com/estilos/api/v1/encuesta/${asignacion.enc_id}`,
-  //         {
-  //           method: 'GET',
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //             Authorization: `Bearer ${sessionToken}`,
-  //           },
-  //         },
-  //       );
-  //       if (encuestaResponse.status != 200) {
-  //         throw new Error('Error al obtener los datos de la encuesta');
-  //       }
-  //       const encuestaData = await encuestaResponse.json();
-  //       const fecha = new Date(asignacion.asi_fecha_completado);
-  //       const opcionesFecha: Intl.DateTimeFormatOptions = {
-  //         month: 'short',
-  //         day: 'numeric',
-  //         year: 'numeric',
-  //       };
-  //       const titulo = `${encuestaData.data.enc_id}. ${encuestaData.data.enc_titulo} - ${cursoData.data.cur_carrera} ${cursoData.data.cur_nivel}`;
-  //       const descripcion = fecha.toLocaleDateString('es-ES', opcionesFecha);
-  //       asignacionesData.push({ titulo, descripcion });
-  //     }
-
-  //     setAsignaciones(asignacionesData);
-  //   } catch (error) {
-  //     console.error('Error:', error);
-  //   }
-  // };
-
   const fetchAsignaciones = async () => {
-    const fetchData = async (url:any) => {
+    const fetchData = async (url: any) => {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -348,9 +303,9 @@ const Chart: React.FC = () => {
 
       const asignaciones = response.data;
       const fechaActual = new Date();
-      const asignacionesData:any = [];
+      const asignacionesData: any = [];
 
-      const fetchDetailsPromises = asignaciones.map(async (asignacion:any) => {
+      const fetchDetailsPromises = asignaciones.map(async (asignacion: any) => {
         const cursoPromise = fetchData(
           `https://backendestilos.onrender.com/estilos/api/v1/curso/${asignacion.cur_id}`,
         );
@@ -568,9 +523,8 @@ const Chart: React.FC = () => {
         }
 
         const result = await response.json();
-        setAsignacionTest(result.data);
-        console.log(result.data)
         const preguntas = result.data.preguntas;
+        setRespuestasHistorial(result.data.respuesta_historial);
         const estiloReglas = result.data.encuesta.estilos_aprendizaje.map(
           (estilo: any) => estilo.est_nombre,
         );
@@ -578,8 +532,18 @@ const Chart: React.FC = () => {
         const formattedData = [['Pregunta', ...estiloReglas]];
 
         preguntas.forEach((pregunta: any) => {
-          const counts = estiloReglas.map(() => 0.05);
-
+          const counts = estiloReglas.map((estiloR: any) => {
+            const indice = pregunta.respuesta.findIndex(
+              (opcion: any) => opcion.opc_valor_cualitativo === estiloR,
+            );
+            if (indice != -1) {
+              console.log(pregunta.respuesta[indice]);
+              return pregunta.respuesta[indice].opc_valor_cuantitativo;
+            } else {
+              console.log(estiloR);
+              return 0;
+            }
+          });
           const valorSeleccionado = pregunta.opciones.reduce(
             (acc: any, opcion: any) => {
               if (pregunta.respuesta.opc_id === opcion.opc_id) {
@@ -599,7 +563,6 @@ const Chart: React.FC = () => {
 
           formattedData.push([pregunta.pre_enunciado, ...counts]);
         });
-        console.log(formattedData)
         setAsignacionTest(formattedData);
       } catch (error: any) {
         setError(error.message);
@@ -745,7 +708,7 @@ const Chart: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 gap-4 md:gap-6 2xl:gap-7.5">
             {titulosEncuesta && (
-              <div className="bg-white p-1 rounded-lg">
+              <div className="bg-whiten dark:bg-boxdark p-1 rounded-lg">
                 <GoogleChart
                   chartType="PieChart"
                   width="100%"
@@ -756,24 +719,26 @@ const Chart: React.FC = () => {
               </div>
             )}
 
-            <div className="w-full h-screen bg-white p-5 rounded-lg">
-              {asignacionTest.length != 0 && (
-                <GoogleChart
-                  chartType="Bar"
-                  width="100%"
-                  height="100%"
-                  data={asignacionTest}
-                  options={optionsAsignacion}
-                />
-              )}
+            <div className="w-full h-screen overflow-x-scroll bg-white dark:bg-boxdark p-5 rounded-lg">
+              <div className="h-[100%] w-[100%]">
+                {asignacionTest.length != 0 && (
+                  <GoogleChart
+                    chartType="Bar"
+                    width="100%"
+                    height="100%"
+                    data={asignacionTest}
+                    options={optionsAsignacion}
+                  />
+                )}
+              </div>
             </div>
 
-            <div className="w-full h-screen bg-white p-5 rounded-lg">
+            <div className="w-full h-screen bg-whiten dark:bg-boxdark p-5 rounded-lg">
               {resultadoEncuestaCounts.length > 1 && (
                 <GoogleChart
                   chartType="Bar"
-                  width="100%"
-                  height="100%"
+                  // width="100%"
+                  // height="100%"
                   data={resultadoEncuestaCounts}
                   options={optionsTest}
                 />

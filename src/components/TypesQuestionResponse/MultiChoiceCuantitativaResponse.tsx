@@ -43,7 +43,9 @@ const MultiChoiceCuantitativaResponse: React.FC<
         ...respuestas,
         [opcionId]: newValue,
       };
-      const cantidadRespuestas = Object.values(nuevasRespuestas).filter(value => value > 0).length;
+      const cantidadRespuestas = Object.values(nuevasRespuestas).filter(
+        (value) => value > 0,
+      ).length;
       const sumaRespuestas = Object.values(nuevasRespuestas).reduce(
         (total, value) => total + value,
         0,
@@ -90,12 +92,19 @@ const MultiChoiceCuantitativaResponse: React.FC<
           </h3>
         </div>
         <div>{`Valor máximo total: ${valor}`}</div>
+        <div>
+          {pregunta.max
+            ? `*Selecciona maximo ${pregunta.max} respuesta(s)`
+            : pregunta.min
+            ? `*Selecciona minimo ${pregunta.min} respuesta(s)`
+            : '*Selecciona una respuesta'}
+        </div>
       </div>
-      <div className="grid grid-cols-2 w-full">
+      <div className={`grid grid-cols-1 lg:grid-cols-2 w-full`}>
         {pregunta.opciones?.map((opc) => (
           <div
             key={opc.id}
-            className="rounded-l-lg py-2 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            className={`rounded-l-lg w-fit py-2 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
           >
             <label className="flex justify-center items-center gap-5">
               <input
