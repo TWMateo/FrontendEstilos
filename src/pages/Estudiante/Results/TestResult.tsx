@@ -26,42 +26,63 @@ const TestResult = () => {
     string | null
   >('');
   const { resultado, titulo, autor } = location.state || {};
-  const openai = new OpenAI({
-    apiKey:
-      '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',
-    dangerouslyAllowBrowser: true,
-  });
+  // const openai = new OpenAI({
+  //   apiKey:
+  //     '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',
+  //   dangerouslyAllowBrowser: true,
+  // });
+  // const openai = new OpenAI({
+  //   apiKey:apiKeyChatGpt,
+  //   dangerouslyAllowBrowser: true,
+  // });
 
   useEffect(() => {
-    getPracticasGPT();
+    // getPracticasGPT();
     setTimeout(() => {
       setLoading(false);
     }, 5000);
   }, []);
 
-  async function getPracticasGPT() {
-    const stream = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'Eres un experto en técnicas de estudio y estilos de aprendizaje.',
-        },
-        {
-          role: 'user',
-          content: `Hice el test ${titulo} del autor ${autor} relacionado a los estilos de aprendizaje y los resultados indicaron que tengo un estilo de aprendizaje ${resultado}. ¿Puedes proporcionarme 6 técnicas y estrategias de estudio específicamente adaptadas a un estilo de aprendizaje ${resultado}?. Solo dame una pequeña descripción del estilo de aprendzizaje relacionado al test nombra al test con el nombre que te di no lo pongas entre comillas y no nombres al autor, y el listado de técnicas y estrategias no indiques la cantidad de tecnicas y estrategias.`,
-        },
-      ],
-    });
-    setTecnicasDeAprendizaje(stream.choices[0].message.content);
-    console.log(stream.choices[0].message.content);
-    console.log(autor);
-    console.log(titulo);
-    // for await (const chunk of stream) {
-    //   process.stdout.write(chunk.choices[0]?.delta?.content || '');
-    // }
-  }
+  // async function getPracticasGPT() {
+  //   const stream = await openai.chat.completions.create({
+  //     model: 'gpt-4o-mini',
+  //     messages: [
+  //       {
+  //         role: 'system',
+  //         content:
+  //           'Eres un experto en técnicas de estudio y estilos de aprendizaje.',
+  //       },
+  //       {
+  //         role: 'user',
+  //         content: `Hice el test ${titulo} del autor ${autor} relacionado a los estilos de aprendizaje y los resultados indicaron que tengo un estilo de aprendizaje ${resultado}. ¿Puedes proporcionarme 6 técnicas y estrategias de estudio específicamente adaptadas a un estilo de aprendizaje ${resultado}?. Solo dame una pequeña descripción del estilo de aprendzizaje relacionado al test nombra al test con el nombre que te di no lo pongas entre comillas y no nombres al autor, y el listado de técnicas y estrategias no indiques la cantidad de tecnicas y estrategias.`,
+  //       },
+  //     ],
+  //   });
+  //   setTecnicasDeAprendizaje(stream.choices[0].message.content);
+  //   console.log(stream.choices[0].message.content);
+  //   console.log(autor);
+  //   console.log(titulo);
+  //   // for await (const chunk of stream) {
+  //   //   process.stdout.write(chunk.choices[0]?.delta?.content || '');
+  //   // }
+  // }
+  // async function getPracticasGPT() {
+  //   const stream = await openai.chat.completions.create({
+  //     model: 'gpt-4o-mini',
+  //     messages: [
+  //       {
+  //         role: 'system',
+  //         content:
+  //           'Eres un experto en técnicas de estudio y estilos de aprendizaje.',
+  //       },
+  //       {
+  //         role: 'user',
+  //         content: `Hice el test ${titulo} del autor ${autor} relacionado a los estilos de aprendizaje y los resultados indicaron que tengo un estilo de aprendizaje ${resultado}. ¿Puedes proporcionarme 6 técnicas y estrategias de estudio específicamente adaptadas a un estilo de aprendizaje ${resultado}?. Solo dame una pequeña descripción del estilo de aprendzizaje relacionado al test nombra al test con el nombre que te di no lo pongas entre comillas y no nombres al autor, y el listado de técnicas y estrategias no indiques la cantidad de tecnicas y estrategias.`,
+  //       },
+  //     ],
+  //   });
+  //   setTecnicasDeAprendizaje(stream.choices[0].message.content);
+  // }
 
   return (
     <DefaultLayout>
