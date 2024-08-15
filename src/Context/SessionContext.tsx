@@ -14,6 +14,7 @@ interface SessionContextType {
   login: (data: boolean) => void;
   logout: () => void;
   sessionToken: string;
+  apiKeyChatGpt: string;
   setNewSessionToken: (data: string) => void;
   usuCedula: string;
   setNewUsuCedula: (data: string) => void;
@@ -21,11 +22,13 @@ interface SessionContextType {
   setNewUsuId: (data: number | undefined) => void;
   curId: number | undefined;
   setNewCurId: (data: number | undefined) => void;
+  setNewApiKeyChatGPT: (data: string) => void;
 }
 
 export const SessionContext = createContext<SessionContextType>({
   isLoggedIn: false,
   userContext: '',
+  apiKeyChatGpt: '',
   setNewUserContext: (data: string) => {},
   passwordContext: '',
   setNewUserPassword: (data: string) => {},
@@ -41,6 +44,7 @@ export const SessionContext = createContext<SessionContextType>({
   setNewUsuId: (data: number | undefined) => {},
   curId: undefined,
   setNewCurId: (data: number | undefined) => {},
+  setNewApiKeyChatGPT: (data: string) => {},
 });
 
 export const SessionProvider = ({ children }: SessionProviderProps) => {
@@ -50,6 +54,7 @@ export const SessionProvider = ({ children }: SessionProviderProps) => {
   const [rolContext, setRolContext] = useState('');
   const [sessionToken, setSessionToken] = useState('');
   const [usuCedula, setUsuCedula] = useState('');
+  const [apiKeyChatGpt, setApiKeyChatGpt] = useState<string>('');
   const [usuId, setUsuId] = useState<number | undefined>(undefined);
   const [curId, setCurId] = useState<number | undefined>(undefined);
 
@@ -61,6 +66,7 @@ export const SessionProvider = ({ children }: SessionProviderProps) => {
     const storedSessionToken = localStorage.getItem('sessionToken') || '';
     const storedUsuCedula = localStorage.getItem('usuCedula') || '';
     const storedUsuId = localStorage.getItem('usuId');
+    const storedApiKeyChatGpt = localStorage.getItem('apikeychatgpt') || '';
 
     if (storedIsLoggedIn) {
       setIsLoggedIn(storedIsLoggedIn);
@@ -69,6 +75,7 @@ export const SessionProvider = ({ children }: SessionProviderProps) => {
       setRolContext(storedRolContext);
       setSessionToken(storedSessionToken);
       setUsuCedula(storedUsuCedula);
+      setApiKeyChatGpt(storedApiKeyChatGpt);
       setUsuId(storedUsuId ? Number(storedUsuId) : undefined);
     }
   }, []);
@@ -81,6 +88,7 @@ export const SessionProvider = ({ children }: SessionProviderProps) => {
     localStorage.setItem('sessionToken', sessionToken);
     localStorage.setItem('usuCedula', usuCedula);
     localStorage.setItem('usuId', String(usuId));
+    localStorage.setItem('apikeychatgpt', apiKeyChatGpt);
   }, [
     isLoggedIn,
     userContext,
@@ -88,11 +96,16 @@ export const SessionProvider = ({ children }: SessionProviderProps) => {
     rolContext,
     sessionToken,
     usuCedula,
+    apiKeyChatGpt,
     usuId,
   ]);
 
   const setNewSessionToken = (data: string) => {
     setSessionToken(data);
+  };
+
+  const setNewApiKeyChatGPT = (data: string) => {
+    setApiKeyChatGpt(data);
   };
 
   const setNewCurId = (data: number | undefined) => {
@@ -150,6 +163,8 @@ export const SessionProvider = ({ children }: SessionProviderProps) => {
     setNewUsuId,
     curId,
     setNewCurId,
+    setNewApiKeyChatGPT,
+    apiKeyChatGpt
   };
   return (
     <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
