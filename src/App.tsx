@@ -18,12 +18,16 @@ import Buttons from './pages/UiElements/Buttons';
 import Models from './pages/Docente/IModels/Models';
 import Course from './pages/Docente/Course';
 import HomeEstudiante from './pages/Estudiante/HomeEstudiante';
+import HomeAdministrador from './pages/Administrador/HomeAdministrador';
 import ProfileEstudiante from './pages/Estudiante/ProfileEstudiante';
 import { SessionContext } from './Context/SessionContext';
 import ListTest from './pages/Estudiante/Tests/ListTest';
 import TestResult from '../src/pages/Estudiante/Results/TestResult';
 import Test from './pages/Estudiante/Tests/Test';
 import TestResults from './pages/Estudiante/Tests/TestResults';
+import RegistroUsuarios from './pages/Administrador/RegistroUsuarios';
+import ProfileAdministrador from './pages/Administrador/Profile';
+import GestionUsuarios from './pages/Administrador/GestionUsuarios';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -194,13 +198,50 @@ function App() {
           element={
             <>
               <PageTitle title="Resultado | Estudiante" />
-              <TestResult/>
+              <TestResult />
             </>
           }
         />
       </Routes>
-    ) : rolContext == 'Administrador' ? (
-      <div>Admin</div>
+    ) : rolContext == 'ADM' ? (
+      <Routes>
+        <Route
+          index
+          element={
+            <>
+              <PageTitle title="Inicio | UTN" />
+              <HomeAdministrador />
+            </>
+          }
+        />
+        <Route
+          path="/registro-usuarios"
+          element={
+            <>
+              <PageTitle title="Registro | Administrador" />
+              <RegistroUsuarios />
+            </>
+          }
+        />
+        <Route
+          path="/gestion-usuarios"
+          element={
+            <>
+              <PageTitle title="Gestión | Administrador" />
+              <GestionUsuarios />
+            </>
+          }
+        />
+        <Route
+          path="/perfil"
+          element={
+            <>
+              <PageTitle title="Perfil | Administrador" />
+              <ProfileAdministrador />
+            </>
+          }
+        />
+      </Routes>
     ) : (
       rolContext == 'Pruebas' && (
         <>

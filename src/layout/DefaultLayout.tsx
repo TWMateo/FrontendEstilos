@@ -2,6 +2,7 @@ import React, { useState, ReactNode, useEffect, useContext } from 'react';
 import Header from '../components/Header/index';
 import Sidebar from '../components/Sidebar/index';
 import SidebarEstudiante from '../components/Sidebar-Estudiante';
+import SidebarAdministrador from '../components/Sidebar-Administrador';
 import { SessionContext } from '../Context/SessionContext';
 
 const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -45,7 +46,7 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
             setSidebarOpen={setSidebarOpen}
           />
         ) : rolContext === 'ADM' ? (
-          <SidebarEstudiante
+          <SidebarAdministrador
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
           />

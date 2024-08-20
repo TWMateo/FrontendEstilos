@@ -72,7 +72,7 @@ const HomeEstudiante = () => {
           },
         },
       );
-      if (!response.ok) {
+      if (response.status!=200) {
         throw new Error('Error al obtener las asignaciones');
       }
       const data = await response.json();
@@ -89,7 +89,7 @@ const HomeEstudiante = () => {
             },
           },
         );
-        if (!cursoResponse.ok) {
+        if (cursoResponse.status!=200) {
           throw new Error('Error al obtener los datos del curso');
         }
         const cursoData = await cursoResponse.json();

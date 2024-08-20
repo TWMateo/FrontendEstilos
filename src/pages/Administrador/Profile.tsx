@@ -95,7 +95,9 @@ const Profile = () => {
         descripcion:
           rolContext == 'EST'
             ? 'Un estudiante tiene acceso a los recursos educativos proporcionados por la plataforma, puede participar en encuestas, revisar sus asignaciones, y seguir el progreso de sus cursos. Los estudiantes pueden interactuar con el contenido del curso y enviar tareas según las indicaciones de los docentes.'
-            : 'Un docente tiene la responsabilidad de crear y gestionar los contenidos del curso, asignar tareas, evaluar y calificar a los estudiantes. Los docentes pueden acceder a las encuestas relacionadas con sus cursos, proporcionar retroalimentación y supervisar el progreso académico de sus estudiantes.',
+            : rolContext == 'DOC'
+            ? 'Un docente tiene la responsabilidad de crear y gestionar los contenidos del curso, asignar tareas, evaluar y calificar a los estudiantes. Los docentes pueden acceder a las encuestas relacionadas con sus cursos, proporcionar retroalimentación y supervisar el progreso académico de sus estudiantes.'
+            : 'Un administrador tiene la responsabilidad de crear y gestionar a usuarios dentro de la aplicación.',
       });
       const result = await response.json();
       setPersona(result.data);
