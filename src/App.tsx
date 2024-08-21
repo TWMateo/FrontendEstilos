@@ -28,6 +28,7 @@ import TestResults from './pages/Estudiante/Tests/TestResults';
 import RegistroUsuarios from './pages/Administrador/RegistroUsuarios';
 import ProfileAdministrador from './pages/Administrador/Profile';
 import GestionUsuarios from './pages/Administrador/GestionUsuarios';
+import Configuracion from './pages/Administrador/Configuracion';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -220,6 +221,15 @@ function App() {
             <>
               <PageTitle title="Registro | Administrador" />
               <RegistroUsuarios />
+            </>
+          }
+        />
+        <Route
+          path="/configuracion"
+          element={
+            <>
+              <PageTitle title="Configuración | Administrador" />
+              <Configuracion />
             </>
           }
         />
