@@ -9,7 +9,7 @@ interface Condition {
   parametros: Column[];
   condicion: string;
   valor: number;
-  comparacion: string; // Nueva propiedad para la comparación
+  comparacion: string; 
 }
 
 type Opcion = {

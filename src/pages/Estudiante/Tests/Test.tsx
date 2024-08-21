@@ -701,22 +701,26 @@ const Test = () => {
       asi_realizado: true,
     };
     actualizarAsignacion(asignacion?.asi_id, asignacionActualizar);
+    
     setPantallaResultado(true);
     setResultadoPantalla(mensajeRespuesta);
   };
 
   useEffect(() => {
     if (pantallaResultado) {
-      const timer = setTimeout(() => {
-        navigate('/resultado', {
-          state: {
-            resultado: resultadoPantalla,
-            titulo: testAsignado?.titulo,
-            autor: testAsignado?.autor,
-          },
-        });
-      }, 100);
-      return () => clearTimeout(timer);
+      // const timer = setTimeout(() => {
+      //   navigate('/resultado', {
+      //     state: {
+      //       resultado: resultadoPantalla,
+      //       titulo: testAsignado?.titulo,
+      //       autor: testAsignado?.autor,
+      //     },
+      //   });
+      // }, 100);
+      // return () => clearTimeout(timer);
+      console.log(resultadoPantalla)
+      console.log(testAsignado?.titulo)
+      console.log(testAsignado?.autor)
     }
   }, [pantallaResultado]);
 

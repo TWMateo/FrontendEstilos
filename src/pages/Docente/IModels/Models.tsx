@@ -271,7 +271,6 @@ const Models = () => {
       cambiarEstadoErrorGuardadoTemporalmente();
       return;
     }
-
     for (const pregunta of listaPreguntas) {
       if (pregunta.pregunta.length === 0) {
         setMensajeError('Debe llenar todos los campos!');
@@ -366,11 +365,12 @@ const Models = () => {
           Authorization: `Bearer ${sessionToken}`,
         };
 
-        for (let estilo of estilosAprendizaje) {
+        for (let estilo of estilosAprendizajeAux) {
           let estilos = {
             est_descripcion: estilo.tipo,
             est_nombre: estilo.tipo,
             enc_id: testId,
+            est_parametro:false
           };
 
           console.log(estilos);
@@ -393,9 +393,37 @@ const Models = () => {
             valor: dataEstilo.data.est_id,
           });
         }
+        for (let estilo of parametrosAprendizaje) {
+          let estilos = {
+            est_descripcion: estilo.tipo,
+            est_nombre: estilo.tipo,
+            enc_id: testId,
+            est_parametro:true
+          };
+
+          console.log(estilos);
+          const responseEstilo = await fetch(apiUrl, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(estilos),
+          });
+
+          if (responseEstilo.status !== 201) {
+            setLoadingGuardando(false);
+            setMensajeError(`Error al guardar el parametro ${estilo}!`);
+            cambiarEstadoErrorGuardadoTemporalmente();
+            throw new Error('Error al guardar el parametro');
+          }
+
+          const dataEstilo = await responseEstilo.json();
+          arregloEstilosApr.push({
+            tipo: estilo.tipo,
+            valor: dataEstilo.data.est_id,
+          });
+        }
       } catch (error) {
         setLoadingGuardando(false);
-        setMensajeError(`Error al guardar los estilos: ${error}`);
+        setMensajeError(`Error al guardar los parametros: ${error}`);
         cambiarEstadoErrorGuardadoTemporalmente();
         return;
       }
@@ -1124,7 +1152,7 @@ const Models = () => {
             </div>
             <div className="flex flex-col">
               <h3 className="text-title-xsm pb-3 font-semibold text-black dark:text-white">
-                Dimensiones de aprendizaje:
+                Parametro de aprendizaje:
               </h3>
               <div className="flex flex-row">
                 <input
@@ -1143,7 +1171,7 @@ const Models = () => {
                     className={`flex w-[50%] justify-center bg-primary p-3 font-medium text-gray hover:bg-opacity-90`}
                     onClick={() => onActualizarEstiloAprendizaje('dimension')}
                   >
-                    Actualizar Dimensión de aprendizaje
+                    Actualizar parametro de aprendizaje
                   </button>
                 ) : (
                   <button
