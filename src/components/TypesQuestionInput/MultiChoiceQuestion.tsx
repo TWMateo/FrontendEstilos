@@ -1,4 +1,4 @@
-import React, { HtmlHTMLAttributes, useState } from 'react';
+import React, { HtmlHTMLAttributes, useEffect, useState } from 'react';
 import SelectGroupOne from '../Forms/SelectGroup/SelectGroupOne';
 import { AlertError } from '../Alerts/AlertError';
 import { parsePath } from 'react-router-dom';
@@ -20,8 +20,8 @@ interface Pregunta {
 }
 
 interface tipoValor {
-  tipo:string;
-  valor:string;
+  tipo: string;
+  valor: string;
 }
 
 interface Props {
@@ -56,7 +56,10 @@ const MultiChoiceQuestion: React.FC<Props> = ({
 }) => {
   const responseLimits = {
     mensaje: 'Escoge el límite de respuestas',
-    tipos: [{tipo:'min',valor:'min'}, {tipo:'max',valor:'max'}],
+    tipos: [
+      { tipo: 'min', valor: 'min' },
+      { tipo: 'max', valor: 'max' },
+    ],
   };
   const [indicadorLimite, setIndicadorLimite] = useState('min');
 
@@ -78,6 +81,10 @@ const MultiChoiceQuestion: React.FC<Props> = ({
     }
   };
 
+  // useEffect(() => {
+  //   console.log('VERIFICANDO')
+  //   console.log(pregunta);
+  // }, []);
   return (
     <div className="flex flex-col rounded-lg pt-3">
       <div className="flex flex-col">

@@ -16,6 +16,7 @@ import Home from './pages/Docente/Home';
 import Alerts from './pages/UiElements/Alerts';
 import Buttons from './pages/UiElements/Buttons';
 import Models from './pages/Docente/IModels/Models';
+import EditModels from './pages/Docente/IModels/EditModels';
 import Course from './pages/Docente/Course';
 import HomeEstudiante from './pages/Estudiante/HomeEstudiante';
 import HomeAdministrador from './pages/Administrador/HomeAdministrador';
@@ -88,6 +89,15 @@ function App() {
               <>
                 <PageTitle title="Modelos" />
                 <Models />
+              </>
+            }
+          />
+          <Route
+            path="/modelos/editar/test"
+            element={
+              <>
+                <PageTitle title="Editar Modelos" />
+                <EditModels/>
               </>
             }
           />

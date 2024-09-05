@@ -242,6 +242,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               Ingresar modelos
                             </NavLink>
                           </li>
+                          <li>
+                            <NavLink
+                              to="/modelos/editar/test"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium dark:text-bodydark2 duration-300 ease-in-out text-slate-500 hover:text-black dark:hover:text-white ' +
+                                (isActive && 'text-black dark:!text-white')
+                              }
+                              onClick={(e) =>
+                                handleNavLinkClick('/modelos/editar/test', e)
+                              }
+                            >
+                              Editar modelos
+                            </NavLink>
+                          </li>
                         </ul>
                       </div>
                     </React.Fragment>

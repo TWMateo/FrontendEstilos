@@ -36,14 +36,20 @@ const RuleComponent: React.FC<RuleComponentProps> = ({
   onChange,
   onDelete,
   estilosAprendizaje,
-  parametrosAprendizaje
+  parametrosAprendizaje,
 }) => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
+    console.log(name)
+    console.log(value)
     onChange({ ...rule, [name]: value });
   };
+
+  useEffect(()=>{
+    console.log(rule)
+  },[])
 
   const handleConditionChange = (
     index: number,
@@ -57,7 +63,9 @@ const RuleComponent: React.FC<RuleComponentProps> = ({
 
   const addCondition = () => {
     const newCondition: Condition = {
-      parametros: [{ value: [parametrosAprendizaje[0].tipo], operacion: 'suma' }],
+      parametros: [
+        { value: [parametrosAprendizaje[0].tipo], operacion: 'suma' },
+      ],
       condicion: 'ninguna',
       valor: 0,
       comparacion: 'and',
@@ -66,35 +74,36 @@ const RuleComponent: React.FC<RuleComponentProps> = ({
   };
 
   const deleteCondition = (index: number) => {
-    if(rule.condiciones.length==1) return;
+    if (rule.condiciones.length == 1) return;
     const updatedConditions = rule.condiciones.filter((_, i) => i !== index);
     onChange({ ...rule, condiciones: updatedConditions });
   };
 
-  useEffect(()=>{
+  useEffect(() => {
 
-  },[parametrosAprendizaje])
+  }, [parametrosAprendizaje]);
 
-  useEffect(()=>{
-    if(estilosAprendizaje.length>0){
-      rule.estilo=estilosAprendizaje[0].tipo
+  useEffect(() => {
+    if (estilosAprendizaje.length > 0) {
+      rule.estilo = estilosAprendizaje[0].tipo;
     }
-  },[])
+  }, []);
 
   return (
     <div className="flex flex-col gap-5 border rounded-lg p-5">
-        {/* <div>Estilo o dimensión</div> */}
+      {/* <div>Estilo o dimensión</div> */}
       <div className="flex justify-between">
         <select
           title="fila"
+          multiple={false}
           className={`relative p-2 z-20 w-[90%] lg:w-[85%] bg-whiten appearance-none rounded border border-strokedark bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}
           name="estilo"
           value={rule.estilo}
           onChange={handleChange}
         >
-          {estilosAprendizaje.map((estilo,index) => (
-            <option key={estilo+'-'+index} value={estilo.tipo}>
-              {estilo.tipo}
+          {estilosAprendizaje.map((estilo, index) => (
+            <option key={estilo + '-' + index} value={estilo.tipo}>
+             {index+1}{'. '}{estilo.tipo}
             </option>
           ))}
         </select>
@@ -115,7 +124,7 @@ const RuleComponent: React.FC<RuleComponentProps> = ({
           </svg>
         </button>
       </div>
-      {rule.condiciones.map((condicion, index) => (
+      {rule.condiciones && rule.condiciones.map((condicion, index) => (
         <ConditionComponent
           key={index}
           condicion={condicion}

@@ -101,13 +101,14 @@ const ConditionComponent: React.FC<ConditionProps> = ({
   return (
     <div className="flex flex-col gap-5 border rounded-lg p-5">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-        {condicion.parametros.map((col, index) => (
+        {condicion.parametros && condicion.parametros.map((col, index) => (
           <div key={index} className="flex gap-3 justify-center">
             <div className="font-bold text-black dark:text-bodydark1">
               Dimensión:
             </div>
             <select
               title="columna"
+              multiple={false}
               name="columnas"
               value={col.value}
               onChange={(e) => handleColumnsChange(e, index)}
