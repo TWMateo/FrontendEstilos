@@ -329,9 +329,9 @@ const Chart: React.FC = () => {
         const titulo = `${encuestaData.data.enc_id}. ${encuestaData.data.enc_titulo} - ${cursoData.data.cur_carrera} ${cursoData.data.cur_nivel}`;
         const descripcion = fecha.toLocaleDateString('es-ES', opcionesFecha);
 
-        if (fechaActual <= fecha && !asignacion.asi_realizado) {
+        // if (fechaActual <= fecha && !asignacion.asi_realizado) {
           asignacionesData.push({ id, idAsignacion, titulo, descripcion });
-        }
+        // }
       });
 
       await Promise.all(fetchDetailsPromises);
@@ -612,7 +612,7 @@ const Chart: React.FC = () => {
             />
             <TableGeneral
               listado={asignaciones}
-              titulo="Asignaciones Creadas"
+              titulo="Asignaciones"
               icono="curso"
               path="/curso"
             />
@@ -643,12 +643,12 @@ const Chart: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                {selectedCursoId && (
+                {/* {selectedCursoId && (
                   <div>
                     <h2>Curso Seleccionado</h2>
                     <p>ID del Curso: {selectedCursoId}</p>
                   </div>
-                )}
+                )} */}
               </div>
               <div className="flex flex-col gap-4 text-black">
                 <h1 className="font-bold dark:text-white">Asignaciones</h1>
@@ -673,12 +673,12 @@ const Chart: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                {selectedAsignacionId && (
+                {/* {selectedAsignacionId && (
                   <div>
                     <h2>Asi</h2>
                     <p>ID del ASI: {selectedAsignacionId}</p>
                   </div>
-                )}
+                )} */}
               </div>
               <div className="flex flex-col gap-4 text-black">
                 <h1 className="font-bold dark:text-white">Lista de Tests</h1>
