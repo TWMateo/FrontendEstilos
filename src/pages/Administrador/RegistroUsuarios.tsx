@@ -154,7 +154,7 @@ function RegistroUsuarios() {
 
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/persona',
+        'https://backendestilos.onrender.com/estilos/api/v1/persona',
         {
           method: 'POST',
           headers: {
@@ -190,7 +190,7 @@ function RegistroUsuarios() {
   const handleCedulas = async () => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/usuario-cedulas',
+        'https://backendestilos.onrender.com/estilos/api/v1/usuario-cedulas',
         {
           method: 'GET',
           headers: {
@@ -229,7 +229,7 @@ function RegistroUsuarios() {
   const handleCursos = async () => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/curso',
+        'https://backendestilos.onrender.com/estilos/api/v1/curso',
         {
           method: 'GET',
           headers: {
@@ -308,7 +308,7 @@ function RegistroUsuarios() {
     };
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/usuario',
+        'https://backendestilos.onrender.com/estilos/api/v1/usuario',
         {
           method: 'POST',
           headers: {

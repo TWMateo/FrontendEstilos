@@ -31,7 +31,7 @@ function HomeAdministrador() {
   const fetchUsuarios = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/usuario`,
+        `https://backendestilos.onrender.com/estilos/api/v1/usuario`,
         {
           method: 'GET',
           headers: {
