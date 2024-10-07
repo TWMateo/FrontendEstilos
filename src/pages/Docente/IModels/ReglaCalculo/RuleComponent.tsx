@@ -47,10 +47,6 @@ const RuleComponent: React.FC<RuleComponentProps> = ({
     onChange({ ...rule, [name]: value });
   };
 
-  useEffect(()=>{
-    console.log(rule)
-  },[])
-
   const handleConditionChange = (
     index: number,
     updatedCondition: Condition,
@@ -83,11 +79,11 @@ const RuleComponent: React.FC<RuleComponentProps> = ({
 
   }, [parametrosAprendizaje]);
 
-  useEffect(() => {
-    if (estilosAprendizaje.length > 0) {
-      rule.estilo = estilosAprendizaje[0].tipo;
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (estilosAprendizaje.length > 0) {
+  //     rule.estilo = estilosAprendizaje[0].tipo;
+  //   }
+  // }, []);
 
   return (
     <div className="flex flex-col gap-5 border rounded-lg p-5">

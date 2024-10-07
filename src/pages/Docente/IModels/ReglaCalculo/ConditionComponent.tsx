@@ -104,7 +104,7 @@ const ConditionComponent: React.FC<ConditionProps> = ({
         {condicion.parametros && condicion.parametros.map((col, index) => (
           <div key={index} className="flex gap-3 justify-center">
             <div className="font-bold text-black dark:text-bodydark1">
-              Dimensión:
+              Parámetro:
             </div>
             <select
               title="columna"

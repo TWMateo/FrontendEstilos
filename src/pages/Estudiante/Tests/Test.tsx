@@ -219,7 +219,7 @@ const Test = () => {
   const fetchTest = async (id: number) => {
     try {
       const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/encuestaDetalles/${id}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/encuesta/detalles/${id}`,
         {
           method: 'GET',
           headers: {
@@ -708,16 +708,16 @@ const Test = () => {
 
   useEffect(() => {
     if (pantallaResultado) {
-      // const timer = setTimeout(() => {
-      //   navigate('/resultado', {
-      //     state: {
-      //       resultado: resultadoPantalla,
-      //       titulo: testAsignado?.titulo,
-      //       autor: testAsignado?.autor,
-      //     },
-      //   });
-      // }, 100);
-      // return () => clearTimeout(timer);
+      const timer = setTimeout(() => {
+        navigate('/resultado', {
+          state: {
+            resultado: resultadoPantalla,
+            titulo: testAsignado?.titulo,
+            autor: testAsignado?.autor,
+          },
+        });
+      }, 100);
+      return () => clearTimeout(timer);
       console.log(resultadoPantalla)
       console.log(testAsignado?.titulo)
       console.log(testAsignado?.autor)

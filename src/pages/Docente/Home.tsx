@@ -224,13 +224,13 @@ const Home = () => {
               listado={encuestas}
               titulo="Tests Creados"
               icono="test"
-              path="/modelos/nuevo/test"
+              path="/"
             />
             <TableGeneral
               listado={asignaciones}
               titulo="Asignaciones"
               icono="curso"
-              path="/curso"
+              path="/"
             />
           </div>
         </>

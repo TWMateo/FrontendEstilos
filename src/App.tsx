@@ -97,7 +97,7 @@ function App() {
             element={
               <>
                 <PageTitle title="Editar Modelos" />
-                <EditModels/>
+                <EditModels />
               </>
             }
           />
@@ -261,6 +261,33 @@ function App() {
             </>
           }
         />
+        {/* <Route
+          path="/modelos/nuevo/test"
+          element={
+            <>
+              <PageTitle title="Modelos" />
+              <Models />
+            </>
+          }
+        />
+        <Route
+          path="/modelos/editar/test"
+          element={
+            <>
+              <PageTitle title="Editar Modelos" />
+              <EditModels />
+            </>
+          }
+        />
+        <Route
+          path="/curso"
+          element={
+            <>
+              <PageTitle title="Cursos" />
+              <Course />
+            </>
+          }
+        /> */}
       </Routes>
     ) : (
       rolContext == 'Pruebas' && (

@@ -14,6 +14,8 @@ import { SessionContext } from '../../../Context/SessionContext';
 import Loader from '../../../common/Loader';
 import { AlertLoading } from '../../../components/Alerts/AlertLoading';
 import EscudoUtn from '../../../images/UTN/escudo-utn.svg';
+import CardListUpdate from '../../../components/CardListUpdate';
+import { BsCurrencyBitcoin } from 'react-icons/bs';
 
 interface EstiloAprendizaje {
   id: number;
@@ -39,6 +41,7 @@ interface Pregunta {
   tipoPregunta: string;
   opciones: Opcion[];
   escalas: string[];
+  new: boolean;
   min: number;
   max: number;
 }
@@ -47,6 +50,7 @@ interface Opcion {
   id: number;
   opcion: string;
   estilo: string;
+  new: boolean;
 }
 
 interface ReglaDeCalculo {
@@ -79,6 +83,7 @@ interface valoresAsignados {
 interface tipoValor {
   tipo: string;
   valor: string;
+  new: boolean;
 }
 
 interface Encuesta {
@@ -108,15 +113,15 @@ const EditModels = () => {
   const [tipoPregunta, setTipoPregunta] = useState('');
   const [opcionesPregunta, setOpcionesPregunta] = useState<Opcion[]>([]);
   const [estilosAprendizaje, setEstilosAprendizaje] = useState<tipoValor[]>([
-    { tipo: '', valor: '' },
+    { tipo: '', valor: '', new: true },
   ]);
   const [estilosAprendizajeAux, setEstilosAprendizajeAux] = useState<
     tipoValor[]
-  >([{ tipo: '', valor: '' }]);
+  >([{ tipo: '', valor: '', new: true }]);
   const [nuevoEstiloAprendizaje, setNuevoEstiloAprendizaje] = useState('');
   const [parametrosAprendizaje, setParametrosAprendizaje] = useState<
     tipoValor[]
-  >([{ tipo: '', valor: '' }]);
+  >([{ tipo: '', valor: '', new: true }]);
   const [nuevaOpcion, setNuevaOpcion] = useState('');
   const [estiloNuevaOpcion, setEstiloNuevaOpcion] = useState('');
   const [actualizandoEstilo, setActualizandoEstilo] = useState(false);
@@ -139,16 +144,18 @@ const EditModels = () => {
   const [encuestas, setEncuestas] = useState([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [rules, setRules] = useState<Rule[]>([]);
   const [test, setTest] = useState('');
   const [datosPrueba, setDatosPrueba] = useState<any>([]);
   const [probandoo, setProbandoo] = useState<any>([]);
   const [probandooAux, setProbandooAux] = useState<any>([]);
   const [reglasActualizadas, setReglasActualizadas] = useState<any>([]);
+  const [idRegla, setIdRegla] = useState('');
   const [datosTests, setDatosTests] = useState<valoresAsignados>({
     mensaje: 'Listado de Tests',
     tipos: [
-      { tipo: 'Kolb', valor: 'Kolb' },
-      { tipo: 'Sperry', valor: 'Sperry' },
+      { tipo: 'Kolb', valor: 'Kolb', new: true },
+      { tipo: 'Sperry', valor: 'Sperry', new: true },
     ],
   });
   const [reglaCalculo, setReglaCalculo] = useState<ReglaDeCalculo[]>([
@@ -184,12 +191,13 @@ const EditModels = () => {
     if (opciones.length == 0) {
       nuevoIdOpcion = 1;
     } else {
-      nuevoIdOpcion = opciones[opciones?.length - 1].id + 1;
+      nuevoIdOpcion = opciones[opciones?.length - 1].id + 2;
     }
     const opcion: Opcion = {
       id: nuevoIdOpcion,
       opcion: 'Opción ' + nuevoIdOpcion,
       estilo: '',
+      new: true,
     };
     let copiaPreguntas = [...listaPreguntas];
     let pregunta = copiaPreguntas.find((pre) => pre.id === idPregunta);
@@ -234,6 +242,7 @@ const EditModels = () => {
   };
 
   const handleClickDeleteOpcion = (idPregunta: number, idOpcion: number) => {
+    console.log(idOpcion);
     if (idPregunta == undefined && idOpcion == undefined) return;
     let currentListaPreguntas = [...listaPreguntas];
     const indexPregunta = currentListaPreguntas.findIndex(
@@ -241,12 +250,17 @@ const EditModels = () => {
     );
     if (indexPregunta == -1) return;
     const currentListaOpciones = currentListaPreguntas[indexPregunta].opciones;
+    console.log(currentListaOpciones);
     if (currentListaOpciones.length == 1) return;
     const indexOpcion = currentListaOpciones.findIndex(
       (opc) => opc.id === idOpcion,
     );
-    currentListaPreguntas[indexPregunta].opciones.splice(indexOpcion, 1);
-    setListaPreguntas(currentListaPreguntas);
+    console.log(currentListaPreguntas[indexPregunta].opciones[indexOpcion]);
+    console.log(currentListaPreguntas[indexPregunta].opciones[indexOpcion].new);
+    if (currentListaPreguntas[indexPregunta].opciones[indexOpcion].new) {
+      currentListaPreguntas[indexPregunta].opciones.splice(indexOpcion, 1);
+      setListaPreguntas(currentListaPreguntas);
+    }
   };
 
   const handleClickDeletePregunta = (idPregunta: number) => {
@@ -256,8 +270,10 @@ const EditModels = () => {
       (pre) => pre.id === idPregunta,
     );
     if (indexPregunta === -1) return;
-    currentListaPregunta.splice(indexPregunta, 1);
-    setListaPreguntas(currentListaPregunta);
+    if (currentListaPregunta[indexPregunta].new) {
+      currentListaPregunta.splice(indexPregunta, 1);
+      setListaPreguntas(currentListaPregunta);
+    }
   };
 
   const handleChangeLimiteRespuesta = (
@@ -331,14 +347,14 @@ const EditModels = () => {
       enc_fecha_creacion: fecha.toISOString(),
       enc_titulo: nombreTest.toString(),
     };
-    console.log(encuestaData);
+    console.log('POR ACA 11');
     try {
-      console.log('UNOOO');
+      console.log('PROBANDO 22');
       setLoadingGuardando(true);
       const responseTest = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/encuesta',
+        'https://backendestilos.onrender.com/estilos/api/v1/encuesta/' + test,
         {
-          method: 'POST',
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${sessionToken}`,
@@ -346,30 +362,34 @@ const EditModels = () => {
           body: JSON.stringify(encuestaData),
         },
       );
-      console.log('DOSS');
-      if (responseTest.status !== 201) {
+      console.log('ERROR 2');
+      if (responseTest.status !== 200) {
+        console.log('ERROR');
         setLoadingGuardando(false);
-        setMensajeError('Error al guardar la encuesta en el servidor');
+        setMensajeError('Error al actualizar la encuesta en el servidor');
         cambiarEstadoErrorGuardadoTemporalmente();
         return;
       }
-
+      console.log('POR ACAAA');
+      console.log(test);
+      console.log(rules);
+      console.log('POR ACA TRES');
       const data = await responseTest.json();
-      let testId = data.data.enc_id;
       let arregloEstilosApr: tipoValor[] = [];
 
+      // ACTUALIZADO CON EL ID TEST CORRECTO
+      console.log(test);
+      console.log(rules);
       const reglaCalculoData = {
-        enc_id: testId,
+        enc_id: test,
         reglas_json: rules,
       };
-
       console.log(reglaCalculoData);
-
       try {
         const responseRegla = await fetch(
-          'https://backendestilos.onrender.com/estilos/api/v1/reglas',
+          'https://backendestilos.onrender.com/estilos/api/v1/reglas/' + test,
           {
-            method: 'POST',
+            method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${sessionToken}`,
@@ -377,85 +397,130 @@ const EditModels = () => {
             body: JSON.stringify(reglaCalculoData),
           },
         );
-
-        if (responseRegla.status !== 201) {
-          const errorData = await responseRegla.json();
-          setLoadingGuardando(false);
-          setMensajeError('Error al crear la regla de cálculo!');
-          cambiarEstadoErrorGuardadoTemporalmente();
-          throw new Error(
-            errorData.mensaje || 'Error al crear la regla de cálculo',
-          );
-        }
+        // if (responseRegla.status !== 200) {
+        //   const errorData = await responseRegla.json();
+        //   setLoadingGuardando(false);
+        //   setMensajeError('Error al actualizar la regla de cálculo!');
+        //   cambiarEstadoErrorGuardadoTemporalmente();
+        //   throw new Error(
+        //     errorData.mensaje || 'Error al actualizar la regla de cálculo',
+        //   );
+        // }
       } catch (error) {
         setLoadingGuardando(false);
-        setMensajeError('Error al crear la regla de cálculo!');
+        setMensajeError('Error al actualizar la regla de cálculo!');
         cambiarEstadoErrorGuardadoTemporalmente();
-        throw new Error('Error al guardar la regla de cálculo');
+        throw new Error('Error al actualizar la regla de cálculo');
       }
 
+      // ACTUALIZANDO ESTILOS HASTA 17/09/2024
       try {
         const apiUrl = 'https://backendestilos.onrender.com/estilos/api/v1/estilo';
         const headers = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${sessionToken}`,
         };
-
-        for (let estilo of estilosAprendizajeAux) {
+        for (let estilo of estilosAprendizaje) {
           let estilos = {
             est_descripcion: estilo.tipo,
             est_nombre: estilo.tipo,
-            enc_id: testId,
+            enc_id: test,
             est_parametro: false,
           };
+          if (estilo.new) {
+            const responseEstilo = await fetch(apiUrl, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify(estilos),
+            });
 
-          console.log(estilos);
-          const responseEstilo = await fetch(apiUrl, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(estilos),
-          });
+            if (responseEstilo.status !== 201) {
+              setLoadingGuardando(false);
+              setMensajeError(`Error al guardar el estilo ${estilo}!`);
+              cambiarEstadoErrorGuardadoTemporalmente();
+              throw new Error('Error al guardar el estilo');
+            }
 
-          if (responseEstilo.status !== 201) {
-            setLoadingGuardando(false);
-            setMensajeError(`Error al guardar el estilo ${estilo}!`);
-            cambiarEstadoErrorGuardadoTemporalmente();
-            throw new Error('Error al guardar el estilo');
+            const dataEstilo = await responseEstilo.json();
+            arregloEstilosApr.push({
+              tipo: estilo.tipo,
+              valor: dataEstilo.data.est_id,
+              new: true,
+            });
+          } else {
+            console.log('actualizando estilo');
+            let estiloActualizado = {
+              est_nombre: estilo.tipo,
+              est_descripcion: estilo.tipo,
+              enc_id: test,
+              est_parametro: false,
+            };
+            const responseEstilo = await fetch(
+              'https://backendestilos.onrender.com/estilos/api/v1/estilo/' + estilo.valor,
+              {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${sessionToken}`,
+                },
+                body: JSON.stringify(estiloActualizado),
+              },
+            );
+            arregloEstilosApr.push({
+              tipo: estilo.tipo,
+              valor: estilo.valor,
+              new: false,
+            });
           }
-
-          const dataEstilo = await responseEstilo.json();
-          arregloEstilosApr.push({
-            tipo: estilo.tipo,
-            valor: dataEstilo.data.est_id,
-          });
         }
         for (let estilo of parametrosAprendizaje) {
           let estilos = {
             est_descripcion: estilo.tipo,
             est_nombre: estilo.tipo,
-            enc_id: testId,
+            enc_id: test,
             est_parametro: true,
           };
 
-          console.log(estilos);
-          const responseEstilo = await fetch(apiUrl, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(estilos),
-          });
+          if (estilo.new) {
+            console.log('nuevo parametro');
+            const responseEstilo = await fetch(apiUrl, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify(estilos),
+            });
 
-          if (responseEstilo.status !== 201) {
-            setLoadingGuardando(false);
-            setMensajeError(`Error al guardar el parametro ${estilo}!`);
-            cambiarEstadoErrorGuardadoTemporalmente();
-            throw new Error('Error al guardar el parametro');
+            if (responseEstilo.status !== 201) {
+              setLoadingGuardando(false);
+              setMensajeError(`Error al guardar el parametro ${estilo}!`);
+              cambiarEstadoErrorGuardadoTemporalmente();
+              throw new Error('Error al guardar el parametro');
+            }
+
+            const dataEstilo = await responseEstilo.json();
+            arregloEstilosApr.push({
+              tipo: estilo.tipo,
+              valor: dataEstilo.data.est_id,
+              new: true,
+            });
+          } else {
+            const responseEstilo = await fetch(
+              'https://backendestilos.onrender.com/estilos/api/v1/estilo/' + estilo.valor,
+              {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${sessionToken}`,
+                },
+                body: JSON.stringify(estilos),
+              },
+            );
+            const dataEstilo = await responseEstilo.json();
+            arregloEstilosApr.push({
+              tipo: estilo.tipo,
+              valor: estilo.valor,
+              new: false,
+            });
           }
-
-          const dataEstilo = await responseEstilo.json();
-          arregloEstilosApr.push({
-            tipo: estilo.tipo,
-            valor: dataEstilo.data.est_id,
-          });
         }
       } catch (error) {
         setLoadingGuardando(false);
@@ -466,9 +531,9 @@ const EditModels = () => {
 
       for (let i = 0; i < listaPreguntas.length; i++) {
         const pregunta = listaPreguntas[i];
-
+        console.log(pregunta);
         const preguntaData = {
-          enc_id: testId,
+          enc_id: test,
           pre_enunciado: pregunta.pregunta,
           pre_num_respuestas_max: pregunta.max,
           pre_num_respuestas_min: pregunta.min,
@@ -476,36 +541,64 @@ const EditModels = () => {
           pre_tipo_pregunta: pregunta.tipoPregunta,
           pre_valor_total: valorPregunta,
         };
+        console.log(preguntaData);
 
         try {
-          console.log(preguntaData);
-          const responsePregunta = await fetch(
-            'https://backendestilos.onrender.com/estilos/api/v1/pregunta',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${sessionToken}`,
+          let preguntaId;
+          if (pregunta.new) {
+            console.log('Nueva pregunta');
+            const responsePregunta = await fetch(
+              'https://backendestilos.onrender.com/estilos/api/v1/pregunta',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${sessionToken}`,
+                },
+                body: JSON.stringify(preguntaData),
               },
-              body: JSON.stringify(preguntaData),
-            },
-          );
-
-          if (responsePregunta.status !== 201) {
-            setLoadingGuardando(false);
-            setMensajeError(
-              `Error al guardar la pregunta ${pregunta.pregunta}!`,
             );
-            cambiarEstadoErrorGuardadoTemporalmente();
-            throw new Error('Error al guardar la pregunta');
-          }
 
-          let dataPregunta = await responsePregunta.json();
-          let preguntaId = dataPregunta.data.pre_id;
+            if (responsePregunta.status !== 201) {
+              setLoadingGuardando(false);
+              setMensajeError(
+                `Error al guardar la pregunta ${pregunta.pregunta}!`,
+              );
+              cambiarEstadoErrorGuardadoTemporalmente();
+              throw new Error('Error al guardar la pregunta');
+            }
+
+            let dataPregunta = await responsePregunta.json();
+            preguntaId = dataPregunta.data.pre_id;
+          } else {
+            console.log('Actualizando pregunta');
+            console.log(preguntaData);
+            preguntaId = pregunta.id;
+            const responsePregunta = await fetch(
+              'https://backendestilos.onrender.com/estilos/api/v1/pregunta/' + preguntaId,
+              {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${sessionToken}`,
+                },
+                body: JSON.stringify(preguntaData),
+              },
+            );
+
+            if (responsePregunta.status !== 200) {
+              setLoadingGuardando(false);
+              setMensajeError(
+                `Error al guardar la pregunta ${pregunta.pregunta}!`,
+              );
+              cambiarEstadoErrorGuardadoTemporalmente();
+              throw new Error('Error al actualizar la pregunta');
+            }
+          }
 
           for (const opcion of pregunta.opciones) {
             let estiloId = arregloEstilosApr.find(
-              (estiloApr) => estiloApr.tipo === opcion.estilo,
+              (estiloApr) => estiloApr.valor === opcion.estilo.toString(),
             );
 
             if (estiloId === undefined) {
@@ -522,25 +615,57 @@ const EditModels = () => {
               pre_id: preguntaId,
             };
 
+            console.log('OPCIONES');
             try {
-              console.log(opcionData);
-              const responseOpcion = await fetch(
-                'https://backendestilos.onrender.com/estilos/api/v1/opcion',
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${sessionToken}`,
+              if (opcion.new) {
+                console.log('NUEVA OPCION');
+                const responseOpcion = await fetch(
+                  'https://backendestilos.onrender.com/estilos/api/v1/opcion',
+                  {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${sessionToken}`,
+                    },
+                    body: JSON.stringify(opcionData),
                   },
-                  body: JSON.stringify(opcionData),
-                },
-              );
-              console.log('pasando primer');
-              if (responseOpcion.status !== 201) {
-                setLoadingGuardando(false);
-                setMensajeError(`Error al guardar la opción ${opcion.opcion}!`);
-                cambiarEstadoErrorGuardadoTemporalmente();
-                throw new Error('Error al guardar la opción');
+                );
+                if (responseOpcion.status !== 201) {
+                  setLoadingGuardando(false);
+                  setMensajeError(
+                    `Error al actualizar la opción ${opcion.opcion}!`,
+                  );
+                  cambiarEstadoErrorGuardadoTemporalmente();
+                  throw new Error('Error al actualizar la opción');
+                }
+              } else {
+                console.log('ACTUALIZANDO OPCION');
+                const opcionDataActualizacion = {
+                  est_id: estiloIdNumerico,
+                  opc_texto: opcion.opcion,
+                  opc_valor_cualitativo: opcion.estilo,
+                  opc_valor_cuantitativo: valorPregunta,
+                  pre_id: preguntaId,
+                };
+                const responseOpcion = await fetch(
+                  'https://backendestilos.onrender.com/estilos/api/v1/opcion/' + opcion.id,
+                  {
+                    method: 'PUT',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${sessionToken}`,
+                    },
+                    body: JSON.stringify(opcionDataActualizacion),
+                  },
+                );
+                if (responseOpcion.status !== 200) {
+                  setLoadingGuardando(false);
+                  setMensajeError(
+                    `Error al actualizar la opción ${opcion.opcion}!`,
+                  );
+                  cambiarEstadoErrorGuardadoTemporalmente();
+                  throw new Error('Error al guardar la opción');
+                }
               }
             } catch (error) {
               console.error('Error al enviar la opción:', error);
@@ -548,9 +673,11 @@ const EditModels = () => {
           }
         } catch (error) {
           console.error(
-            `Error al guardar la pregunta ${pregunta.pregunta}:`,
+            `Error al actualizar la pregunta ${pregunta.pregunta}:`,
             error,
           );
+        } finally {
+          setLoadingGuardando(false);
         }
       }
       setLoadingGuardando(false);
@@ -559,24 +686,24 @@ const EditModels = () => {
     } catch (error) {
       setMensajeError('Error al guardar la encuesta');
       cambiarEstadoErrorGuardadoTemporalmente();
-      console.log(error);
       return;
+    } finally {
+      setLoadingGuardando(false);
     }
   };
 
   const onGuardarNuevoEstiloAprendizaje = (dim: string) => {
-    console.log('AGREGANDO');
     const estilo = nuevoEstiloAprendizaje.toLowerCase();
     const nuevoParam = nuevoParametro.toLowerCase();
     if (estilosAprendizaje[0].tipo.length == 0) {
       if (parametrosAprendizaje[0].tipo.length == 0 && dim == 'dimension') {
-        let auxParam = { tipo: nuevoParam, valor: nuevoParam };
+        let auxParam = { tipo: nuevoParam, valor: nuevoParam, new: true };
         setEstilosAprendizaje([auxParam]);
         setParametrosAprendizaje([auxParam]);
       }
       if (estilosAprendizajeAux[0].tipo.length == 0 && dim == '') {
-        setEstilosAprendizaje([{ tipo: estilo, valor: estilo }]);
-        setEstilosAprendizajeAux([{ tipo: estilo, valor: estilo }]);
+        setEstilosAprendizaje([{ tipo: estilo, valor: estilo, new: true }]);
+        setEstilosAprendizajeAux([{ tipo: estilo, valor: estilo, new: true }]);
       }
     } else {
       if (
@@ -585,193 +712,261 @@ const EditModels = () => {
       ) {
         setEstilosAprendizaje((prevState) => [
           ...prevState,
-          { tipo: estilo, valor: estilo },
+          { tipo: estilo, valor: estilo, new: true },
         ]);
         let aux = [...estilosAprendizajeAux];
         if (aux.length == 1 && aux[0].tipo.length == 0) {
-          aux[0] = { tipo: estilo, valor: estilo };
+          aux[0] = { tipo: estilo, valor: estilo, new: true };
           setEstilosAprendizajeAux(aux);
         } else {
           setEstilosAprendizajeAux((prevState) => [
             ...prevState,
-            { tipo: estilo, valor: estilo },
+            { tipo: estilo, valor: estilo, new: true },
           ]);
         }
       }
       if (
         dim == 'dimension' &&
-        !estilosAprendizaje.find((estiloA) => estiloA.tipo === nuevoParam)
+        !parametrosAprendizaje.find((estiloA) => estiloA.tipo === nuevoParam)
       ) {
-        console.log('viendo');
-        setEstilosAprendizaje((prevState) => [
-          ...prevState,
-          { tipo: nuevoParam, valor: nuevoParam },
-        ]);
-        console.log('NUEVA DIMENSION');
+        console.log('AGREGANDO PARAMETRO');
         let aux = [...parametrosAprendizaje];
         if (aux.length == 1 && aux[0].tipo.length == 0) {
-          aux[0] = { tipo: nuevoParam, valor: nuevoParam };
+          aux[0] = { tipo: nuevoParam, valor: nuevoParam, new: true };
+          console.log('CASO 1');
           setParametrosAprendizaje(aux);
         } else {
+          console.log('CASO 2');
           setParametrosAprendizaje((prevState) => [
             ...prevState,
-            { tipo: nuevoParam, valor: nuevoParam },
+            { tipo: nuevoParam, valor: nuevoParam, new: true },
           ]);
         }
       }
     }
   };
 
-  const handleClickDeleteEstiloAprendizaje = (estilo: string) => {
+  useEffect(() => {
+    console.log(rules);
+  }, [rules]);
+
+  useEffect(() => {
+    console.log(parametrosAprendizaje);
+  }, [parametrosAprendizaje]);
+
+  const handleClickDeleteEstiloAprendizaje = (estilo: tipoValor) => {
     const index = estilosAprendizaje.findIndex(
-      (itemEst) => itemEst.tipo === estilo && itemEst.valor === estilo,
+      (itemEst) =>
+        itemEst.tipo === estilo.tipo && itemEst.valor === estilo.valor,
     );
-    const indexAux = estilosAprendizajeAux.indexOf({
-      tipo: estilo,
-      valor: estilo,
-    });
-    let currentEstilosAprendizaje = [...estilosAprendizaje];
-    let currentEstilosAux = [...estilosAprendizajeAux];
-    let nuevasReglas;
-    let nuevasPreguntas: Pregunta[] = [];
-    if (index != -1) {
-      if (currentEstilosAux.length == 1) {
-        currentEstilosAux[0] = { tipo: '', valor: '' };
-      }
-      if (currentEstilosAprendizaje.length == 1) {
-        currentEstilosAprendizaje[0] = { tipo: '', valor: '' };
-        setListaPreguntas(nuevasPreguntas);
-      } else {
-        const preguntasActualizadas = listaPreguntas.map((pregunta) => ({
-          ...pregunta,
-          opciones: pregunta.opciones.filter((opc) => opc.estilo !== estilo),
-        }));
-        setListaPreguntas(preguntasActualizadas);
-        let currentAuxi = [...estilosAprendizaje];
-        currentEstilosAprendizaje = currentAuxi.filter(
-          (item) => item.tipo !== estilo,
+    console.log(estilo);
+    console.log('INDICE: ' + index);
+    console.log(estilosAprendizaje[index].new);
+    if (estilosAprendizaje[index].new) {
+      let currentEstilosAprendizaje = [...estilosAprendizaje];
+      let currentEstilosAux = [...estilosAprendizajeAux];
+      let nuevasReglas;
+      let nuevasPreguntas: Pregunta[] = [];
+      if (index != -1) {
+        if (currentEstilosAux.length == 1) {
+          currentEstilosAux[0] = { tipo: '', valor: '', new: true };
+        }
+        if (currentEstilosAprendizaje.length == 1) {
+          currentEstilosAprendizaje[0] = { tipo: '', valor: '', new: true };
+          setListaPreguntas(nuevasPreguntas);
+        } else {
+          const preguntasActualizadas = listaPreguntas.map((pregunta) => ({
+            ...pregunta,
+            opciones: pregunta.opciones.filter(
+              (opc) => opc.estilo !== estilo.tipo,
+            ),
+          }));
+          setListaPreguntas(preguntasActualizadas);
+          let currentAuxi = [...estilosAprendizaje];
+          currentEstilosAprendizaje = currentAuxi.filter(
+            (item) => item.tipo !== estilo.tipo,
+          );
+          currentEstilosAux = estilosAprendizajeAux.filter(
+            (item) => item.tipo !== estilo.tipo,
+          );
+        }
+        nuevasReglas = reglaCalculo.filter((regla) => {
+          const valorCoincide =
+            regla.fila === estilo.tipo || regla.columnas.includes(estilo.tipo);
+          return !valorCoincide;
+        });
+        const updatedRules = rules.filter(
+          (rule) =>
+            rule.estilo !== estilo.tipo &&
+            !rule.condiciones.some((condicion) =>
+              condicion.parametros.some((col) =>
+                col.value.includes(estilo.tipo),
+              ),
+            ),
         );
-        currentEstilosAux = estilosAprendizajeAux.filter(
-          (item) => item.tipo !== estilo,
-        );
+        setRules(updatedRules);
+        setEstilosAprendizaje(currentEstilosAprendizaje);
+        setEstilosAprendizajeAux(currentEstilosAux);
+        setReglaCalculo(nuevasReglas);
       }
-      nuevasReglas = reglaCalculo.filter((regla) => {
-        const valorCoincide =
-          regla.fila === estilo || regla.columnas.includes(estilo);
-        return !valorCoincide;
-      });
-      const updatedRules = rules.filter(
-        (rule) =>
-          rule.estilo !== estilo &&
-          !rule.condiciones.some((condicion) =>
-            condicion.parametros.some((col) => col.value.includes(estilo)),
-          ),
-      );
-      setRules(updatedRules);
-      setEstilosAprendizaje(currentEstilosAprendizaje);
-      setEstilosAprendizajeAux(currentEstilosAux);
-      console.log(currentEstilosAux);
-      setReglaCalculo(nuevasReglas);
     }
   };
 
-  const handleClickDeleteParametroAprendizaje = (estilo: string) => {
-    const index = estilosAprendizaje.findIndex(
-      (itemEst) => itemEst.tipo === estilo && itemEst.valor === estilo,
+  const handleClickDeleteParametroAprendizaje = (estilo: tipoValor) => {
+    const index = parametrosAprendizaje.findIndex(
+      (itemEst) => itemEst.tipo === estilo.tipo,
     );
-    const indexAux = parametrosAprendizaje.indexOf({
-      tipo: estilo,
-      valor: estilo,
-    });
-    let currentEstilosAprendizaje = [...estilosAprendizaje];
+    // const indexAux = parametrosAprendizaje.indexOf({
+    //   tipo: estilo,
+    //   valor: estilo,
+    // });
+    console.log('BORRANDO PARAM:');
+    console.log(estilo);
+    // let currentEstilosAprendizaje = [...estilosAprendizaje];
     let currentParametrosAux = [...parametrosAprendizaje];
     let nuevasReglas;
     let nuevasPreguntas: Pregunta[] = [];
+    console.log(currentParametrosAux);
+    console.log(index);
     if (index != -1) {
+      // if (currentParametrosAux.length == 1) {
+      //   currentParametrosAux[0] = { tipo: '', valor: '', new: true };
+      // }
       if (currentParametrosAux.length == 1) {
-        currentParametrosAux[0] = { tipo: '', valor: '' };
-      }
-      if (currentEstilosAprendizaje.length == 1) {
-        currentEstilosAprendizaje[0] = { tipo: '', valor: '' };
+        currentParametrosAux[0] = { tipo: '', valor: '', new: true };
         setListaPreguntas(nuevasPreguntas);
       } else {
-        const preguntasActualizadas = listaPreguntas.map((pregunta) => ({
-          ...pregunta,
-          opciones: pregunta.opciones.filter((opc) => opc.estilo !== estilo),
-        }));
-        setListaPreguntas(preguntasActualizadas);
-        currentEstilosAprendizaje = currentEstilosAprendizaje.filter(
-          (item) => item.tipo != estilo,
-        );
-        currentParametrosAux = currentParametrosAux.filter(
-          (item) => item.tipo != estilo,
-        );
+        // const preguntasActualizadas = listaPreguntas.map((pregunta) => ({
+        //   ...pregunta,
+        //   opciones: pregunta.opciones.filter(
+        //     (opc) => opc.estilo !== estilo.tipo,
+        //   ),
+        // }));
+        // setListaPreguntas(preguntasActualizadas);
+        console.log(currentParametrosAux[index]);
+        if (currentParametrosAux[index].new) {
+          currentParametrosAux = currentParametrosAux.filter(
+            (item) => item.tipo != estilo.tipo,
+          );
+        }
       }
-      nuevasReglas = reglaCalculo.filter((regla) => {
-        const valorCoincide =
-          regla.fila === estilo || regla.columnas.includes(estilo);
-        return !valorCoincide;
-      });
-      const updatedRules = rules.filter(
-        (rule) =>
-          !rule.condiciones.some((condicion) =>
-            condicion.parametros.some((col) => col.value.includes(estilo)),
-          ),
-      );
-      setRules(updatedRules);
-      setEstilosAprendizaje(currentEstilosAprendizaje);
+      // nuevasReglas = reglaCalculo.filter((regla) => {
+      //   const valorCoincide =
+      //     regla.fila === estilo.tipo || regla.columnas.includes(estilo.tipo);
+      //   return !valorCoincide;
+      // });
+      // const updatedRules = rules.filter(
+      //   (rule) =>
+      //     !rule.condiciones.some((condicion) =>
+      //       condicion.parametros.some((col) => col.value.includes(estilo.tipo)),
+      //     ),
+      // );
+      // setRules(updatedRules);
+      // setEstilosAprendizaje(currentEstilosAprendizaje);
       setParametrosAprendizaje(currentParametrosAux);
-      setReglaCalculo(nuevasReglas);
+      // setReglaCalculo(nuevasReglas);
     }
   };
 
+  useEffect(() => {
+    console.log(rules);
+  }, [rules]);
+
+  function replaceValue(
+    obj: Rule[],
+    targetValue: string,
+    newValue: string,
+  ): Rule[] {
+    return obj.map((rule) => {
+      const updatedRule = { ...rule }; // Creamos una copia del objeto para mantener la inmutabilidad
+
+      // Iterar sobre las condiciones y parámetros de cada regla
+      updatedRule.condiciones = updatedRule.condiciones.map((condicion) => {
+        const updatedCondicion = { ...condicion };
+
+        updatedCondicion.parametros = updatedCondicion.parametros.map(
+          (parametro) => {
+            const updatedParametro = { ...parametro };
+
+            // Reemplazar el valor si coincide con el valor objetivo
+            updatedParametro.value = updatedParametro.value.map((val) =>
+              val === targetValue ? newValue : val,
+            );
+
+            return updatedParametro;
+          },
+        );
+
+        return updatedCondicion;
+      });
+
+      return updatedRule;
+    });
+  }
+
   const onActualizarEstiloAprendizaje = (dim: string) => {
     let posicion;
+    console.log(rules);
     if (dim == 'dimension') {
-      posicion = estilosAprendizaje.findIndex(
-        (item) =>
-          item.tipo == parametroBuscado && item.valor == parametroBuscado,
+      console.log('DIMENSION');
+      posicion = parametrosAprendizaje.findIndex(
+        (item) => item.tipo == parametroBuscado,
       );
     } else {
       posicion = estilosAprendizaje.findIndex(
-        (item) => item.tipo == estiloBuscado && item.valor == estiloBuscado,
+        (item) => item.tipo == estiloBuscado,
       );
     }
-    const auxEstilosAprendizaje = [...estilosAprendizaje];
-    auxEstilosAprendizaje[posicion] = {
-      tipo: nuevoEstiloAprendizaje,
-      valor: nuevoEstiloAprendizaje,
-    };
-    setEstilosAprendizaje(auxEstilosAprendizaje);
+    if (posicion == -1) {
+      setActualizandoParametro(false);
+      setActualizandoEstilo(false);
+      return;
+    }
+    // const auxEstilosAprendizaje = [...estilosAprendizaje];
+    // auxEstilosAprendizaje[posicion] = {
+    //   tipo: nuevoEstiloAprendizaje,
+    //   valor: auxEstilosAprendizaje[posicion].valor,
+    //   new: auxEstilosAprendizaje[posicion].new,
+    // };
+    // setEstilosAprendizaje(auxEstilosAprendizaje);
     if (dim == 'dimension') {
+      console.log('ACTUALIZANDO DIMENSION');
       const posicionAux = parametrosAprendizaje.findIndex(
-        (item) =>
-          item.tipo == parametroBuscado && item.valor == parametroBuscado,
+        (item) => item.tipo == parametroBuscado,
       );
       const parametrosAux = [...parametrosAprendizaje];
       parametrosAux[posicionAux] = {
         tipo: nuevoParametro,
-        valor: nuevoParametro,
+        valor: parametrosAux[posicionAux].valor,
+        new: parametrosAux[posicionAux].new,
       };
       setParametrosAprendizaje(parametrosAux);
       setActualizandoParametro(false);
     } else {
-      const posicionAux = estilosAprendizajeAux.findIndex(
-        (item) => item.tipo == estiloBuscado && item.valor == estiloBuscado,
+      const posicionAux = estilosAprendizaje.findIndex(
+        (item) => item.tipo == estiloBuscado,
       );
       if (posicionAux != -1) {
-        const estilosAprendizajeAuxDos = [...estilosAprendizajeAux];
+        console.log('ESTILO');
+        const estilosAprendizajeAuxDos = [...estilosAprendizaje];
         estilosAprendizajeAuxDos[posicionAux] = {
           tipo: nuevoEstiloAprendizaje,
-          valor: nuevoEstiloAprendizaje,
+          valor: estilosAprendizajeAuxDos[posicionAux].valor,
+          new: estilosAprendizajeAuxDos[posicionAux].new,
         };
-        setEstilosAprendizajeAux(estilosAprendizajeAuxDos);
+        setEstilosAprendizaje(estilosAprendizajeAuxDos);
       }
-      console.log('actual');
-      setActualizandoParametro(false);
       setActualizandoEstilo(false);
     }
   };
+
+  useEffect(() => {
+    console.log(estilosAprendizaje);
+  }, [estilosAprendizaje]);
+
+  useEffect(() => {
+    console.log(parametrosAprendizaje);
+  }, [parametrosAprendizaje]);
 
   const onActualizarParametroAprendizaje = () => {
     const posicion = parametrosAprendizaje.indexOf({
@@ -797,7 +992,6 @@ const EditModels = () => {
   };
 
   const cambiarTipoPregunta = (valor: string) => {
-    console.log(valor);
     setTipoPregunta(valor);
     setOpcionesPregunta([]);
     setNuevaOpcion('');
@@ -805,12 +999,16 @@ const EditModels = () => {
   };
 
   const handleClickAddPregunta = () => {
+    console.log('add preg');
+    console.log(estilosAprendizajeAux);
+    if(tipoPregunta.length==0) return;
     if (estilosAprendizaje[0].tipo == '') return;
+    console.log('PASO');
     let IdUltimaPregunta;
     if (listaPreguntas.length == 0) {
       IdUltimaPregunta = 1;
     } else {
-      IdUltimaPregunta = listaPreguntas[listaPreguntas.length - 1].id + 1;
+      IdUltimaPregunta = listaPreguntas[listaPreguntas.length - 1].id + 2;
     }
     let escalas: string[] = [];
     if (tipoPregunta == 'likert')
@@ -823,13 +1021,14 @@ const EditModels = () => {
       ];
     const pregunta: Pregunta = {
       id: IdUltimaPregunta,
-      orden: listaPreguntas.length + 1,
+      orden: listaPreguntas.length + 2,
       pregunta: 'Nueva pregunta',
       tipoPregunta: tipoPregunta,
       opciones: [
-        { id: 1, opcion: 'Opción 1', estilo: '' },
-        { id: 2, opcion: 'Opción 2', estilo: '' },
+        { id: 1, opcion: 'Opción 1', estilo: '', new: true },
+        { id: 2, opcion: 'Opción 2', estilo: '', new: true },
       ],
+      new: true,
       escalas: escalas,
       min: 0,
       max: 0,
@@ -837,6 +1036,7 @@ const EditModels = () => {
     const nuevaLista = listaPreguntas
       .concat(pregunta)
       .sort((a, b) => a.orden - b.orden);
+    console.log(nuevaLista);
     setListaPreguntas(nuevaLista);
     ResetCamposPregunta();
   };
@@ -875,39 +1075,30 @@ const EditModels = () => {
   /*{Código relacionado al funcionamiento del registro de las reglas 
     de cálculo
   }*/
-  const [rules, setRules] = useState<Rule[]>([]);
   const addRule = () => {
     const newRule: Rule = { estilo: '', condiciones: [] };
     setRules([...rules, newRule]);
   };
 
+  useEffect(() => {
+    console.log(listaPreguntas);
+  }, [listaPreguntas]);
+
   const deleteRule = (index: number) => {
-    console.log('INDICE REGLAAAA');
-    console.log(datosPrueba);
+    console.log('BORRAR REGLAS:');
+    console.log(rules);
     console.log(index);
-    const newRules = [...datosPrueba];
+    const newRules = [...rules];
     newRules.splice(index, 1);
-    setDatosPrueba(newRules);
+    setRules(newRules);
   };
 
   const handleRuleChange = (index: number, updatedRule: Rule) => {
-    console.log('REGLASSS:');
-    console.log(datosPrueba);
-    console.log(index);
-    console.log(updatedRule);
-    const updatedRules = [...datosPrueba];
+    const updatedRules = [...rules];
     updatedRules[index] = updatedRule;
-    console.log(updatedRules);
-    console.log(datosPrueba);
     // setReglasActualizadas(updatedRules);
-    setDatosPrueba(updatedRules);
+    setRules(updatedRules);
   };
-
-  useEffect(() => {
-    console.log('ACAAA:');
-    console.log(reglasActualizadas);
-    console.log(datosPrueba);
-  }, [datosPrueba]);
 
   const fetchEncuestas = async () => {
     try {
@@ -921,7 +1112,7 @@ const EditModels = () => {
           },
         },
       );
-      if (!response.ok) {
+      if (response.status != 200) {
         throw new Error('Error al obtener las encuestas');
       }
       const data = await response.json();
@@ -930,6 +1121,7 @@ const EditModels = () => {
         tipo: `${encuesta.enc_id}. ${encuesta.enc_titulo} - ${encuesta.enc_autor}`,
         valor: encuesta.enc_id.toString(),
       }));
+
       setDatosTests({
         mensaje: 'Listado de Tests ',
         tipos: tipos,
@@ -973,11 +1165,15 @@ const EditModels = () => {
   }, []);
 
   useEffect(() => {
-    if (parametrosAprendizaje.length > 0) {
-      const newRules = rules.map((rul) => ({ ...rul, condiciones: [] }));
-      setRules(newRules);
-    }
-  }, [parametrosAprendizaje]);
+    console.log(valorPregunta);
+  }, [valorPregunta]);
+
+  // useEffect(() => {
+  //   if (parametrosAprendizaje.length > 0) {
+  //     const newRules = rules.map((rul) => ({ ...rul, condiciones: [] }));
+  //     setRules(newRules);
+  //   }
+  // }, [parametrosAprendizaje]);
 
   const handleTestInformation = async (id: any) => {
     try {
@@ -996,36 +1192,42 @@ const EditModels = () => {
       }
       const data = await response.json();
 
-      console.log(data.data);
       // Manejo de otros estados
       setAutor(data.data.enc_autor);
       setNombreTest(data.data.enc_titulo);
       setEncuestaCuantitativa(data.data.enc_cuantitativa);
       setDescripcion(data.data.enc_descripcion);
-      setValorPregunta(data.data.pre_valor_pregunta);
+      setValorPregunta(data.data.preguntas[0].pre_valor_total);
 
       // Procesamiento de estilos y parámetros
       let totalParametros = [];
       let totalEstilos = [];
       for (const ESTILO of data.data.estilos) {
-        console.log(ESTILO);
         if (ESTILO.est_parametro) {
-          let parametro = { tipo: ESTILO.est_nombre, valor: ESTILO.est_id };
+          let parametro = {
+            tipo: ESTILO.est_nombre,
+            valor: ESTILO.est_id,
+            new: false,
+          };
           totalParametros.push(parametro);
         } else {
-          let estilo = { tipo: ESTILO.est_nombre, valor: ESTILO.est_id };
+          let estilo = {
+            tipo: ESTILO.est_nombre,
+            valor: ESTILO.est_id,
+            new: false,
+          };
           totalEstilos.push(estilo);
         }
       }
       setParametrosAprendizaje(totalParametros);
-      setEstilosAprendizajeAux(totalEstilos);
+      setEstilosAprendizaje(totalEstilos);
 
       // Procesamiento de reglas y condiciones
-      let totalReglasOriginales = data.data.reglas[0].reglas_json;
       setProbandooAux(data.data.reglas[0].reglas_json);
+      setIdRegla(data.data.reglas[0].reg_id);
       let reglasAuxi = [] as Rule[];
 
-      let totalReglas: Rule[] = data.data.reglas[0].reglas_json.map(
+      let totalReglas: Rule[] = await data.data.reglas[0].reglas_json.map(
         (REGLAS_JSON: any) => {
           const condiciones = REGLAS_JSON.condiciones.map((CONDICION: any) => ({
             parametros: CONDICION.parametros.map((COLUMN: any) => ({
@@ -1043,20 +1245,11 @@ const EditModels = () => {
           };
         },
       );
-
-      console.log('REVISION:');
-      console.log(totalReglas);
-      console.log(reglasAuxi);
       setProbandoo(reglasAuxi);
-      // setProbandooAux(reglasAuxi);
-      setDatosPrueba(totalReglas); // Asumiendo que `setDatosPrueba` es otra función de estado
-      // setDatosPrueba(reglasAuxi)
+      setRules(totalReglas); // Asumiendo que `setDatosPrueba` es otra función de estado
       setRules(totalReglas); // Actualización del estado `rules`
-      // Procesamiento de preguntas
-      // console.log('PREGUNTAS');
-      // console.log(data.data.preguntas);
       let preguntasConsultadas = data.data.preguntas;
-      let opcion: Opcion = { id: 0, opcion: '', estilo: '' };
+      let opcion: Opcion = { id: 0, opcion: '', estilo: '', new: false };
       const preguntasListadas: Pregunta[] = preguntasConsultadas.map(
         (preguntaConsultada: any) => {
           const opciones =
@@ -1064,6 +1257,7 @@ const EditModels = () => {
               id: opcion.opc_id,
               opcion: opcion.opc_texto,
               estilo: opcion.est_id,
+              new: false,
             })) || [];
 
           return {
@@ -1072,20 +1266,18 @@ const EditModels = () => {
             pregunta: preguntaConsultada.pre_enunciado ?? '',
             tipoPregunta: preguntaConsultada.pre_tipo_pregunta ?? '',
             opciones: opciones,
+            new: false,
             escalas: [],
             min: preguntaConsultada.pre_num_respuestas_min ?? 0,
             max: preguntaConsultada.pre_num_respuestas_max ?? 0,
           };
         },
       );
-      console.log(preguntasConsultadas);
-      console.log(preguntasListadas);
       setListaPreguntasAux(preguntasListadas);
     } catch (error: any) {
       console.error('Error: ', error.message);
-      // setError(error.message);  // Manejo del error
     } finally {
-      handleChangeLoadingCargando(); // Manejo del estado de carga
+      handleChangeLoadingCargando();
     }
   };
 
@@ -1104,37 +1296,20 @@ const EditModels = () => {
     } else {
       setTiposEstilosAprendizaje({
         mensaje: 'Estilo de aprendizaje ',
-        tipos: estilosAprendizajeAux,
+        tipos: estilosAprendizaje,
       });
     }
-  }, [parametrosAprendizaje, estilosAprendizajeAux]);
+  }, [parametrosAprendizaje, estilosAprendizaje]);
 
   useEffect(() => {
-    console.log('PREGUNTAS');
-    console.log(listaPreguntas);
     setListaPreguntas(listaPreguntasAux);
   }, [listaPreguntasAux]);
 
   useEffect(() => {
-    console.log(probandooAux);
-    console.log(estilosAprendizajeAux);
-    setDatosPrueba(probandooAux);
-    // setRules(probandooAux);
-    // setDatosPrueba(probandooAux);
-    // setDatosPrueba(probandoo);
-    // console.log(rules);
-    // console.log(probandooAux);
-    // console.log(probandoo);
-    // setDatosPrueba(rules);
+    setRules(probandooAux);
   }, [probandoo]);
 
-  // useEffect(() => {
-  //   console.log('DATOS PRUEBA');
-  //   console.log(datosPrueba);
-  // }, [datosPrueba]);
-
   const handleChangeIdTest = (id: any) => {
-    console.log(id);
     setTest(id);
     setLoadingCargando(true);
     handleTestInformation(id);
@@ -1148,9 +1323,14 @@ const EditModels = () => {
     setIsModalOpen(false);
   };
 
+  useEffect(() => {
+    console.log('CAMBIO ESTILOS');
+    console.log(estilosAprendizaje);
+  }, [estilosAprendizaje]);
+
   const handleConfirm = () => {
-    // onGuardarTest();
-    // handleCloseModal();
+    onGuardarTest();
+    handleCloseModal();
     console.log(datosPrueba);
   };
 
@@ -1210,13 +1390,13 @@ const EditModels = () => {
           </div>
           <div
             className="flex flex-col gap-3 opacity-85"
-            style={{
-              backgroundImage: `url(${EscudoUtn})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: '400px 350px',
-              backgroundPosition: 'center',
-              width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
-            }}
+            // style={{
+            //   backgroundImage: `url(${EscudoUtn})`,
+            //   backgroundRepeat: 'no-repeat',
+            //   backgroundSize: '400px 350px',
+            //   backgroundPosition: 'center',
+            //   width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
+            // }}
           >
             <div className="grid grid-cols-2 gap-4 opacity-95">
               <div className="">
@@ -1385,21 +1565,24 @@ const EditModels = () => {
                     </button>
                   )}
                 </div>
-                {estilosAprendizajeAux.length > 0 &&
+                {estilosAprendizaje.length > 0 &&
                   errorCamposGuardar &&
-                  estilosAprendizajeAux[0].tipo == '' && (
+                  estilosAprendizaje[0].tipo == '' && (
                     <AlertError mensaje="La lista no debe estar vacía" />
                   )}
                 <ul className="grid grid-cols-3 gap-4 pt-3">
-                  {estilosAprendizajeAux.length > 0 &&
-                    estilosAprendizajeAux[0].tipo.length > 0 &&
-                    estilosAprendizajeAux.map((estilo) => (
-                      <CardList
-                        actualizar={prepararActualizacionEstilo}
-                        eliminar={handleClickDeleteEstiloAprendizaje}
-                        valor={estilo.tipo}
-                        limite={20}
-                      />
+                  {estilosAprendizaje.length > 0 &&
+                    estilosAprendizaje[0].tipo.length > 0 &&
+                    estilosAprendizaje.map((estilo) => (
+                      <>
+                        {/* {console.log(estilo)} */}
+                        <CardListUpdate
+                          actualizar={prepararActualizacionEstilo}
+                          eliminar={handleClickDeleteEstiloAprendizaje}
+                          valor={estilo}
+                          limite={20}
+                        />
+                      </>
                     ))}
                 </ul>
               </div>
@@ -1433,7 +1616,7 @@ const EditModels = () => {
                         onGuardarNuevoEstiloAprendizaje('dimension')
                       }
                     >
-                      Agregar Dimensión de Aprendizaje
+                      Agregar parámetro
                     </button>
                   )}
                 </div>
@@ -1446,10 +1629,10 @@ const EditModels = () => {
                   {parametrosAprendizaje.length > 0 &&
                     parametrosAprendizaje[0].tipo.length > 0 &&
                     parametrosAprendizaje.map((estilo) => (
-                      <CardList
+                      <CardListUpdate
                         actualizar={prepararActualizacionParametro}
                         eliminar={handleClickDeleteParametroAprendizaje}
-                        valor={estilo.tipo}
+                        valor={estilo}
                         limite={11}
                       />
                     ))}
@@ -1460,29 +1643,14 @@ const EditModels = () => {
                 <h3 className="text-title-xsm pt-3 pb-3 font-semibold text-black dark:text-white">
                   Regla de cálculo:
                 </h3>
-                {datosPrueba.map((rule: any, index: any) => (
-                  <>
-                    <div>
-                      {index + 1}
-                      {'.-'}
-                      {rule.estilo}
-                    </div>
-                    {console.log(rule)}
-                  </>
-                ))}
                 <div className="flex flex-col bg-whiten dark:bg-form-input gap-5 rounded-t-lg border-[1.5px] border-black py-8 px-5 dark:text-white outline-none transition dark:border-form-strokedark">
                   {/* INGRESO DE REGLA ESPECIAL */}
                   <div className="App flex flex-col gap-10">
-                    {datosPrueba.map((rule: any, index: any) => (
+                    {rules.map((rule: any, index: any) => (
                       <div>
                         <div className="font-bold text-black dark:text-white text-lg mb-5">
                           Regla {index + 1}:
                         </div>
-                        {console.log('COMPON')}
-                        {rule && console.log(rule)}
-                        {console.log(datosPrueba)}
-                        {console.log(estilosAprendizajeAux)}
-                        {console.log(parametrosAprendizaje.length)}
                         <RuleComponent
                           key={index}
                           rule={rule}
@@ -1490,14 +1658,14 @@ const EditModels = () => {
                             handleRuleChange(index, updatedRule)
                           }
                           onDelete={() => deleteRule(index)}
-                          estilosAprendizaje={estilosAprendizajeAux}
                           parametrosAprendizaje={
                             parametrosAprendizaje.every(
                               (param) => param.tipo === '',
                             )
-                              ? estilosAprendizajeAux
+                              ? estilosAprendizaje
                               : parametrosAprendizaje
                           }
+                          estilosAprendizaje={estilosAprendizaje}
                         />
                       </div>
                     ))}
@@ -1538,12 +1706,9 @@ const EditModels = () => {
               <h3 className="text-title-xsm pt-4 placeholder:b-4 font-semibold text-black dark:text-white">
                 Test:
               </h3>
-              <>{console.log(listaPreguntas.length)}</>
-              <>{console.log(listaPreguntas)}</>
               {listaPreguntas &&
                 listaPreguntas.map((pre) => (
                   <div className="gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
-                    <>{console.log(pre)}</>
                     {pre.tipoPregunta === 'seleccion' && (
                       <MultiChoiceQuestion
                         pregunta={pre}

@@ -272,7 +272,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       <NavLink
                         to="#"
                         className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium dark:text-bodydark1 duration-300 ease-in-out text-black hover:bg-black hover:text-white dark:hover:text-white dark:hover:bg-meta-4 ${
-                          pathname.includes('models') &&
+                          pathname.includes('modelos') &&
                           'bg-black text-white dark:bg-meta-4'
                         }`}
                         onClick={(e) => {
@@ -324,9 +324,25 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 'group relative flex items-center gap-2.5 rounded-md px-4 font-medium dark:text-bodydark2 duration-300 ease-in-out text-slate-500 hover:text-black dark:hover:text-white ' +
                                 (isActive && 'text-black dark:!text-white')
                               }
-                              onClick={(e) => handleNavLinkClick('/models', e)}
+                              onClick={(e) =>
+                                handleNavLinkClick('/modelos/nuevo/test', e)
+                              }
                             >
                               Ingresar modelos
+                            </NavLink>
+                          </li>
+                          <li>
+                            <NavLink
+                              to="/modelos/editar/test"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium dark:text-bodydark2 duration-300 ease-in-out text-slate-500 hover:text-black dark:hover:text-white ' +
+                                (isActive && 'text-black dark:!text-white')
+                              }
+                              onClick={(e) =>
+                                handleNavLinkClick('/modelos/editar/test', e)
+                              }
+                            >
+                              Editar modelos
                             </NavLink>
                           </li>
                         </ul>
@@ -334,7 +350,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     </React.Fragment>
                   );
                 }}
-              </SidebarLinkGroup> */}
+              </SidebarLinkGroup>  */}
               {/* <!-- Menu Item Modelos --> */}
               {/* Menu item curso */}
               {/* <li>

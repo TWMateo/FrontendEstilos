@@ -362,14 +362,14 @@ function RegistroUsuarios() {
         {/* <div>RegistroUsuarios</div> */}
         <div
           className="flex flex-col gap-8 h-screen"
-          style={{
-            backgroundImage: `url(${EscudoUtn})`,
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'contain',
-            backgroundPosition: 'center',
-            width: '100%',
-            height: '70vh',
-          }}
+          // style={{
+          //   backgroundImage: `url(${EscudoUtn})`,
+          //   backgroundRepeat: 'no-repeat',
+          //   backgroundSize: 'contain',
+          //   backgroundPosition: 'center',
+          //   width: '100%',
+          //   height: '70vh',
+          // }}
         >
           <div className="bg-whiten dark:text-whiten dark:bg-boxdark text-black flex flex-col gap-5 opacity-85 rounded-lg p-10">
             <h1 className="font-bold text-lg">Registro de personas</h1>

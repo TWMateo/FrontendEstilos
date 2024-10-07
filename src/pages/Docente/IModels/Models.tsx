@@ -370,7 +370,7 @@ const Models = () => {
             est_descripcion: estilo.tipo,
             est_nombre: estilo.tipo,
             enc_id: testId,
-            est_parametro:false
+            est_parametro: false,
           };
 
           console.log(estilos);
@@ -398,28 +398,29 @@ const Models = () => {
             est_descripcion: estilo.tipo,
             est_nombre: estilo.tipo,
             enc_id: testId,
-            est_parametro:true
+            est_parametro: true,
           };
+          if (estilos.est_descripcion != '' && estilos.est_descripcion != '') {
+            console.log(estilos);
+            const responseEstilo = await fetch(apiUrl, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify(estilos),
+            });
 
-          console.log(estilos);
-          const responseEstilo = await fetch(apiUrl, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(estilos),
-          });
+            if (responseEstilo.status !== 201) {
+              setLoadingGuardando(false);
+              setMensajeError(`Error al guardar el parametro ${estilo}!`);
+              cambiarEstadoErrorGuardadoTemporalmente();
+              throw new Error('Error al guardar el parametro');
+            }
 
-          if (responseEstilo.status !== 201) {
-            setLoadingGuardando(false);
-            setMensajeError(`Error al guardar el parametro ${estilo}!`);
-            cambiarEstadoErrorGuardadoTemporalmente();
-            throw new Error('Error al guardar el parametro');
+            const dataEstilo = await responseEstilo.json();
+            arregloEstilosApr.push({
+              tipo: estilo.tipo,
+              valor: dataEstilo.data.est_id,
+            });
           }
-
-          const dataEstilo = await responseEstilo.json();
-          arregloEstilosApr.push({
-            tipo: estilo.tipo,
-            valor: dataEstilo.data.est_id,
-          });
         }
       } catch (error) {
         setLoadingGuardando(false);
@@ -959,13 +960,13 @@ const Models = () => {
         )}
         <div
           className="flex flex-col gap-3 opacity-85"
-          style={{
-            backgroundImage: `url(${EscudoUtn})`,
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '400px 350px',
-            backgroundPosition: 'center',
-            width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
-          }}
+          // style={{
+          //   backgroundImage: `url(${EscudoUtn})`,
+          //   backgroundRepeat: 'no-repeat',
+          //   backgroundSize: '400px 350px',
+          //   backgroundPosition: 'center',
+          //   width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
+          // }}
         >
           <div className="grid grid-cols-2 gap-4 opacity-95">
             <div className="">

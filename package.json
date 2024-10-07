@@ -24,9 +24,12 @@
     "dayjs": "^1.11.11",
     "flatpickr": "^4.6.13",
     "headlessui": "^0.0.0",
+    "html2canvas": "^1.4.1",
     "jsvectormap": "^1.5.3",
     "match-sorter": "^6.3.1",
     "openai": "^4.55.3",
+    "papaparse": "^5.4.1",
+    "pdfjs-dist": "^2.15.349",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
     "react-dom": "^18.2.0",
@@ -41,6 +44,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@types/papaparse": "^5.3.14",
     "@types/react": "^18.2.17",
     "@types/react-dom": "^18.2.7",
     "@types/styled-react-modal": "^1.2.5",

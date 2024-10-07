@@ -6,6 +6,9 @@ import { SessionContext } from '../../Context/SessionContext';
 import { Chart as GoogleChart } from 'react-google-charts';
 import Loader from '../../common/Loader';
 import EscudoUtn from '../../images/UTN/escudo-utn.svg';
+import ChartFull from '../../components/Charts/ChartFull';
+import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
+import html2canvas from 'html2canvas';
 
 interface Encuesta {
   enc_id: number;
@@ -56,11 +59,22 @@ interface Curso {
   cur_id: number;
   cur_carrera: string;
   cur_nivel: number;
+  cur_periodo_academico: string;
 }
 
 interface Test {
   titulo: string;
   descripcion: string;
+}
+
+interface Tipo {
+  tipo: string;
+  valor: string;
+}
+
+interface DatosMateria {
+  mensaje: string;
+  tipos: Tipo[];
 }
 
 const Chart: React.FC = () => {
@@ -96,6 +110,7 @@ const Chart: React.FC = () => {
   const [searchTermAsignacion, setSearchTermAsignacion] = useState<string>('');
   const [tituloAsignacionSeleccionada, setTituloAsignacionSeleccionada] =
     useState<Asignacion>();
+  const [listadoMaterias, setListadoMaterias] = useState<Tipo[]>([]);
   const [selectedAsignacionId, setSelectedAsignacionId] = useState<
     number | undefined
   >(undefined);
@@ -105,8 +120,36 @@ const Chart: React.FC = () => {
       descripcion: string;
     }[]
   >([]);
-  const [asignacionTest, setAsignacionTest] = useState<any[][]>([]);
-
+  const [idMateria, setIdMateria] = useState('');
+  const [idParcial, setIdParcial] = useState('');
+  const [asignacionTest, setAsignacionTest] = useState<any[][]>([['Probando','Probando','Probando','Probando'],['Probando',0,0,0],['Probando',0,0,0],['Probando',0,0,0]]);
+  const [datosMateria, setDatosMateria] = useState({
+    mensaje: 'Selecciona la materia',
+    tipos: [
+      {
+        tipo: 'Ética',
+        valor: '1',
+      },
+      {
+        tipo: 'Investigación científica',
+        valor: '2',
+      },
+    ],
+  });
+  const resultadoRef = useRef<HTMLDivElement>(null);
+  const [datosParcial, setDatosParcial] = useState({
+    mensaje: 'Selecciona el parcial',
+    tipos: [
+      {
+        tipo: 'Parcial 1',
+        valor: '1',
+      },
+      {
+        tipo: 'Parcial 2',
+        valor: '2',
+      },
+    ],
+  });
   const optionsAsignacion = {
     chart: {
       title: `Resultados de Asignación ${tituloAsignacionSeleccionada?.asi_id} de ${tituloAsignacionSeleccionada?.usuario.usu_usuario}`,
@@ -131,24 +174,10 @@ const Chart: React.FC = () => {
   };
 
   const optionsCurso = {
-    title: 'Tests por Curso',
-    pieHole: 0.4,
-    is3D: true,
-    colors: ['#3357FF', '#FF5733', '#33FF57'],
-    backgroundColor: 'transparent',
-    animation: {
-      startup: true, // Activar animación al cargar
-      duration: 50000, // Duración de la animación en milisegundos
-      easing: 'out', // Tipo de suavizado para la animación (opciones: 'in', 'out', 'inAndOut')
-    },
-  };
-
-  const optionsTest = {
     chart: {
-      title: `Resultado del curso ${datosCursoSeleccionado?.cur_nivel} - ${datosCursoSeleccionado?.cur_carrera}`,
-      subtitle: `En el test ${encuestaSeleccionada?.enc_titulo}`,
+      title: `Cantidad de respuestas por test ${datosCursoSeleccionado?.cur_carrera} - ${datosCursoSeleccionado?.cur_nivel}`,
     },
-    bar: {groupWidth: "15%"},
+    bar: { groupWidth: '15%' },
     animation: {
       startup: true, // Activa la animación al cargar
       duration: 1000, // Duración de la animación en milisegundos
@@ -159,6 +188,47 @@ const Chart: React.FC = () => {
       1: { color: '#ff7f0e' }, // Color de la segunda serie de datos (si hay más series)
     },
   };
+
+  const optionsNotas = {
+    title: 'Promedio de Notas por Estilo de Aprendizaje',
+    hAxis: { title: 'Estilo de Aprendizaje' }, // Eje horizontal
+    vAxis: { title: 'Promedio de Notas' }, // Eje vertical
+    colors: ['#FF5733', '#33FF57', '#3357FF'],
+    // backgroundColor: 'transparent',
+    animation: {
+      startup: true,
+      duration: 1500,
+      easing: 'out',
+    },
+    legend: { position: 'bottom' },
+    isStacked: true, // Apila las áreas
+  };
+
+  const optionsTest = {
+    chart: {
+      title: `Resultado del curso ${datosCursoSeleccionado?.cur_nivel} - ${datosCursoSeleccionado?.cur_carrera}`,
+      subtitle: `En el test ${encuestaSeleccionada?.enc_titulo}`,
+    },
+    bar: { groupWidth: '15%' },
+    animation: {
+      startup: true, // Activa la animación al cargar
+      duration: 1000, // Duración de la animación en milisegundos
+      easing: 'out', // Tipo de animación
+    },
+    series: {
+      0: { color: '#1f77b4' }, // Color de la primera serie de datos
+      1: { color: '#ff7f0e' }, // Color de la segunda serie de datos (si hay más series)
+    },
+  };
+  const [datosNotas, setDatosNotas] = useState<any>([
+    ['', 0],
+    ['', 0],
+  ]);
+
+  const dataGoogleCharts = [
+    ['Estilo de aprendizaje', 'Promedio de notas'], // Encabezados
+    ...datosNotas,
+  ];
 
   const fetchEncuestas = async () => {
     try {
@@ -215,6 +285,19 @@ const Chart: React.FC = () => {
       }
       const result = await response.json();
       console.log(result.data);
+      const resultMaterias: string[] = Array.from(
+        new Set(
+          await result.data.map((item: any) =>
+            JSON.stringify({ tipo: item.materia, valor: item.mat_id }),
+          ),
+        ),
+      );
+      const resultMateriasFiltradas: Tipo[] = resultMaterias.map((item) => {
+        return JSON.parse(item) as Tipo; // Aquí TypeScript ya sabe que item es un string
+      });
+      setListadoMaterias(resultMateriasFiltradas);
+      // datosMateria.tipos(resultMateriasFiltradas);
+      console.log(resultMateriasFiltradas);
       let datosNuevos = await result.data.filter(
         (dato: any) => dato.asi_realizado === true,
       );
@@ -226,6 +309,16 @@ const Chart: React.FC = () => {
       setError(error.message);
     }
   };
+
+  useEffect(() => {
+    if (listadoMaterias) {
+      setDatosMateria({
+        mensaje: 'Selecciona la materia',
+        tipos: listadoMaterias,
+      });
+      // datosMateria.tipos(listadoMaterias)
+    }
+  }, [listadoMaterias]);
 
   useEffect(() => {
     console.log(encuestasPorAsignacion);
@@ -244,7 +337,7 @@ const Chart: React.FC = () => {
       }
     });
     let resultado = Array.from(encuestaMap.values());
-    resultado.unshift(['Encuesta', 'Veces que se ha tomado el test']);
+    resultado.unshift(['Test', 'Veces que se ha tomado el test']);
     return Array.from(resultado);
   };
 
@@ -330,7 +423,7 @@ const Chart: React.FC = () => {
         const descripcion = fecha.toLocaleDateString('es-ES', opcionesFecha);
 
         // if (fechaActual <= fecha && !asignacion.asi_realizado) {
-          asignacionesData.push({ id, idAsignacion, titulo, descripcion });
+        asignacionesData.push({ id, idAsignacion, titulo, descripcion });
         // }
       });
 
@@ -370,7 +463,7 @@ const Chart: React.FC = () => {
     console.log(cursos);
     const filtered = cursos.filter((curso) => {
       const cursoString =
-        `${curso.cur_carrera} (Nivel: ${curso.cur_nivel})`.toLowerCase();
+        `${curso.cur_carrera} (Nivel: ${curso.cur_nivel}) - ${curso.cur_periodo_academico}`.toLowerCase();
       return cursoString.includes(searchTerm.toLowerCase());
     });
     setFilteredCursos(filtered);
@@ -437,6 +530,7 @@ const Chart: React.FC = () => {
 
     const resultadoArray: any = Array.from(resultadoMap.entries());
     resultadoArray.unshift(['Estilos', 'Valor']);
+    console.log(resultadoArray);
     setResultadoEncuestaCounts(resultadoArray);
   };
 
@@ -480,6 +574,78 @@ const Chart: React.FC = () => {
       setHistorialData(data.data);
     } catch (error: any) {
       setError(error.message);
+    }
+  };
+
+  const fetchHistorialByCursoMateria = async (
+    curId: number,
+    matId: number,
+    parId: number,
+  ) => {
+    try {
+      const response = await fetch(
+        'https://backendestilos.onrender.com/estilos/api/v1/historial/curso/materia',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`, // Token de autenticación
+          },
+          body: JSON.stringify({
+            cur_id: curId,
+            mat_id: matId,
+            par_id: parId,
+          }),
+        },
+      );
+
+      if (response.status != 200) {
+        setDatosNotas([
+          ['', 0],
+          ['', 0],
+        ]);
+        throw new Error('Error al obtener los datos del historial');
+      }
+
+      const data = await response.json();
+      const agrupados: { [key: string]: { suma: number; count: number } } = {};
+      data.data.forEach(
+        (item: { not_nota: number; his_resultado_encuesta: string }) => {
+          const { not_nota, his_resultado_encuesta } = item;
+          if (!agrupados[his_resultado_encuesta]) {
+            agrupados[his_resultado_encuesta] = { suma: 0, count: 0 };
+          }
+          agrupados[his_resultado_encuesta].suma += not_nota;
+          agrupados[his_resultado_encuesta].count += 1;
+        },
+      );
+
+      const promedios: [string, number][] = [];
+      for (const resultado in agrupados) {
+        const { suma, count } = agrupados[resultado];
+        const promedio = suma / count;
+        promedios.push([resultado, promedio]);
+      }
+      setDatosNotas(promedios);
+      console.log(promedios);
+      return data.data;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  };
+
+  const downloadChartAsImage = (
+    ref: React.RefObject<HTMLDivElement>,
+    fileName: string,
+  ) => {
+    if (ref.current) {
+      html2canvas(ref.current).then((canvas) => {
+        const imgUri = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = imgUri;
+        link.download = `${fileName}.png`;
+        link.click();
+      });
     }
   };
 
@@ -561,8 +727,12 @@ const Chart: React.FC = () => {
             counts[estiloIndex] = valorSeleccionado;
           }
 
-          formattedData.push([pregunta.pre_enunciado, ...counts]);
+          formattedData.push([
+            pregunta.pre_enunciado.substring(0, 15),
+            ...counts,
+          ]);
         });
+        console.log(formattedData)
         setAsignacionTest(formattedData);
       } catch (error: any) {
         setError(error.message);
@@ -573,8 +743,14 @@ const Chart: React.FC = () => {
   }, [selectedAsignacionId]);
 
   useEffect(() => {
-    console.log(asignacionTest);
-  }, [asignacionTest]);
+    if (idMateria && selectedCursoId && idParcial) {
+      fetchHistorialByCursoMateria(
+        selectedCursoId,
+        parseInt(idMateria),
+        parseInt(idParcial),
+      );
+    }
+  }, [idMateria, idParcial]);
 
   useEffect(() => {
     fetchCursos();
@@ -594,13 +770,13 @@ const Chart: React.FC = () => {
         <Loader />
       ) : (
         <div
-          style={{
-            backgroundImage: `url(${EscudoUtn})`,
-            backgroundRepeat: 'repeat-y',
-            backgroundSize: '400px 495px',
-            backgroundPosition: 'center',
-            width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
-          }}
+        // style={{
+        //   backgroundImage: `url(${EscudoUtn})`,
+        //   backgroundRepeat: 'repeat-y',
+        //   backgroundSize: '400px 495px',
+        //   backgroundPosition: 'center',
+        //   width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
+        // }}
         >
           <Breadcrumb pageName="Chart" />
           <div className="flex flex-col gap-8">
@@ -619,7 +795,7 @@ const Chart: React.FC = () => {
           </div>
           <div className="col-span-12 opacity-85 text-black dark:text-white mt-8 mb-8 w-full rounded-lg border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
             <div className="grid grid-cols-3 gap-4 min-w-47.5">
-              <div className="flex flex-col gap-4 text-black">
+              <div className="flex flex-col pt-6 lg:pt-0 gap-4 text-black">
                 <h1 className="font-bold dark:text-white">Lista de Cursos</h1>
                 <input
                   type="text"
@@ -639,7 +815,8 @@ const Chart: React.FC = () => {
                   </option>
                   {filteredCursos.map((curso) => (
                     <option key={curso.cur_id} value={curso.cur_id}>
-                      {curso.cur_carrera} (Nivel: {curso.cur_nivel})
+                      {curso.cur_carrera} (Nivel: {curso.cur_nivel}) /{' '}
+                      {curso.cur_periodo_academico}
                     </option>
                   ))}
                 </select>
@@ -651,10 +828,12 @@ const Chart: React.FC = () => {
                 )} */}
               </div>
               <div className="flex flex-col gap-4 text-black">
-                <h1 className="font-bold dark:text-white">Asignaciones</h1>
+                <h1 className="font-bold dark:text-white">
+                  Resultados por estudiante
+                </h1>
                 <input
                   type="text"
-                  placeholder="Buscar asignación"
+                  placeholder="Buscar un estudiante"
                   className="border rounded-md p-2"
                   value={searchTermAsignacion}
                   onChange={(e) => setSearchTermAsignacion(e.target.value)}
@@ -665,7 +844,7 @@ const Chart: React.FC = () => {
                   className="p-2 rounded-md border"
                   value={selectedAsignacionId ?? ''}
                 >
-                  <option value="">Selecciona una asignación</option>
+                  <option value="">Selecciona un estudiante</option>
                   {filteredAsignaciones.map((asignacion) => (
                     <option key={asignacion.asi_id} value={asignacion.asi_id}>
                       {asignacion.usuario.usu_usuario} -{' '}
@@ -680,11 +859,11 @@ const Chart: React.FC = () => {
                   </div>
                 )} */}
               </div>
-              <div className="flex flex-col gap-4 text-black">
-                <h1 className="font-bold dark:text-white">Lista de Tests</h1>
+              <div className="flex flex-col gap-4 pt-6 lg:pt-0 text-black">
+                <h1 className="font-bold dark:text-white">Resultados curso</h1>
                 <input
                   type="text"
-                  placeholder="Buscar asignación"
+                  placeholder="Buscar curso"
                   className="border rounded-md p-2"
                   value={searchTermTest}
                   onChange={(e) => setSearchTermTest(e.target.value)}
@@ -696,7 +875,7 @@ const Chart: React.FC = () => {
                   className="p-2 rounded-md border"
                   value={idEncuestaPorAsignacion ?? ''}
                 >
-                  <option value="">Selecciona una asignación</option>
+                  <option value="">Selecciona un curso</option>
                   {filteredEncuestas?.map((asi) => (
                     <option key={asi.enc_id} value={asi.enc_id}>
                       Test: {asi.enc_titulo}
@@ -706,7 +885,70 @@ const Chart: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-4 md:gap-6 2xl:gap-7.5">
+          <div>
+            <ChartFull
+              titulosEncuesta={titulosEncuesta}
+              asignacionTest={asignacionTest}
+              resultadoEncuestaCounts={resultadoEncuestaCounts}
+              optionsCurso={optionsCurso}
+              optionsAsignacion={optionsAsignacion}
+              optionsTest={optionsTest}
+            />
+          </div>
+          <div className="flex flex-col col-span-12 opacity-85 text-black dark:text-white mt-8 mb-8 w-full rounded-lg border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
+            <h1 className="font-bold text-xl">Notas:</h1>
+            <div className="flex gap-10">
+              <div className="w-[48%]">
+                <h1 className="font-bold">Materia:</h1>
+                <SelectGroupOne
+                  opciones={datosMateria}
+                  onChange={setIdMateria}
+                  opcionPorDefecto={idMateria}
+                  advertencia="n"
+                />
+              </div>
+              <div className="w-[48%]">
+                <h1 className="font-bold">Parcial:</h1>
+                <SelectGroupOne
+                  opciones={datosParcial}
+                  onChange={setIdParcial}
+                  opcionPorDefecto={idParcial}
+                  advertencia="n"
+                />
+              </div>
+            </div>
+            <div
+              ref={resultadoRef}
+              className="bg-whiten dark:bg-boxdark p-1 rounded-lg"
+            >
+              <button
+                title="Exportar gráfico como PNG"
+                onClick={() =>
+                  downloadChartAsImage(resultadoRef, 'promedio-chart')
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="0.88em"
+                  height="1em"
+                  viewBox="0 0 448 512"
+                >
+                  <path
+                    fill="currentColor"
+                    d="m433.941 129.941l-83.882-83.882A48 48 0 0 0 316.118 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V163.882a48 48 0 0 0-14.059-33.941M224 416c-35.346 0-64-28.654-64-64s28.654-64 64-64s64 28.654 64 64s-28.654 64-64 64m96-304.52V212c0 6.627-5.373 12-12 12H76c-6.627 0-12-5.373-12-12V108c0-6.627 5.373-12 12-12h228.52c3.183 0 6.235 1.264 8.485 3.515l3.48 3.48A12 12 0 0 1 320 111.48"
+                  />
+                </svg>
+              </button>
+              <GoogleChart
+                chartType="AreaChart"
+                width="100%"
+                height="400px"
+                data={dataGoogleCharts}
+                options={optionsNotas}
+              />
+            </div>
+          </div>
+          {/* <div className="grid grid-cols-1 gap-4 md:gap-6 2xl:gap-7.5">
             {titulosEncuesta && (
               <div className="bg-whiten dark:bg-boxdark p-1 rounded-lg">
                 <GoogleChart
@@ -744,7 +986,7 @@ const Chart: React.FC = () => {
                 />
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       )}
     </DefaultLayout>

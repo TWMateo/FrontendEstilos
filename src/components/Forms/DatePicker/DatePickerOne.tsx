@@ -1,19 +1,20 @@
-import { DatePickerProps } from '@mui/x-date-pickers';
+import React, { useEffect, useRef } from 'react';
 import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es.js';
-import { ChangeEvent, useEffect, useState } from 'react';
 
 interface Props {
   setFechaActual: (fecha: string) => void;
 }
 
 const DatePickerOne: React.FC<Props> = ({ setFechaActual }) => {
-  // const [fechaActual, setFechaActual] = useState('');
+  const datePickerRef = useRef<HTMLInputElement>(null); // Referencia para el input
 
   useEffect(() => {
-    let flatpickrInstance: any;
-    const initializeFlatpickr = () => {
-      flatpickrInstance = flatpickr('.form-datepicker', {
+    let flatpickrInstance: flatpickr.Instance | undefined;
+
+    if (datePickerRef.current) {
+      // Inicializa flatpickr usando la referencia
+      flatpickrInstance = flatpickr(datePickerRef.current, {
         locale: Spanish,
         mode: 'single',
         dateFormat: 'F j, Y',
@@ -23,29 +24,24 @@ const DatePickerOne: React.FC<Props> = ({ setFechaActual }) => {
           }
         },
       });
-    };
-
-    initializeFlatpickr();
+    }
 
     return () => {
+      // Limpia la instancia cuando el componente se desmonte
       if (flatpickrInstance) {
         flatpickrInstance.destroy();
       }
     };
-  }, []);
-
-  // useEffect(() => {
-  //   console.log(fechaActual);
-  // }, [fechaActual]);
+  }, [setFechaActual]);
 
   return (
     <div>
       <div className="relative">
         <input
+          ref={datePickerRef} // Asigna la referencia al input
           className="form-datepicker w-full rounded border-[1.5px] border-black bg-transparent px-5 py-3 font-normal outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
           placeholder="mm/dd/yyyy"
           type="text"
-          data-class="flatpickr-right"
         />
         <div className="pointer-events-none absolute inset-0 left-auto right-5 flex items-center">
           <svg
@@ -67,6 +63,3 @@ const DatePickerOne: React.FC<Props> = ({ setFechaActual }) => {
 };
 
 export default DatePickerOne;
-function initializeFlatpickr() {
-  throw new Error('Function not implemented.');
-}

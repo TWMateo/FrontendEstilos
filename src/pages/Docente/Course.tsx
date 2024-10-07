@@ -26,8 +26,8 @@ interface Asignaciones {
 interface Persona {
   per_cedula: string;
   per_nombres: string;
-  per_apellidos: string;
-  per_genero: string;
+  // per_apellidos: string;
+  // per_genero: string;
 }
 
 interface Usuario {
@@ -37,13 +37,15 @@ interface Usuario {
   usu_estado: boolean;
   usu_password: string;
   usu_usuario: string;
+  n1: number;
+  n2: number;
 }
 
 interface Student {
-  nombre: string;
-  apellido: string;
   cedula: string;
-  genero: string;
+  nombre: string;
+  n1: number;
+  n2: number;
 }
 
 interface Curso {
@@ -61,17 +63,26 @@ interface Encuesta {
   enc_fecha_creacion: string;
 }
 
-interface Student {
-  cedula: string;
-  nombre: string;
-  [key: string]: any;
+interface Nota {
+  usu_id: number;
+  cur_id: number;
+  mat_id: number;
+  par_id: number;
+  not_nota: number;
 }
 
+// interface Student {
+//   cedula: string;
+//   nombre: string;
+//   n1: number;
+//   n2: number;
+// }
+
 interface StudentListo {
-  nombre: string;
-  apellido: string;
   cedula: string;
-  genero: string;
+  nombre: string;
+  n1: number;
+  n2: number;
 }
 
 interface Curso {
@@ -115,6 +126,11 @@ const Course = () => {
       ],
     });
   const [fechaAsignacion, setFechaAsignacion] = useState('');
+  const [periodoAcademicoInicio, setPeriodoAcademicoInicio] = useState('');
+  const [periodoAcademicoFin, setPeriodoAcademicoFin] = useState('');
+  const [periodoAcademicoInicioAux, setPeriodoAcademicoInicioAux] =
+    useState('');
+  const [periodoAcademicoFinAux, setPeriodoAcademicoFinAux] = useState('');
   const [error, setError] = useState(false);
   const [mensajeError, setMensajeError] = useState('');
   const [periodo, setPeriodo] = useState('');
@@ -159,8 +175,8 @@ const Course = () => {
   const datosParciales = {
     mensaje: 'Escoja el parcial',
     tipos: [
-      { tipo: 'Primer parcial', valor: 'Primer parcial' },
-      { tipo: 'Segundo parcial', valor: 'Segundo parcial' },
+      { tipo: 'Primer parcial', valor: '1' },
+      { tipo: 'Segundo parcial', valor: '2' },
     ],
   };
   const datosSemestre = {
@@ -198,6 +214,51 @@ const Course = () => {
   const [loading, setLoading] = useState(true);
   const { sessionToken, usuId, usuCedula, rolContext } =
     useContext(SessionContext);
+
+  useEffect(() => {
+    const fecha = formatearFecha(periodoAcademicoInicio);
+    setPeriodoAcademicoInicioAux(fecha);
+  }, [periodoAcademicoInicio]);
+  useEffect(() => {
+    const fecha = formatearFecha(periodoAcademicoFin);
+    setPeriodoAcademicoFinAux(fecha);
+  }, [periodoAcademicoFin]);
+
+  useEffect(() => {
+    console.log(periodoAcademicoInicioAux);
+  }, [periodoAcademicoInicioAux]);
+
+  useEffect(() => {
+    console.log(periodoAcademicoFinAux);
+  }, [periodoAcademicoFinAux]);
+
+  useEffect(() => {
+    console.log(periodo);
+  }, [periodo]);
+
+  const formatearFecha = (data: string) => {
+    const fecha = new Date(data);
+
+    const meses = [
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
+    ];
+
+    const mes = meses[fecha.getMonth()];
+    const year = fecha.getFullYear();
+
+    return `${mes} ${year}`;
+  };
 
   // const crearCurso = async (curso) => {
   //   try {
@@ -278,7 +339,7 @@ const Course = () => {
         }
 
         const headers = jsonData[0];
-        const expectedHeaders = ['nombre', 'apellido', 'cedula', 'genero'];
+        const expectedHeaders = ['Cédula', 'Apellidos Nombres', 'N1', 'N2'];
 
         const missingHeaders = expectedHeaders.filter(
           (header) => !headers.includes(header),
@@ -303,33 +364,27 @@ const Course = () => {
         const studentData = jsonData
           .slice(1)
           .filter((row) => {
-            // Filtrar filas que tienen al menos un valor no nulo o no vacío
             return row.some(
               (cell) => cell !== null && cell !== undefined && cell !== '',
             );
           })
           .map((row) => {
-            // Crear objeto Student solo si todos los campos necesarios tienen valores válidos
             if (
-              row[headers.indexOf('nombre')] &&
-              row[headers.indexOf('apellido')] &&
-              row[headers.indexOf('cedula')] &&
-              row[headers.indexOf('genero')]
+              row[headers.indexOf('Cédula')] &&
+              row[headers.indexOf('Apellidos Nombres')]
             ) {
               const student: Student = {
-                nombre: row[headers.indexOf('nombre')],
-                apellido: row[headers.indexOf('apellido')],
-                cedula: row[headers.indexOf('cedula')],
-                genero: row[headers.indexOf('genero')],
+                cedula: row[headers.indexOf('Cédula')],
+                nombre: row[headers.indexOf('Apellidos Nombres')],
+                n1: row[headers.indexOf('N1')] ? row[headers.indexOf('N1')] : 0,
+                n2: row[headers.indexOf('N2')] ? row[headers.indexOf('N2')] : 0,
               };
               return student;
             }
-            return null; // Devolver null si la fila no es válida
+            return null;
           })
-          .filter((student) => student !== null); // Filtrar cualquier entrada nula
+          .filter((student) => student !== null); 
 
-        console.log(studentData.length);
-        console.log(studentData);
         if (studentData.length < 1) {
           cambiarEstadoGuardadoTemporalmente('error');
           setMensajeError('El listado debe contener estudiantes.');
@@ -354,18 +409,21 @@ const Course = () => {
     setGuardando(true);
     try {
       const usuarios: Usuario[] = studentsListo.map((student) => ({
-        cur_id: 1,
+        cur_id: parseInt(cursoSeleccionado),
         per_cedula: student.cedula.toString(),
         rol_codigo: 'EST',
         usu_estado: false,
         usu_password: student.cedula.toString(),
         usu_usuario: `E` + student.cedula,
+        n1: student.n1,
+        n2: student.n2,
       }));
+      console.log(studentsListo);
 
       const fechaISO = new Date(fechaAsignacion).toISOString();
       const asignaciones: Asignaciones[] = studentsListo.map(
         (student, index) => ({
-          asi_descripcion: `Asignación para ${student.nombre} ${student.apellido}`,
+          asi_descripcion: `Asignación para ${student.nombre}`,
           asi_fecha_completado: fechaISO,
           cur_id: parseInt(cursoSeleccionado),
           enc_id: parseInt(test),
@@ -378,16 +436,32 @@ const Course = () => {
         const persona: Persona = {
           per_cedula: student.cedula.toString(),
           per_nombres: `${student.nombre}`,
-          per_apellidos: `${student.apellido}`,
-          per_genero: student.genero == 'm' ? 'Masculino' : 'Femenino',
+          // per_apellidos: `${student.apellido}`,
+          // per_genero: student.genero == 'm' ? 'Masculino' : 'Femenino',
         };
         await crearPersona(persona);
       }
+      console.log(usuarios);
       for (let i = 0; i < usuarios.length; i++) {
         const usuario = usuarios[i];
         const response = await crearUsuario(usuario);
         const usuarioCreado = await response.json();
         asignaciones[i].usu_id = usuarioCreado.data.usu_id;
+        // DETERMINAR CUAL NOTA SE VA A REGISTRAR
+        console.log(usuarios[i]);
+        const notaParcial: Nota = {
+          usu_id: asignaciones[i].usu_id,
+          cur_id: usuarios[i].cur_id,
+          mat_id: parseInt(asignatura),
+          par_id: parseInt(periodo),
+          not_nota: 0,
+        };
+        if (parseInt(periodo) == 1) {
+          notaParcial.not_nota = usuarios[i].n1;
+        } else {
+          notaParcial.not_nota = usuarios[i].n2;
+        }
+        await registrarNotas(notaParcial);
         await registrarAsignacion(asignaciones[i]);
       }
       const asignacionCreador = {
@@ -424,9 +498,9 @@ const Course = () => {
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       const student: Student = {} as Student;
-      headers.forEach((header: string, index: number) => {
-        student[header] = row[index];
-      });
+      // headers.forEach((header: string, index: number) => {
+      //   student[header] = row[index];
+      // });
 
       // Validar que la cédula tenga exactamente 10 dígitos
       if (!/^\d{10}$/.test(student.cedula)) {
@@ -666,8 +740,36 @@ const Course = () => {
     }
   };
 
+  const registrarNotas = async (nota: Nota) => {
+    try {
+      const response = await fetch(
+        'https://backendestilos.onrender.com/estilos/api/v1/nota',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(nota),
+        },
+      );
+
+      if (response.status != 201) {
+        if (response.status != 200) {
+          const errorData = await response.json();
+          throw new Error(errorData.mensaje || 'Error al registrar la nota');
+        }
+      }
+    } catch (error: any) {
+      throw new Error(
+        `Error al registrar la nota para el usuario con ID ${nota.usu_id}`,
+      );
+    }
+  };
+
   const registrarAsignacion = async (asignacion: Asignaciones) => {
     try {
+      console.log(asignacion);
       const response = await fetch(
         'https://backendestilos.onrender.com/estilos/api/v1/asignacion',
         {
@@ -680,7 +782,7 @@ const Course = () => {
         },
       );
 
-      if (!response.ok) {
+      if (response.status != 201) {
         const errorData = await response.json();
         throw new Error(errorData.mensaje || 'Error al registrar asignación');
       }
@@ -709,8 +811,8 @@ const Course = () => {
       }
 
       const data: { mensaje: string; data: Curso[] } = await response.json();
-      const tipos = data.data.map((curso) => ({
-        tipo: `${curso.cur_carrera} ${curso.cur_nivel}`,
+      const tipos = data.data.map((curso: any) => ({
+        tipo: `${curso.cur_id}. ${curso.cur_carrera} ${curso.cur_nivel} / ${curso.cur_periodo_academico}`,
         valor: curso.cur_id.toString(),
       }));
 
@@ -728,10 +830,17 @@ const Course = () => {
   };
 
   const fetchCreateCursos = async (carrera: string, nivel: number) => {
+    if (
+      periodoAcademicoInicioAux.length == 0 ||
+      periodoAcademicoFinAux.length == 0
+    )
+      return;
     try {
       const cursoData = {
         cur_carrera: carrera,
         cur_nivel: nivel,
+        cur_periodo_academico:
+          periodoAcademicoInicioAux + '-' + periodoAcademicoFinAux,
       };
       const response = await fetch(
         'https://backendestilos.onrender.com/estilos/api/v1/curso',
@@ -910,6 +1019,7 @@ const Course = () => {
             </div>
           )}
         </div>
+
         <button
           className="rounded-b-lg w-90 min-h-14 max-h-14 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
           onClick={
@@ -923,33 +1033,43 @@ const Course = () => {
       </div>
       <div
         className="flex flex-col gap-4"
-        style={{
-          backgroundImage: `url(${EscudoUtn})`,
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: '400px 500px',
-          backgroundPosition: 'center',
-          width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
-        }}
+        // style={{
+        //   backgroundImage: `url(${EscudoUtn})`,
+        //   backgroundRepeat: 'no-repeat',
+        //   backgroundSize: '400px 500px',
+        //   backgroundPosition: 'center',
+        //   width: '100%', // Asegúrate de que el contenedor tenga el ancho adecuado
+        // }}
       >
-        <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-          Carrera:
-        </h3>
-        <SelectGroupOne
-          opciones={datosCarrera}
-          onChange={setCarrera}
-          opcionPorDefecto={carrera}
-        />
-        <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-          Semestre:
-        </h3>
-        <SelectGroupOne
-          opciones={datosSemestre}
-          onChange={setSemestre}
-          opcionPorDefecto={semestre}
-        />
-
+        <div className="flex opacity-85 mt-1 flex-col gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
+          <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+            Carrera:
+          </h3>
+          <SelectGroupOne
+            opciones={datosCarrera}
+            onChange={setCarrera}
+            opcionPorDefecto={carrera}
+          />
+          <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+            Semestre:
+          </h3>
+          <SelectGroupOne
+            opciones={datosSemestre}
+            onChange={setSemestre}
+            opcionPorDefecto={semestre}
+          />
+          <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+            Periodo Acádemico
+          </h3>
+          <div>
+            <div className="flex flex-row gap-10 col-span-2 rounded-lg">
+              <DatePickerOne setFechaActual={setPeriodoAcademicoInicio} />
+              <DatePickerOne setFechaActual={setPeriodoAcademicoFin} />
+            </div>
+          </div>
+        </div>
         <h2 className="text-title-xsm font-semibold text-black dark:text-white">
-          Aginaciones:
+          Asignaciones:
         </h2>
         <div className="flex opacity-85 flex-col gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
           <h3 className="text-title-xsm font-semibold text-black dark:text-white">
@@ -980,7 +1100,7 @@ const Course = () => {
           <div className="flex gap-5">
             <div className="w-[50%]">
               <h3 className="text-title-xsm font-semibold text-black dark:text-white">
-                Asignaturas:
+                Materias:
               </h3>
               <SelectGroupOne
                 opciones={datosAsignaturas}
@@ -1040,14 +1160,14 @@ const Course = () => {
             <div className="flex flex-row col-span-2 rounded-lg">
               <DatePickerOne setFechaActual={setFechaAsignacion} />
             </div>
-            {/* <div className="col-span-2">
+            <div className="col-span-2">
               <SelectGroupOne
                 opciones={datosParciales}
                 onChange={setPeriodo}
                 opcionPorDefecto={periodo}
                 advertencia="n"
               />
-            </div> */}
+            </div>
             <button
               className="rounded-b-lg col-span-1 h-13 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
               onClick={handleSubmitAsignaciones}
