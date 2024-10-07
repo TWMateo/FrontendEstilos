@@ -148,13 +148,11 @@ function RegistroUsuarios() {
     const data = {
       per_cedula: cedula,
       per_nombres: nombres,
-      per_apellidos: apellidos,
-      per_genero: genero,
     };
 
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/persona',
+        'http://127.0.0.1:5000/estilos/api/v1/persona',
         {
           method: 'POST',
           headers: {
@@ -190,7 +188,7 @@ function RegistroUsuarios() {
   const handleCedulas = async () => {
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/usuario-cedulas',
+        'http://127.0.0.1:5000/estilos/api/v1/usuario-cedulas',
         {
           method: 'GET',
           headers: {
@@ -229,7 +227,7 @@ function RegistroUsuarios() {
   const handleCursos = async () => {
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/curso',
+        'http://127.0.0.1:5000/estilos/api/v1/curso',
         {
           method: 'GET',
           headers: {
@@ -308,7 +306,7 @@ function RegistroUsuarios() {
     };
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/usuario',
+        'http://127.0.0.1:5000/estilos/api/v1/usuario',
         {
           method: 'POST',
           headers: {
@@ -392,7 +390,7 @@ function RegistroUsuarios() {
               <input
                 type="text"
                 value={nombres}
-                maxLength={49}
+                maxLength={99}
                 onChange={handleNombresChange}
                 placeholder="Ingrese los nombres"
                 className="w-full rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -400,77 +398,6 @@ function RegistroUsuarios() {
               {errores.nombres && (
                 <p className="text-red-500">{errores.nombres}</p>
               )}
-            </div>
-            <div>
-              <h1 className="font-bold">Apellidos:</h1>
-              <input
-                type="text"
-                value={apellidos}
-                maxLength={49}
-                onChange={handleApellidosChange}
-                placeholder="Ingrese los apellidos"
-                className="w-full rounded-lg border-[1.5px] bg-whiten border-strokedark bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-              />
-              {errores.apellidos && (
-                <p className="text-red-500">{errores.apellidos}</p>
-              )}
-            </div>
-            <div className="flex flex-col gap-3">
-              <h3 className="font-semibold text-black dark:text-white">
-                Género:
-              </h3>
-              <div className="gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
-                <label className="flex items-center gap-3 pt-2 pb-2">
-                  <div className="w-full pl-4 font-semibold">Masculino</div>
-                  <div>
-                    <input
-                      title="Masculino"
-                      type="radio"
-                      name="tipoTest"
-                      onClick={() => setGenero('Masculino')}
-                      className="sr-only"
-                    />
-                    <div
-                      className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border ${
-                        genero == 'Masculino' && 'border-primary'
-                      }`}
-                    >
-                      <span
-                        className={`h-2.5 w-2.5 rounded-full bg-transparent ${
-                          genero == 'Masculino' && '!bg-primary'
-                        }`}
-                      >
-                        {' '}
-                      </span>
-                    </div>
-                  </div>
-                </label>
-                <label className="flex items-center gap-3 pt-2 pb-2">
-                  <div className="w-full pl-4 font-semibold">Femenino</div>
-                  <div className="relative">
-                    <input
-                      title="Cuantitativo"
-                      type="radio"
-                      name="tipoTest"
-                      onClick={() => setGenero('Femenino')}
-                      className="sr-only"
-                    />
-                    <div
-                      className={`mr-4 flex h-5 w-5 items-center justify-center rounded-full border ${
-                        genero == 'Femenino' && 'border-primary'
-                      }`}
-                    >
-                      <span
-                        className={`h-2.5 w-2.5 rounded-full bg-transparent ${
-                          genero == 'Femenino' && '!bg-primary'
-                        }`}
-                      >
-                        {' '}
-                      </span>
-                    </div>
-                  </div>
-                </label>
-              </div>
             </div>
             <button
               onClick={confirmSubmit}

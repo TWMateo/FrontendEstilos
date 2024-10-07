@@ -219,7 +219,7 @@ const Test = () => {
   const fetchTest = async (id: number) => {
     try {
       const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/encuesta/detalles/${id}`,
+        `http://127.0.0.1:5000/estilos/api/v1/encuesta/detalles/${id}`,
         {
           method: 'GET',
           headers: {
@@ -369,7 +369,7 @@ const Test = () => {
   const fetchAsignacion = async () => {
     try {
       const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/asignacion/${idAsignacion}`,
+        `http://127.0.0.1:5000/estilos/api/v1/asignacion/${idAsignacion}`,
         {
           method: 'GET',
           headers: {
@@ -394,7 +394,7 @@ const Test = () => {
   const postHistorial = async (historialData: Historial) => {
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/historial',
+        'http://127.0.0.1:5000/estilos/api/v1/historial',
         {
           method: 'POST',
           headers: {
@@ -421,7 +421,7 @@ const Test = () => {
   const postRespuesta = async (respuestaData: RespuestaEnvio) => {
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/respuesta',
+        'http://127.0.0.1:5000/estilos/api/v1/respuesta',
         {
           method: 'POST',
           headers: {
@@ -727,7 +727,7 @@ const Test = () => {
   async function actualizarAsignacion(asi_id: number, asignacionData: any) {
     try {
       const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/asignacion/${asi_id}`,
+        `http://127.0.0.1:5000/estilos/api/v1/asignacion/${asi_id}`,
         {
           method: 'PUT',
           headers: {

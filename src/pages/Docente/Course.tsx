@@ -112,10 +112,12 @@ const Course = () => {
   const [guardando, setGuardando] = useState(false);
   const [semestre, setSemestre] = useState('');
   const [asignatura, setAsignatura] = useState('');
+  const [asignaturaNota, setAsignaturaNota] = useState('');
   const [test, setTest] = useState('');
   const [listaCursos, setListaCursos] = useState<Curso[]>([]);
   const [succesfull, setSuccesfull] = useState(false);
   const [cursoSeleccionado, setCursoSeleccionado] = useState('');
+  const [cursoSeleccionadoNota, setCursoSeleccionadoNota] = useState('');
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [datosCursosCombinados, setDatosCursosCombinados] =
     useState<valoresAsignados>({
@@ -134,6 +136,7 @@ const Course = () => {
   const [error, setError] = useState(false);
   const [mensajeError, setMensajeError] = useState('');
   const [periodo, setPeriodo] = useState('');
+  const [periodoNota, setPeriodoNota] = useState('');
   const [encuestas, setEncuestas] = useState([]);
   const [asignacionesCursoSeleccionado, setAsignacionesCursoSeleccionado] =
     useState<Asignacion[]>([]);
@@ -211,6 +214,9 @@ const Course = () => {
   const [errorListado, setErrorListado] = useState<string | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [studentsListo, setStudentsListo] = useState<StudentListo[]>([]);
+  const [studentsListoNotas, setStudentsListoNotas] = useState<StudentListo[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const { sessionToken, usuId, usuCedula, rolContext } =
     useContext(SessionContext);
@@ -383,7 +389,7 @@ const Course = () => {
             }
             return null;
           })
-          .filter((student) => student !== null); 
+          .filter((student) => student !== null);
 
         if (studentData.length < 1) {
           cambiarEstadoGuardadoTemporalmente('error');
@@ -391,6 +397,97 @@ const Course = () => {
           throw new Error(`El listado debe contener estudiantes.`);
         }
         setStudentsListo(studentData);
+        cambiarEstadoGuardadoTemporalmente('ok');
+        setMensajeError('Los datos de estudiante fueron subidos con exito!!');
+        setErrorListado(null);
+        console.log(studentData);
+        return;
+      } catch (err: any) {
+        setErrorListado(err.message);
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleFileUploadNotas = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target?.result as ArrayBuffer);
+      const workbook = XLSX.read(data, { type: 'array' });
+
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+        header: 1,
+      }) as any[][];
+
+      try {
+        if (jsonData.length === 0) {
+          cambiarEstadoGuardadoTemporalmente('error');
+          setMensajeError('El archivo esta vacio');
+          throw new Error('El archivo está vacío');
+        }
+
+        const headers = jsonData[0];
+        const expectedHeaders = ['Cédula', 'Apellidos Nombres', 'N1', 'N2'];
+
+        const missingHeaders = expectedHeaders.filter(
+          (header) => !headers.includes(header),
+        );
+        if (missingHeaders.length > 0) {
+          cambiarEstadoGuardadoTemporalmente('error');
+          setMensajeError('Completa el formtao del documento excel.');
+          throw new Error(
+            `Faltan las siguientes columnas: ${missingHeaders.join(', ')}`,
+          );
+        }
+
+        // const studentData = jsonData.slice(1).map((row) => {
+        //   const student: Student = {
+        //     nombre: row[headers.indexOf('nombre')],
+        //     apellido: row[headers.indexOf('apellido')],
+        //     cedula: row[headers.indexOf('cedula')],
+        //     genero: row[headers.indexOf('genero')],
+        //   };
+        //   return student;
+        // });
+        const studentData = jsonData
+          .slice(1)
+          .filter((row) => {
+            return row.some(
+              (cell) => cell !== null && cell !== undefined && cell !== '',
+            );
+          })
+          .map((row) => {
+            if (
+              row[headers.indexOf('Cédula')] &&
+              row[headers.indexOf('Apellidos Nombres')]
+            ) {
+              const student: Student = {
+                cedula: row[headers.indexOf('Cédula')],
+                nombre: row[headers.indexOf('Apellidos Nombres')],
+                n1: row[headers.indexOf('N1')] ? row[headers.indexOf('N1')] : 0,
+                n2: row[headers.indexOf('N2')] ? row[headers.indexOf('N2')] : 0,
+              };
+              return student;
+            }
+            return null;
+          })
+          .filter((student) => student !== null);
+
+        if (studentData.length < 1) {
+          cambiarEstadoGuardadoTemporalmente('error');
+          setMensajeError('El listado debe contener estudiantes.');
+          throw new Error(`El listado debe contener estudiantes.`);
+        }
+        setStudentsListoNotas(studentData);
         cambiarEstadoGuardadoTemporalmente('ok');
         setMensajeError('Los datos de estudiante fueron subidos con exito!!');
         setErrorListado(null);
@@ -477,6 +574,79 @@ const Course = () => {
       setMensajeError(
         'El listado de estudiantes y la asignación fueron registrados exitosamente!!',
       );
+    } catch (err: any) {
+      setError(err.message);
+      setMensajeError('Revisa los datos antes de enviar.');
+      setErrorGuardado(true);
+      setTimeout(() => {
+        setErrorGuardado(false);
+      }, 5000);
+      console.log(err.message);
+    } finally {
+      setGuardando(false);
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitNotas = async () => {
+    setLoading(true);
+    setGuardando(true);
+    try {
+      const usuarios: Usuario[] = studentsListoNotas.map((student) => ({
+        cur_id: parseInt(cursoSeleccionadoNota),
+        per_cedula: student.cedula.toString(),
+        rol_codigo: 'EST',
+        usu_estado: false,
+        usu_password: student.cedula.toString(),
+        usu_usuario: `E` + student.cedula,
+        n1: student.n1,
+        n2: student.n2,
+      }));
+      console.log(studentsListoNotas);
+
+      const fechaISO = new Date().toISOString();
+      const asignaciones: Asignaciones[] = studentsListoNotas.map(
+        (student, index) => ({
+          asi_descripcion: `Asignación para ${student.nombre}`,
+          asi_fecha_completado: fechaISO,
+          cur_id: parseInt(cursoSeleccionadoNota),
+          enc_id: parseInt(test),
+          usu_id: 0,
+          mat_id: asignatura,
+        }),
+      );
+
+      for (const student of studentsListoNotas) {
+        const persona: Persona = {
+          per_cedula: student.cedula.toString(),
+          per_nombres: `${student.nombre}`,
+        };
+        await crearPersona(persona);
+      }
+      console.log(usuarios);
+      for (let i = 0; i < usuarios.length; i++) {
+        const usuario = usuarios[i];
+        const response = await crearUsuario(usuario);
+        const usuarioCreado = await response.json();
+        asignaciones[i].usu_id = usuarioCreado.data.usu_id;
+        // DETERMINAR CUAL NOTA SE VA A REGISTRAR
+        console.log(usuarios[i]);
+        const notaParcial: Nota = {
+          usu_id: asignaciones[i].usu_id,
+          cur_id: usuarios[i].cur_id,
+          mat_id: parseInt(asignaturaNota),
+          par_id: parseInt(periodoNota),
+          not_nota: 0,
+        };
+        if (parseInt(periodoNota) == 1) {
+          notaParcial.not_nota = usuarios[i].n1;
+        } else {
+          notaParcial.not_nota = usuarios[i].n2;
+        }
+        await registrarNotas(notaParcial);
+      }
+      cambiarEstadoGuardadoTemporalmente('ok');
+      setMensajeError('Las notas fueron registradas exitosamente!!');
     } catch (err: any) {
       setError(err.message);
       setMensajeError('Revisa los datos antes de enviar.');
@@ -661,7 +831,7 @@ const Course = () => {
     try {
       // Verificar si la persona ya existe en la base de datos
       const consultaPersona = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/persona/${persona.per_cedula}`,
+        `http://127.0.0.1:5000/estilos/api/v1/persona/${persona.per_cedula}`,
         {
           method: 'GET',
           headers: {
@@ -675,7 +845,7 @@ const Course = () => {
       }
 
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/persona',
+        'http://127.0.0.1:5000/estilos/api/v1/persona',
         {
           method: 'POST',
           headers: {
@@ -700,7 +870,7 @@ const Course = () => {
   const crearUsuario = async (usuario: Usuario): Promise<Response> => {
     try {
       const responseUsuario = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/usuario/cedula/${usuario.per_cedula}`,
+        `http://127.0.0.1:5000/estilos/api/v1/usuario/cedula/${usuario.per_cedula}`,
         {
           method: 'GET',
           headers: {
@@ -716,7 +886,7 @@ const Course = () => {
       }
 
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/usuario',
+        'http://127.0.0.1:5000/estilos/api/v1/usuario',
         {
           method: 'POST',
           headers: {
@@ -743,7 +913,7 @@ const Course = () => {
   const registrarNotas = async (nota: Nota) => {
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/nota',
+        'http://127.0.0.1:5000/estilos/api/v1/nota',
         {
           method: 'POST',
           headers: {
@@ -771,7 +941,7 @@ const Course = () => {
     try {
       console.log(asignacion);
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/asignacion',
+        'http://127.0.0.1:5000/estilos/api/v1/asignacion',
         {
           method: 'POST',
           headers: {
@@ -796,7 +966,7 @@ const Course = () => {
   const fetchCursos = async () => {
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/curso',
+        'http://127.0.0.1:5000/estilos/api/v1/curso',
         {
           method: 'GET',
           headers: {
@@ -843,7 +1013,7 @@ const Course = () => {
           periodoAcademicoInicioAux + '-' + periodoAcademicoFinAux,
       };
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/curso',
+        'http://127.0.0.1:5000/estilos/api/v1/curso',
         {
           method: 'POST',
           headers: {
@@ -877,7 +1047,7 @@ const Course = () => {
         cur_nivel: nivel,
       };
       const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/curso/${cursoId}`,
+        `http://127.0.0.1:5000/estilos/api/v1/curso/${cursoId}`,
         {
           method: 'PUT',
           headers: {
@@ -903,7 +1073,7 @@ const Course = () => {
   const fetchEncuestas = async () => {
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/encuesta',
+        'http://127.0.0.1:5000/estilos/api/v1/encuesta',
         {
           method: 'GET',
           headers: {
@@ -936,7 +1106,7 @@ const Course = () => {
   const fetchMaterias = async () => {
     try {
       const response = await fetch(
-        'https://backendestilos.onrender.com/estilos/api/v1/materia',
+        'http://127.0.0.1:5000/estilos/api/v1/materia',
         {
           method: 'GET',
           headers: {
@@ -1084,17 +1254,10 @@ const Course = () => {
               />
             </div>
             <button
-              className="rounded-b-lg col-span-1 h-13 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+              className="rounded-b-lg col-span-2 h-13 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
               onClick={handlePrepararActualizacionCurso}
             >
               Actualizar
-            </button>
-            <button
-              className="rounded-b-lg col-span-1 h-13 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-              disabled={actualizandoCurso ? true : false}
-              onClick={handleDeleteCurso}
-            >
-              Eliminar
             </button>
           </div>
           <div className="flex gap-5">
@@ -1174,6 +1337,82 @@ const Course = () => {
             >
               Asignar
             </button>
+          </div>
+        </div>
+        {/* SECCIÓN DE NOTAS */}
+        <h2 className="text-title-xsm font-semibold text-black dark:text-white">
+          Registro de Notas:
+        </h2>
+        <div className="flex opacity-85 flex-col gap-4 p-5 pt-2 border-[1.5px] bg-whiten rounded-lg dark:border-form-strokedark dark:bg-form-input">
+          {/* <div className="flex gap-5"></div> */}
+
+          <div className="grid grid-cols-2 gap-5">
+            <div className="w-[100%]">
+              <div>
+                <h3 className="text-title-xsm pb-4 font-semibold text-black dark:text-white">
+                  Cursos:
+                </h3>
+                <div className="w-[100%]">
+                  <SelectGroupOne
+                    onChange={setCursoSeleccionadoNota}
+                    opciones={datosCursosCombinados}
+                    advertencia="n"
+                  />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-title-xsm pb-4 font-semibold text-black dark:text-white">
+                  Materias:
+                </h3>
+                <SelectGroupOne
+                  opciones={datosAsignaturas}
+                  onChange={setAsignaturaNota}
+                  opcionPorDefecto={asignaturaNota}
+                  advertencia="n"
+                />
+              </div>
+            </div>
+            <div className="w-[100%]">
+              <div>
+                <h3 className="text-title-xsm pb-5 font-semibold text-black dark:text-white">
+                  Parcial:
+                </h3>
+                <div className="w-[100%]">
+                  <SelectGroupOne
+                    opciones={datosParciales}
+                    onChange={setPeriodoNota}
+                    opcionPorDefecto={periodoNota}
+                    advertencia="n"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-5">
+                <h3 className="text-title-xsm font-semibold text-black dark:text-white">
+                  Listado de estudiantes:
+                </h3>
+                {errorListado && (
+                  <div style={{ color: 'red' }}>{errorListado}</div>
+                )}
+                <input
+                  title="Listado estudiantes"
+                  accept=".xlsx, .xls"
+                  onChange={handleFileUploadNotas}
+                  type="file"
+                  className="rounded-b-lg w-[100%] col-span-1 h-13 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                />
+              </div>
+            </div>
+            <div className="w-[100%]"></div>
+            <div className="w-[100%] col-span-2">
+              <div className="flex gap-7">
+                <button
+                  className="rounded-b-lg w-[100%] h-13 justify-center rounded-lg bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  onClick={handleSubmitNotas}
+                >
+                  Registrar notas
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

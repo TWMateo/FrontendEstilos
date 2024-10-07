@@ -61,7 +61,7 @@ function Configuracion() {
   const fetchCredenciales = async () => {
     try {
       const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/credencial`,
+        `http://127.0.0.1:5000/estilos/api/v1/credencial`,
         {
           method: 'GET',
           headers: {
@@ -135,7 +135,7 @@ function Configuracion() {
     };
     try {
       const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/credencial/${idCredencial}`,
+        `http://127.0.0.1:5000/estilos/api/v1/credencial/${idCredencial}`,
         {
           method: 'PUT',
           headers: {

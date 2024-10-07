@@ -31,7 +31,7 @@ function HomeAdministrador() {
   const fetchUsuarios = async () => {
     try {
       const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/usuario`,
+        `http://127.0.0.1:5000/estilos/api/v1/usuario`,
         {
           method: 'GET',
           headers: {
@@ -100,13 +100,13 @@ function HomeAdministrador() {
               listado={docAssignments}
               titulo="Docentes"
               icono="test"
-              path="/modelos/nuevo/test"
+              path="/registro-usuarios"
             />
             <TableGeneral
               listado={estAssignments}
               titulo="Estudiantes"
               icono="curso"
-              path="/curso"
+              path="/registro-usuarios"
             />
           </div>
         </>
