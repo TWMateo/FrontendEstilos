@@ -118,7 +118,7 @@ const ProfileEstudiante = () => {
       const resultados: ApiResponse = await response.json();
       setUsuario({
         cedula: usuCedula,
-        nombres: resultados.data.per_nombres+' '+resultados.data.per_apellidos,
+        nombres: resultados.data.per_nombres,
         descripcion:
           rolContext == 'EST'
             ? 'Un estudiante tiene acceso a los recursos educativos proporcionados por la plataforma, puede participar en encuestas, revisar sus asignaciones, y seguir el progreso de sus cursos.'
