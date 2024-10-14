@@ -533,8 +533,6 @@ const Course = () => {
         const persona: Persona = {
           per_cedula: student.cedula.toString(),
           per_nombres: `${student.nombre}`,
-          // per_apellidos: `${student.apellido}`,
-          // per_genero: student.genero == 'm' ? 'Masculino' : 'Femenino',
         };
         await crearPersona(persona);
       }
@@ -843,7 +841,7 @@ const Course = () => {
       if (consultaPersona.status == 200) {
         return;
       }
-
+      console.log(persona);
       const response = await fetch(
         'http://127.0.0.1:5000/estilos/api/v1/persona',
         {
@@ -856,7 +854,7 @@ const Course = () => {
         },
       );
 
-      if (!response.ok) {
+      if (response.status != 201) {
         const errorData = await response.json();
         throw new Error(errorData.mensaje || 'Error al crear la persona');
       }
@@ -884,6 +882,15 @@ const Course = () => {
       if (responseUsuario.status == 200) {
         return responseUsuario;
       }
+      console.log(usuario);
+      const usuarioFinal = {
+        cur_id: usuario.cur_id,
+        per_cedula: usuario.per_cedula,
+        rol_codigo: usuario.rol_codigo,
+        usu_estado: usuario.usu_estado,
+        usu_password: usuario.usu_password,
+        usu_usuario: usuario.usu_usuario,
+      };
 
       const response = await fetch(
         'http://127.0.0.1:5000/estilos/api/v1/usuario',
@@ -893,7 +900,7 @@ const Course = () => {
             Authorization: `Bearer ${sessionToken}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(usuario),
+          body: JSON.stringify(usuarioFinal),
         },
       );
 
@@ -1157,6 +1164,14 @@ const Course = () => {
   }, []);
 
   useEffect(() => {
+    console.log(asignaturaNota);
+  }, [asignaturaNota]);
+
+  useEffect(() => {
+    console.log(cursoSeleccionadoNota);
+  }, [cursoSeleccionadoNota]);
+
+  useEffect(() => {
     if (listaCursos.length == 0) return;
     const currentListaCurso = [...listaCursos];
     let indiceCurso = currentListaCurso.findIndex(
@@ -1178,14 +1193,14 @@ const Course = () => {
       )}
       {errorGuardado && mensajeError && (
         <div className="sticky mb-4 top-20 bg-[#e4bfbf] dark:bg-[#1B1B24] z-50 rounded-b-lg animate-fade-down animate-once animate-duration-[5000ms] animate-ease-in-out animate-reverse animate-fill-both">
-          <AlertError titulo="Test no guardado" mensaje={mensajeError} />
+          <AlertError titulo="Curso no guardado" mensaje={mensajeError} />
         </div>
       )}
       <div className="flex flex-row justify-between gap-80 sticky top-20 z-50">
         <div className="w-100">
           {succesfull && (
             <div className="z-50 animate-fade-down animate-once animate-duration-[3000ms] animate-ease-in-out animate-reverse animate-fill-both">
-              <AlertSucessfull titulo="Curso agregado" mensaje="" />
+              <AlertSucessfull titulo="Curso agregado" mensaje={mensajeError} />
             </div>
           )}
         </div>

@@ -93,6 +93,8 @@ const LikertResponse: React.FC<Props> = ({
 
     // Envio al componente padre
     valorOpc = indexEscala + 1;
+    console.log(selectedOptions)
+    console.log(pregunta)
     setSelectedOptions((prev) => ({
       ...prev,
       [opcionEstilo]: value,
@@ -170,9 +172,9 @@ const LikertResponse: React.FC<Props> = ({
                           type="radio"
                           name={`escalaOptions-${opcion.id}`}
                           value={escala}
-                          checked={selectedOptions[opcion.estilo] === escala}
+                          checked={selectedOptions[opcion.opcion] === escala}
                           onChange={() =>
-                            handleOptionChange(opcion.estilo, escala, opcion.id)
+                            handleOptionChange(opcion.opcion, escala, opcion.id)
                           }
                         ></input>
                       </td>

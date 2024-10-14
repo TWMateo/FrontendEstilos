@@ -87,8 +87,8 @@ const MultiChoiceResponse: React.FC<Props> = ({ pregunta, onAddResponse }) => {
       <div className="flex flex-col">
         <div className="flex w-full items-start pb-3">
           <h3 className="w-[95%] text- font-semibold text-black dark:text-white">
-            {pregunta.orden}
-            {'.-'}
+            {/* {pregunta.orden}
+            {'.-'} */}
             {pregunta.pregunta}
           </h3>
         </div>

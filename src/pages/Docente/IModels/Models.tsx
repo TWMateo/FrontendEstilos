@@ -128,7 +128,7 @@ const Models = () => {
     mensaje: 'Selecciona el tipo de pregunta',
     tipos: [
       { tipo: 'Selección múltiple', valor: 'seleccion' },
-      { tipo: 'Likert', valor: 'likert' },
+      // { tipo: 'Likert', valor: 'likert' },
     ],
   });
 
@@ -367,7 +367,7 @@ const Models = () => {
 
         for (let estilo of estilosAprendizajeAux) {
           let estilos = {
-            est_descripcion: estilo.tipo,
+            est_descripcion: '',
             est_nombre: estilo.tipo,
             enc_id: testId,
             est_parametro: false,
@@ -395,7 +395,7 @@ const Models = () => {
         }
         for (let estilo of parametrosAprendizaje) {
           let estilos = {
-            est_descripcion: estilo.tipo,
+            est_descripcion: '',
             est_nombre: estilo.tipo,
             enc_id: testId,
             est_parametro: true,
@@ -887,7 +887,7 @@ const Models = () => {
         mensaje: 'Selecciona el tipo de pregunta',
         tipos: [
           { tipo: 'Selección múltiple', valor: 'seleccion' },
-          { tipo: 'Likert', valor: 'likert' },
+          // { tipo: 'Likert', valor: 'likert' },
         ],
       });
       setListaPreguntas([]);
@@ -920,6 +920,10 @@ const Models = () => {
       setErrorGuardado(false);
     }, 4000);
   };
+
+  useEffect(()=>{
+    console.log(rules)
+  },[rules])
 
   useEffect(() => {
     if (parametrosAprendizaje.length > 0) {
@@ -1286,7 +1290,7 @@ const Models = () => {
                       />
                     </>
                   )}
-                  {pre.tipoPregunta === 'likert' && (
+                  {/* {pre.tipoPregunta === 'likert' && (
                     <Likert
                       pregunta={pre}
                       tiposEstilosAprendizaje={tiposEstilosAprendizaje}
@@ -1296,7 +1300,7 @@ const Models = () => {
                       onDeletePregunta={handleClickDeletePregunta}
                       onUpdateOpcion={handleChangeOpcion}
                     />
-                  )}
+                  )} */}
                 </div>
               ))}
           </div>

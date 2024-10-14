@@ -171,7 +171,7 @@ const EditModels = () => {
     mensaje: 'Selecciona el tipo de pregunta',
     tipos: [
       { tipo: 'Selección múltiple', valor: 'seleccion' },
-      { tipo: 'Likert', valor: 'likert' },
+      // { tipo: 'Likert', valor: 'likert' },
     ],
   });
 
@@ -1153,7 +1153,7 @@ const EditModels = () => {
         mensaje: 'Selecciona el tipo de pregunta',
         tipos: [
           { tipo: 'Selección múltiple', valor: 'seleccion' },
-          { tipo: 'Likert', valor: 'likert' },
+          // { tipo: 'Likert', valor: 'likert' },
         ],
       });
       setListaPreguntas([]);

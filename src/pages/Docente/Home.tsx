@@ -30,7 +30,7 @@ const Home = () => {
     }[]
   >([]);
   const [error, setError] = useState(null);
-  const { sessionToken, usuId, usuCedula, rolContext } =
+  const { sessionToken, usuId, usuCedula, rolContext, setNewApiKeyChatGPT } =
     useContext(SessionContext);
 
   const fetchEncuestas = async () => {
@@ -134,6 +134,33 @@ const Home = () => {
   //   }
   // };
 
+  useEffect(() => {
+    fetchCredenciales();
+  }, []);
+
+  const fetchCredenciales = async () => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/credencial/${2}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        },
+      );
+      if (response.status != 200) {
+        throw new Error('Error al obtener las credenciales');
+      }
+      const data = await response.json();
+      console.log(data.data.api_key);
+      setNewApiKeyChatGPT(data.data.api_key);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   const fetchAsignaciones = async () => {
     const fetchData = async (url: any) => {
       const response = await fetch(url, {
@@ -144,7 +171,7 @@ const Home = () => {
         },
       });
 
-      if (response.status!=200) {
+      if (response.status != 200) {
         throw new Error(`Error al obtener datos de ${url}`);
       }
       return response.json();

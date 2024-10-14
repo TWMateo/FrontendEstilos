@@ -9,6 +9,7 @@ import EscudoUtn from '../../images/UTN/escudo-utn.svg';
 import ChartFull from '../../components/Charts/ChartFull';
 import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
 import html2canvas from 'html2canvas';
+import OpenAI from 'openai';
 
 interface Encuesta {
   enc_id: number;
@@ -122,7 +123,12 @@ const Chart: React.FC = () => {
   >([]);
   const [idMateria, setIdMateria] = useState('');
   const [idParcial, setIdParcial] = useState('');
-  const [asignacionTest, setAsignacionTest] = useState<any[][]>([['Probando','Probando','Probando','Probando'],['Probando',0,0,0],['Probando',0,0,0],['Probando',0,0,0]]);
+  const [asignacionTest, setAsignacionTest] = useState<any[][]>([
+    ['Probando', 'Probando', 'Probando', 'Probando'],
+    ['Probando', 0, 0, 0],
+    ['Probando', 0, 0, 0],
+    ['Probando', 0, 0, 0],
+  ]);
   const [datosMateria, setDatosMateria] = useState({
     mensaje: 'Selecciona la materia',
     tipos: [
@@ -225,10 +231,23 @@ const Chart: React.FC = () => {
     ['', 0],
   ]);
 
+  const [estilos, setEstilos] = useState<any>();
+
   const dataGoogleCharts = [
     ['Estilo de aprendizaje', 'Promedio de notas'], // Encabezados
     ...datosNotas,
   ];
+
+  const { apiKeyChatGpt } = useContext(SessionContext);
+
+  useEffect(()=>{
+    console.log(apiKeyChatGpt)
+  },[apiKeyChatGpt])
+
+  const openai = new OpenAI({
+    apiKey: apiKeyChatGpt,
+    dangerouslyAllowBrowser: true,
+  });
 
   const fetchEncuestas = async () => {
     try {
@@ -298,10 +317,12 @@ const Chart: React.FC = () => {
       setListadoMaterias(resultMateriasFiltradas);
       // datosMateria.tipos(resultMateriasFiltradas);
       console.log(resultMateriasFiltradas);
+      console.log(result.data);
       let datosNuevos = await result.data.filter(
         (dato: any) => dato.asi_realizado === true,
       );
       let encuestasU = crearEncuestasUnicas(datosNuevos);
+      console.log(encuestasU);
       setEncuestasPorAsignacion(encuestasU);
       setAsignacionListado(datosNuevos);
     } catch (error: any) {
@@ -319,6 +340,14 @@ const Chart: React.FC = () => {
       // datosMateria.tipos(listadoMaterias)
     }
   }, [listadoMaterias]);
+
+  useEffect(() => {
+    console.log(encuestasPorAsignacion);
+  }, [encuestasPorAsignacion]);
+
+  useEffect(() => {
+    console.log(filteredEncuestas);
+  }, [filteredEncuestas]);
 
   useEffect(() => {
     console.log(encuestasPorAsignacion);
@@ -516,6 +545,132 @@ const Chart: React.FC = () => {
     setEncuestaSeleccionada(enc);
   };
 
+  useEffect(() => {
+    if (!encuestaSeleccionada) {
+      return;
+    }
+    console.log(encuestaSeleccionada);
+    fetchEstilosEncuesta(
+      encuestaSeleccionada.enc_id,
+      encuestaSeleccionada.enc_autor,
+      encuestaSeleccionada.enc_titulo,
+    );
+  }, [encuestaSeleccionada]);
+
+  const fetchEstilosEncuesta = async (
+    enc_id: any,
+    enc_autor: any,
+    enc_titulo: any,
+  ) => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/estilo/encuesta/${enc_id}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        },
+      );
+
+      if (response.status != 200) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log(result.data);
+      // kk;
+      for (const estilo of result.data) {
+        // Verificar si la descripción está vacía
+        if (!estilo.est_descripcion || estilo.est_descripcion.trim() === '') {
+          console.log(`Consultando descripción para: ${estilo.est_nombre}`);
+
+          // Consultar la descripción usando ChatGPT
+          const descripcion = await consultarDescripcionChatGPT(
+            estilo.est_nombre,
+            enc_titulo,
+            enc_autor,
+          );
+
+          if (descripcion) {
+            estilo.est_descripcion = descripcion;
+
+            await actualizarDescripcionEnBD(estilo.est_id, descripcion);
+
+            console.log(`Descripción actualizada para ${estilo.est_nombre}`);
+          } else {
+            console.error(
+              `No se pudo obtener una descripción para ${estilo.est_nombre}`,
+            );
+          }
+        }
+      }
+      setEstilos(result.data);
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
+  async function consultarDescripcionChatGPT(
+    nombreEstilo: string,
+    nombreTest: string,
+    autorTest: string,
+  ) {
+    try {
+      const stream = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Eres un experto en estilos de aprendizaje.',
+          },
+          {
+            role: 'user',
+            content: `Dame una corta descripción de menos de 290 caracteres del estilo de aprendizaje llamado ${nombreEstilo}, relacionado con el test de ${nombreTest} del autor ${autorTest}.`,
+          },
+        ],
+      });
+      // Extraer y devolver la respuesta generada
+      const descripcion = stream.choices[0].message.content?.trim();
+      return descripcion;
+    } catch (error) {
+      console.error('Error al consultar la API de ChatGPT:', error);
+      return null;
+    }
+  }
+
+  const actualizarDescripcionEnBD = async (est_id: any, descripcion: any) => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/estilos/api/v1/estilo/actualizar/${est_id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionToken}`,
+          },
+          body: JSON.stringify({
+            est_descripcion: descripcion,
+          }),
+        },
+      );
+
+      if (response.status!=201) {
+        throw new Error(
+          'Error al actualizar la descripción en la base de datos',
+        );
+      }
+    } catch (error) {
+      console.error('Error al actualizar la base de datos: ', error);
+    }
+  };
+
+  useEffect(() => {
+    console.log(estilos);
+  }, [estilos]);
+
   const contarResultadoEncuesta = (data: Historial[]) => {
     const resultadoMap = new Map<string, number>();
 
@@ -649,6 +804,10 @@ const Chart: React.FC = () => {
     }
   };
 
+  useEffect(()=>{
+    console.log(estilos)
+  },[estilos])
+
   useEffect(() => {
     console.log(resultadoEncuestaCounts);
   }, [resultadoEncuestaCounts]);
@@ -732,7 +891,7 @@ const Chart: React.FC = () => {
             ...counts,
           ]);
         });
-        console.log(formattedData)
+        console.log(formattedData);
         setAsignacionTest(formattedData);
       } catch (error: any) {
         setError(error.message);
@@ -895,6 +1054,21 @@ const Chart: React.FC = () => {
               optionsTest={optionsTest}
             />
           </div>
+          {estilos && (
+            <div className="col-span-12 opacity-85 text-black dark:text-white mt-8 mb-8 w-full rounded-lg border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
+              <h1 className="font-bold text-xl">Descripción de estilos:</h1>
+              {estilos.map((est: any) => (
+                <div>
+                  <div className="font-bold">
+                    {est.est_nombre.charAt(0).toUpperCase() +
+                      est.est_nombre.slice(1)}
+                    :
+                  </div>
+                  <div>{est.est_descripcion}</div>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="flex flex-col col-span-12 opacity-85 text-black dark:text-white mt-8 mb-8 w-full rounded-lg border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
             <h1 className="font-bold text-xl">Notas:</h1>
             <div className="flex gap-10">

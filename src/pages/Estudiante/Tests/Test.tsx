@@ -201,6 +201,7 @@ const Test = () => {
       valorOpc: valorOpc ? valorOpc : 1,
       estilo: estiloI,
     };
+    console.log(nuevaRespuesta)
     currentResponses = currentResponses.filter(
       (respuesta) =>
         !(
@@ -465,6 +466,7 @@ const Test = () => {
   const handleSendTest = () => {
     const res = respuestas;
     const reglaCalculo = testAsignado?.reglaCalculo;
+    console.log(testAsignado?.reglaCalculo)
     let preguntas = testAsignado?.preguntas;
     if (!preguntas) {
       cambiarEstadoErrorGuardadoTemporalmente();
@@ -531,6 +533,7 @@ const Test = () => {
         conteoParametros[estilo] = 0;
       }
     });
+    console.log(reglaCalculo)
     reglaCalculo?.forEach((regla) => {
       let sumaCondiciones = 0;
       let operacion: string;
@@ -718,9 +721,6 @@ const Test = () => {
         });
       }, 100);
       return () => clearTimeout(timer);
-      console.log(resultadoPantalla)
-      console.log(testAsignado?.titulo)
-      console.log(testAsignado?.autor)
     }
   }, [pantallaResultado]);
 
@@ -849,7 +849,7 @@ const Test = () => {
             </h3>
             <div className="flex flex-col p-5 gap-5 w-[80%] cursor-pointer rounded-lg bg-white dark:bg-boxdark">
               {testAsignado?.preguntas.map((preg, index) =>
-                preg.tipoPregunta == 'Seleccion multiple' ? (
+                preg.tipoPregunta == 'Seleccion multiple' && (
                   testAsignado.cuantitativa ? (
                     <MultiChoiceCuantitativaResponse
                       pregunta={preg}
@@ -866,18 +866,20 @@ const Test = () => {
                       key={index}
                     />
                   )
-                ) : (
-                  preg.tipoPregunta == 'Likert' && (
-                    <LikertResponse
-                      pregunta={preg}
-                      key={index}
-                      selectedOptions={selectedOptions}
-                      setSelectedOptions={setSelectedOptions}
-                      onAddResponse={handleAddRespuestaLikert}
-                    />
-                  )
-                ),
-              )}
+                ) 
+                // : (
+                //   preg.tipoPregunta == 'Likert' && (
+                //     <LikertResponse
+                //       pregunta={preg}
+                //       key={index}
+                //       selectedOptions={selectedOptions}
+                //       setSelectedOptions={setSelectedOptions}
+                //       onAddResponse={handleAddRespuestaLikert}
+                //     />
+                //   )
+                // ),
+              )
+            }
               <div className="flex justify-between cursor-auto">
                 <div className="cursor-none"></div>
                 <button

@@ -86,8 +86,8 @@ const MultiChoiceCuantitativaResponse: React.FC<
       <div className="flex flex-col">
         <div className="flex w-full items-start pb-3">
           <h3 className="w-[95%] text- font-semibold text-black dark:text-white">
-            {pregunta.orden}
-            {'.-'}
+            {/* {pregunta.orden}
+            {'.-'} */}
             {pregunta.pregunta}
           </h3>
         </div>
@@ -100,13 +100,13 @@ const MultiChoiceCuantitativaResponse: React.FC<
             : '*Selecciona una respuesta'}
         </div>
       </div>
-      <div className={`grid grid-cols-1 lg:grid-cols-2 w-full`}>
+      <div className={`grid grid-cols-1 lg:grid-cols-2 p-3 gap-4 w-full`}>
         {pregunta.opciones?.map((opc) => (
           <div
             key={opc.id}
             className={`rounded-l-lg w-fit py-2 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
           >
-            <label className="flex justify-center items-center gap-5">
+            <label className="flex justify-center items-center gap-2">
               <input
                 type="number"
                 value={respuestas[opc.id] || ''}
