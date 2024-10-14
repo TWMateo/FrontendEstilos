@@ -84,7 +84,7 @@ function Configuracion() {
   const fetchCredenciales = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/credencial`,
+        `https://backendestilos.onrender.com/estilos/api/v1/credencial`,
         {
           method: 'GET',
           headers: {
@@ -113,7 +113,7 @@ function Configuracion() {
   const fetchPrompts = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/prompt`,
+        `https://backendestilos.onrender.com/estilos/api/v1/prompt`,
         {
           method: 'GET',
           headers: {
@@ -213,7 +213,7 @@ function Configuracion() {
     };
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/credencial/${idCredencial}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/credencial/${idCredencial}`,
         {
           method: 'PUT',
           headers: {
@@ -255,7 +255,7 @@ function Configuracion() {
     console.log('PROMPT 1');
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/prompt/${idPrompt}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/prompt/${idPrompt}`,
         {
           method: 'PUT',
           headers: {

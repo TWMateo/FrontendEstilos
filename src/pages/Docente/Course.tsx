@@ -829,7 +829,7 @@ const Course = () => {
     try {
       // Verificar si la persona ya existe en la base de datos
       const consultaPersona = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/persona/${persona.per_cedula}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/persona/${persona.per_cedula}`,
         {
           method: 'GET',
           headers: {
@@ -843,7 +843,7 @@ const Course = () => {
       }
       console.log(persona);
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/persona',
+        'https://backendestilos.onrender.com/estilos/api/v1/persona',
         {
           method: 'POST',
           headers: {
@@ -868,7 +868,7 @@ const Course = () => {
   const crearUsuario = async (usuario: Usuario): Promise<Response> => {
     try {
       const responseUsuario = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/usuario/cedula/${usuario.per_cedula}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/usuario/cedula/${usuario.per_cedula}`,
         {
           method: 'GET',
           headers: {
@@ -893,7 +893,7 @@ const Course = () => {
       };
 
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/usuario',
+        'https://backendestilos.onrender.com/estilos/api/v1/usuario',
         {
           method: 'POST',
           headers: {
@@ -920,7 +920,7 @@ const Course = () => {
   const registrarNotas = async (nota: Nota) => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/nota',
+        'https://backendestilos.onrender.com/estilos/api/v1/nota',
         {
           method: 'POST',
           headers: {
@@ -948,7 +948,7 @@ const Course = () => {
     try {
       console.log(asignacion);
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/asignacion',
+        'https://backendestilos.onrender.com/estilos/api/v1/asignacion',
         {
           method: 'POST',
           headers: {
@@ -973,7 +973,7 @@ const Course = () => {
   const fetchCursos = async () => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/curso',
+        'https://backendestilos.onrender.com/estilos/api/v1/curso',
         {
           method: 'GET',
           headers: {
@@ -1020,7 +1020,7 @@ const Course = () => {
           periodoAcademicoInicioAux + '-' + periodoAcademicoFinAux,
       };
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/curso',
+        'https://backendestilos.onrender.com/estilos/api/v1/curso',
         {
           method: 'POST',
           headers: {
@@ -1054,7 +1054,7 @@ const Course = () => {
         cur_nivel: nivel,
       };
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/curso/${cursoId}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/curso/${cursoId}`,
         {
           method: 'PUT',
           headers: {
@@ -1080,7 +1080,7 @@ const Course = () => {
   const fetchEncuestas = async () => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/encuesta',
+        'https://backendestilos.onrender.com/estilos/api/v1/encuesta',
         {
           method: 'GET',
           headers: {
@@ -1113,7 +1113,7 @@ const Course = () => {
   const fetchMaterias = async () => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/materia',
+        'https://backendestilos.onrender.com/estilos/api/v1/materia',
         {
           method: 'GET',
           headers: {

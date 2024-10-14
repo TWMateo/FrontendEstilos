@@ -352,7 +352,7 @@ const EditModels = () => {
       console.log('PROBANDO 22');
       setLoadingGuardando(true);
       const responseTest = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/encuesta/' + test,
+        'https://backendestilos.onrender.com/estilos/api/v1/encuesta/' + test,
         {
           method: 'PUT',
           headers: {
@@ -387,7 +387,7 @@ const EditModels = () => {
       console.log(reglaCalculoData);
       try {
         const responseRegla = await fetch(
-          'http://127.0.0.1:5000/estilos/api/v1/reglas/' + test,
+          'https://backendestilos.onrender.com/estilos/api/v1/reglas/' + test,
           {
             method: 'PUT',
             headers: {
@@ -415,7 +415,7 @@ const EditModels = () => {
 
       // ACTUALIZANDO ESTILOS HASTA 17/09/2024
       try {
-        const apiUrl = 'http://127.0.0.1:5000/estilos/api/v1/estilo';
+        const apiUrl = 'https://backendestilos.onrender.com/estilos/api/v1/estilo';
         const headers = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${sessionToken}`,
@@ -456,7 +456,7 @@ const EditModels = () => {
               est_parametro: false,
             };
             const responseEstilo = await fetch(
-              'http://127.0.0.1:5000/estilos/api/v1/estilo/' + estilo.valor,
+              'https://backendestilos.onrender.com/estilos/api/v1/estilo/' + estilo.valor,
               {
                 method: 'PUT',
                 headers: {
@@ -504,7 +504,7 @@ const EditModels = () => {
             });
           } else {
             const responseEstilo = await fetch(
-              'http://127.0.0.1:5000/estilos/api/v1/estilo/' + estilo.valor,
+              'https://backendestilos.onrender.com/estilos/api/v1/estilo/' + estilo.valor,
               {
                 method: 'PUT',
                 headers: {
@@ -548,7 +548,7 @@ const EditModels = () => {
           if (pregunta.new) {
             console.log('Nueva pregunta');
             const responsePregunta = await fetch(
-              'http://127.0.0.1:5000/estilos/api/v1/pregunta',
+              'https://backendestilos.onrender.com/estilos/api/v1/pregunta',
               {
                 method: 'POST',
                 headers: {
@@ -575,7 +575,7 @@ const EditModels = () => {
             console.log(preguntaData);
             preguntaId = pregunta.id;
             const responsePregunta = await fetch(
-              'http://127.0.0.1:5000/estilos/api/v1/pregunta/' + preguntaId,
+              'https://backendestilos.onrender.com/estilos/api/v1/pregunta/' + preguntaId,
               {
                 method: 'PUT',
                 headers: {
@@ -620,7 +620,7 @@ const EditModels = () => {
               if (opcion.new) {
                 console.log('NUEVA OPCION');
                 const responseOpcion = await fetch(
-                  'http://127.0.0.1:5000/estilos/api/v1/opcion',
+                  'https://backendestilos.onrender.com/estilos/api/v1/opcion',
                   {
                     method: 'POST',
                     headers: {
@@ -648,7 +648,7 @@ const EditModels = () => {
                   pre_id: preguntaId,
                 };
                 const responseOpcion = await fetch(
-                  'http://127.0.0.1:5000/estilos/api/v1/opcion/' + opcion.id,
+                  'https://backendestilos.onrender.com/estilos/api/v1/opcion/' + opcion.id,
                   {
                     method: 'PUT',
                     headers: {
@@ -1103,7 +1103,7 @@ const EditModels = () => {
   const fetchEncuestas = async () => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/encuesta',
+        'https://backendestilos.onrender.com/estilos/api/v1/encuesta',
         {
           method: 'GET',
           headers: {
@@ -1178,7 +1178,7 @@ const EditModels = () => {
   const handleTestInformation = async (id: any) => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/encuesta/detalles/${id}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/encuesta/detalles/${id}`,
         {
           method: 'GET',
           headers: {

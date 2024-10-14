@@ -252,7 +252,7 @@ const Chart: React.FC = () => {
   const fetchEncuestas = async () => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/encuesta',
+        'https://backendestilos.onrender.com/estilos/api/v1/encuesta',
         {
           method: 'GET',
           headers: {
@@ -288,7 +288,7 @@ const Chart: React.FC = () => {
   const fetchAsignacionesByCursoId = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/asignacion/curso/${selectedCursoId}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/asignacion/curso/${selectedCursoId}`,
         {
           method: 'GET',
           headers: {
@@ -420,7 +420,7 @@ const Chart: React.FC = () => {
 
     try {
       const response = await fetchData(
-        `http://127.0.0.1:5000/estilos/api/v1/asignacion/usuario/${usuId}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/asignacion/usuario/${usuId}`,
       );
 
       const asignaciones = response.data;
@@ -429,10 +429,10 @@ const Chart: React.FC = () => {
 
       const fetchDetailsPromises = asignaciones.map(async (asignacion: any) => {
         const cursoPromise = fetchData(
-          `http://127.0.0.1:5000/estilos/api/v1/curso/${asignacion.cur_id}`,
+          `https://backendestilos.onrender.com/estilos/api/v1/curso/${asignacion.cur_id}`,
         );
         const encuestaPromise = fetchData(
-          `http://127.0.0.1:5000/estilos/api/v1/encuesta/${asignacion.enc_id}`,
+          `https://backendestilos.onrender.com/estilos/api/v1/encuesta/${asignacion.enc_id}`,
         );
 
         const [cursoData, encuestaData] = await Promise.all([
@@ -466,7 +466,7 @@ const Chart: React.FC = () => {
   const fetchCursos = async () => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/curso',
+        'https://backendestilos.onrender.com/estilos/api/v1/curso',
         {
           method: 'GET',
           headers: {
@@ -564,7 +564,7 @@ const Chart: React.FC = () => {
   ) => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/estilo/encuesta/${enc_id}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/estilo/encuesta/${enc_id}`,
         {
           method: 'GET',
           headers: {
@@ -644,7 +644,7 @@ const Chart: React.FC = () => {
   const actualizarDescripcionEnBD = async (est_id: any, descripcion: any) => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/estilo/actualizar/${est_id}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/estilo/actualizar/${est_id}`,
         {
           method: 'PUT',
           headers: {
@@ -710,7 +710,7 @@ const Chart: React.FC = () => {
     console.log(idsAsignacion);
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/historial/asignacion',
+        'https://backendestilos.onrender.com/estilos/api/v1/historial/asignacion',
         {
           method: 'POST',
           headers: {
@@ -739,7 +739,7 @@ const Chart: React.FC = () => {
   ) => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/historial/curso/materia',
+        'https://backendestilos.onrender.com/estilos/api/v1/historial/curso/materia',
         {
           method: 'POST',
           headers: {
@@ -833,7 +833,7 @@ const Chart: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:5000/estilos/api/v1/asignacion/test/${selectedAsignacionId}`,
+          `https://backendestilos.onrender.com/estilos/api/v1/asignacion/test/${selectedAsignacionId}`,
           {
             method: 'GET',
             headers: {

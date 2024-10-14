@@ -162,7 +162,7 @@ function GestionUsuarios() {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/persona/${primeraPersonaSeleccionada}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/persona/${primeraPersonaSeleccionada}`,
         {
           method: 'PUT',
           headers: {
@@ -199,7 +199,7 @@ function GestionUsuarios() {
   const handleCedulas = async () => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/usuario-cedulas',
+        'https://backendestilos.onrender.com/estilos/api/v1/usuario-cedulas',
         {
           method: 'GET',
           headers: {
@@ -238,7 +238,7 @@ function GestionUsuarios() {
   const handleCursos = async () => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/estilos/api/v1/curso',
+        'https://backendestilos.onrender.com/estilos/api/v1/curso',
         {
           method: 'GET',
           headers: {
@@ -277,7 +277,7 @@ function GestionUsuarios() {
     setLoadingConsultando(true);
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/persona/` +
+        `https://backendestilos.onrender.com/estilos/api/v1/persona/` +
           primeraPersonaSeleccionada,
         {
           method: 'GET',
@@ -295,7 +295,7 @@ function GestionUsuarios() {
       }
 
       const responseUsuario = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/usuario/cedula/` +
+        `https://backendestilos.onrender.com/estilos/api/v1/usuario/cedula/` +
           primeraPersonaSeleccionada,
         {
           method: 'GET',
@@ -394,7 +394,7 @@ function GestionUsuarios() {
     };
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/estilos/api/v1/usuario/${usuarioId}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/usuario/${usuarioId}`,
         {
           method: 'PUT',
           headers: {
