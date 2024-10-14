@@ -166,8 +166,8 @@ const Course = () => {
         valor: 'Ingeniería de Software',
       },
       {
-        tipo: 'Ingeniería en mantenimiento eléctrico',
-        valor: 'Ingeniería en Mantenimiento Eléctrico',
+        tipo: 'Electricidad',
+        valor: 'Electricidad',
       },
       {
         tipo: 'Ingeniería automotriz',
