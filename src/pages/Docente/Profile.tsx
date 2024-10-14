@@ -40,7 +40,7 @@ const Profile = () => {
     if (password.length < 10) return;
     let auxUsuario = usuario;
     if (auxUsuario?.cedula === undefined) return;
-    auxUsuario.contraseña = password;
+    // auxUsuario.contraseña = password;
     setUsuario(auxUsuario);
     actualizandoCampo();
   };
@@ -91,7 +91,7 @@ const Profile = () => {
       setUsuario({
         cedula: usuCedula,
         nombres:
-          resultados.data.per_nombres + ' ' + resultados.data.per_apellidos,
+          resultados.data.per_nombres,
         descripcion:
           rolContext == 'EST'
             ? 'Un estudiante tiene acceso a los recursos educativos proporcionados por la plataforma, puede participar en encuestas, revisar sus asignaciones, y seguir el progreso de sus cursos. Los estudiantes pueden interactuar con el contenido del curso y enviar tareas según las indicaciones de los docentes.'
