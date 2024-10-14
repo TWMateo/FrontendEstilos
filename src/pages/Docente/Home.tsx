@@ -141,7 +141,7 @@ const Home = () => {
   const fetchCredenciales = async () => {
     try {
       const response = await fetch(
-        `https://backendestilos.onrender.com/estilos/api/v1/credencial/${2}`,
+        `https://backendestilos.onrender.com/estilos/api/v1/credencial/${1}`,
         {
           method: 'GET',
           headers: {
