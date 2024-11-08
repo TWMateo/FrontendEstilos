@@ -240,10 +240,6 @@ const Chart: React.FC = () => {
 
   const { apiKeyChatGpt } = useContext(SessionContext);
 
-  useEffect(()=>{
-    console.log(apiKeyChatGpt)
-  },[apiKeyChatGpt])
-
   const openai = new OpenAI({
     apiKey: apiKeyChatGpt,
     dangerouslyAllowBrowser: true,
